@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/extensions.schema.json",
+  "title": "Extensions",
+  "description": "Namespaced vertical extensions. Keys are dot-separated lowercase namespaces (e.g. \"roofing.claim\"); values are objects whose shape is defined by the owning vertical's extension docs (see schemas/roofing.claim.schema.json for the exemplar). Core consumers MUST treat unknown extension keys as opaque and ignore them. This is the only intentionally open (additionalProperties-bearing) region of the core model. Always present on every entity; empty object when the producer has nothing to add.",
+  "type": "object",
+  "propertyNames": {
+    "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+  },
+  "additionalProperties": { "type": "object" }
+}

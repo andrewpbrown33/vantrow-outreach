@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/events/invoice.paid.data.schema.json",
+  "title": "invoice.paid data",
+  "description": "v0 DRAFT. Payload for invoice.paid: the invoice after amount_due reached 0 (status \"paid\", paid_at set).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["invoice"],
+  "properties": {
+    "invoice": { "$ref": "../invoice.schema.json" }
+  }
+}

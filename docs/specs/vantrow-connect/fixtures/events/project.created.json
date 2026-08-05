@@ -1,0 +1,29 @@
+{
+  "id": "evt_01jm6b1wd5sx9mgt",
+  "type": "project.created",
+  "occurred_at": "2026-06-03T17:40:12Z",
+  "tenant_id": "ten_01jm5wq0f8kavr3x",
+  "version": "v1",
+  "data": {
+    "project": {
+      "id": "proj_01jm5y1d7g3jrf9w",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "name": "Bell Residence - Standing Seam Metal Re-roof",
+      "status": "lead",
+      "status_detail": null,
+      "contact_id": "ctc_01jm5xb7r3n8tk2q",
+      "address": {
+        "line1": "917 Foxglove Court",
+        "line2": null,
+        "city": "Maplebrook",
+        "region": "OH",
+        "postal_code": "45803",
+        "country": "US"
+      },
+      "contract_value": null,
+      "created_at": "2026-06-03T17:40:12Z",
+      "updated_at": "2026-06-03T17:40:12Z",
+      "extensions": {}
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/events/roofing.claim.status_changed.data.schema.json",
+  "title": "roofing.claim.status_changed data",
+  "description": "v0 DRAFT. Exemplar extension event payload: the claim attached to a roofing project changed status. Extension events reference core entities by id rather than embedding them; consumers fetch the project via GET /v1/projects/{id} if they need it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project_id", "previous_status", "claim"],
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "pattern": "^proj_[0-9a-z]{8,32}$",
+      "description": "Project the claim is attached to."
+    },
+    "previous_status": {
+      "$ref": "../roofing.claim.schema.json#/properties/status",
+      "description": "Claim status before the change."
+    },
+    "claim": { "$ref": "../roofing.claim.schema.json" }
+  }
+}

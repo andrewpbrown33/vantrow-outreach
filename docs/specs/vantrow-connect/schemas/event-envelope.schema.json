@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/event-envelope.schema.json",
+  "title": "Event envelope",
+  "description": "v0 DRAFT. Standard envelope for every Vantrow Connect webhook delivery. data's shape is determined by type; see schemas/events/<type>.data.schema.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "occurred_at", "tenant_id", "version", "data"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^evt_[0-9a-z]{8,32}$",
+      "description": "Globally unique event id. Consumers deduplicate on this (at-least-once delivery)."
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+      "description": "Event type (e.g. \"project.status_changed\"). Extension events are namespaced by vertical (e.g. \"roofing.claim.status_changed\")."
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 time the underlying change happened on the platform (not the delivery time). Consumers reconcile ordering with this plus the GET APIs."
+    },
+    "tenant_id": { "type": "string", "pattern": "^ten_[0-9a-z]{8,32}$" },
+    "version": {
+      "const": "v1",
+      "description": "Contract version of the payload. Matches the REST API major version."
+    },
+    "data": {
+      "type": "object",
+      "description": "Type-specific payload. Entity objects inside data are snapshots as of occurred_at."
+    }
+  }
+}

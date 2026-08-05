@@ -1,0 +1,31 @@
+{
+  "id": "evt_01jm6b4ag9wc2qkx",
+  "type": "invoice.paid",
+  "occurred_at": "2026-06-20T18:05:33Z",
+  "tenant_id": "ten_01jm5wq0f8kavr3x",
+  "version": "v1",
+  "data": {
+    "invoice": {
+      "id": "inv_01jm5z3f8w2pms6d",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "project_id": "proj_01jm5y0c4t6hqe8v",
+      "contact_id": "ctc_01jm5xa2p9d4hn7e",
+      "number": "INV-1041",
+      "status": "paid",
+      "total": {
+        "amount": 1250000,
+        "currency": "USD"
+      },
+      "amount_due": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "issued_at": "2026-06-15T14:00:08Z",
+      "due_at": "2026-06-30T00:00:00Z",
+      "paid_at": "2026-06-20T18:05:33Z",
+      "created_at": "2026-06-15T14:00:08Z",
+      "updated_at": "2026-06-20T18:05:33Z",
+      "extensions": {}
+    }
+  }
+}

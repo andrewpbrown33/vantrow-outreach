@@ -1,0 +1,59 @@
+{
+  "id": "evt_01jm6b2ye7tz0nhv",
+  "type": "project.status_changed",
+  "occurred_at": "2026-07-08T14:32:11Z",
+  "tenant_id": "ten_01jm5wq0f8kavr3x",
+  "version": "v1",
+  "data": {
+    "project": {
+      "id": "proj_01jm5y0c4t6hqe8v",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "name": "Whitfield Residence - Roof Replacement",
+      "status": "in_progress",
+      "status_detail": "build_scheduled",
+      "contact_id": "ctc_01jm5xa2p9d4hn7e",
+      "address": {
+        "line1": "4182 Larkspur Lane",
+        "line2": null,
+        "city": "Maplebrook",
+        "region": "OH",
+        "postal_code": "45802",
+        "country": "US"
+      },
+      "contract_value": {
+        "amount": 2841000,
+        "currency": "USD"
+      },
+      "created_at": "2026-05-21T16:12:45Z",
+      "updated_at": "2026-07-08T14:32:11Z",
+      "extensions": {
+        "roofing.claim": {
+          "claim_number": "CLM-2026-048291",
+          "carrier": "Ridgeline Mutual Insurance",
+          "status": "approved",
+          "peril": "hail",
+          "date_of_loss": "2026-05-18",
+          "deductible": {
+            "amount": 150000,
+            "currency": "USD"
+          },
+          "approved_amount": {
+            "amount": 2841000,
+            "currency": "USD"
+          },
+          "adjuster_name": "T. Okafor",
+          "adjuster_phone": "+1-555-0163"
+        },
+        "roofing.job": {
+          "material": "asphalt_architectural",
+          "squares": 32.5,
+          "pitch": "8/12",
+          "stories": 2,
+          "tear_off": true
+        }
+      }
+    },
+    "previous_status": "approved",
+    "previous_status_detail": "contract_signed"
+  }
+}

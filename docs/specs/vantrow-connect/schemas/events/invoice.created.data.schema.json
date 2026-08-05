@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/events/invoice.created.data.schema.json",
+  "title": "invoice.created data",
+  "description": "v0 DRAFT. Payload for invoice.created: the invoice as it existed at occurred_at.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["invoice"],
+  "properties": {
+    "invoice": { "$ref": "../invoice.schema.json" }
+  }
+}

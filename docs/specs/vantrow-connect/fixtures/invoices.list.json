@@ -1,0 +1,52 @@
+{
+  "data": [
+    {
+      "id": "inv_01jm5z3f8w2pms6d",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "project_id": "proj_01jm5y0c4t6hqe8v",
+      "contact_id": "ctc_01jm5xa2p9d4hn7e",
+      "number": "INV-1041",
+      "status": "paid",
+      "total": {
+        "amount": 1250000,
+        "currency": "USD"
+      },
+      "amount_due": {
+        "amount": 0,
+        "currency": "USD"
+      },
+      "issued_at": "2026-06-15T14:00:08Z",
+      "due_at": "2026-06-30T00:00:00Z",
+      "paid_at": "2026-06-20T18:05:33Z",
+      "created_at": "2026-06-15T14:00:08Z",
+      "updated_at": "2026-06-20T18:05:33Z",
+      "extensions": {}
+    },
+    {
+      "id": "inv_01jm5z4k1x9snt7f",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "project_id": "proj_01jm5y1d7g3jrf9w",
+      "contact_id": "ctc_01jm5xb7r3n8tk2q",
+      "number": "INV-1042",
+      "status": "open",
+      "total": {
+        "amount": 1434000,
+        "currency": "USD"
+      },
+      "amount_due": {
+        "amount": 1434000,
+        "currency": "USD"
+      },
+      "issued_at": "2026-07-10T16:45:19Z",
+      "due_at": "2026-07-24T00:00:00Z",
+      "paid_at": null,
+      "created_at": "2026-07-10T16:45:19Z",
+      "updated_at": "2026-07-10T16:45:19Z",
+      "extensions": {}
+    }
+  ],
+  "meta": {
+    "limit": 25,
+    "next_cursor": null
+  }
+}

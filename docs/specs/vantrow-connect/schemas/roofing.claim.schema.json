@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/roofing.claim.schema.json",
+  "title": "roofing.claim extension",
+  "description": "v0 DRAFT. Exemplar vertical extension: the insurance claim attached to a roofing project, carried as extensions[\"roofing.claim\"] on Project and as the claim object in roofing.claim.status_changed events. Extension schemas are owned by the vertical and versioned with the vertical's extension docs; core consumers treat them as opaque. RECONCILE(doc-04/05): claim status set and supplement fields against AccuLynx's insurance/supplements module.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_number",
+    "carrier",
+    "status",
+    "peril",
+    "date_of_loss",
+    "deductible",
+    "approved_amount",
+    "adjuster_name",
+    "adjuster_phone"
+  ],
+  "properties": {
+    "claim_number": { "type": "string", "minLength": 1, "description": "Carrier-issued claim number." },
+    "carrier": { "type": "string", "minLength": 1, "description": "Insurance carrier name." },
+    "status": {
+      "type": "string",
+      "enum": ["filed", "inspection_scheduled", "approved", "supplement_pending", "denied", "paid", "closed"],
+      "description": "Claim lifecycle status (roofing-vertical enum, may evolve with the vertical's extension version)."
+    },
+    "peril": {
+      "type": "string",
+      "description": "Cause of loss, free-form (e.g. \"hail\", \"wind\", \"tree_impact\")."
+    },
+    "date_of_loss": { "type": "string", "format": "date", "description": "Calendar date of the loss event (no time component)." },
+    "deductible": { "$ref": "money.schema.json" },
+    "approved_amount": {
+      "anyOf": [{ "$ref": "money.schema.json" }, { "type": "null" }],
+      "description": "Carrier-approved amount; null until approved."
+    },
+    "adjuster_name": { "type": ["string", "null"] },
+    "adjuster_phone": { "type": ["string", "null"] }
+  }
+}
