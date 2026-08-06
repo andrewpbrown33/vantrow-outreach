@@ -3,6 +3,11 @@
 > **ACTIVE** since 2026-08-06 — Gate 1 selected **posture B, founder-as-design-partner
 > (split corpus)**; see the Gate 1 record in `docs/plan/decision-log.md`.
 
+> **Note (2026-08-06):** the first founder-verification round returned **product
+> requirements**, not incumbent-usage descriptions — those are Tier R and live in
+> `docs/research/inputs/customer1-requirements.md`. This log remains empty until
+> Andrew describes actual Outreach usage.
+
 Rules when active (protocol §1 Tier F):
 
 - Entries record **Andrew's own descriptions of his licensed Outreach usage** — dated,

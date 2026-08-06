@@ -7,6 +7,8 @@ row. "Decided by" vocabulary: `Andrew` (founder ruling) · `Claude` (agent analy
 
 | Date | Decision | Detail | Decided by |
 |---|---|---|---|
+| 2026-08-06 | **GATE 2 CLOSED: brand name → Nudgerow** | Andrew chose **nudgerow** from the ranked slate (memo `docs/brand/naming-decision-memo.md`; ranked #4, grade LOW — chosen over the #1 recommendation pitchrow; founder preference rules at a decision gate). Applied to `packages/brand/src/brand.config.ts` in this same commit: name Nudgerow, legalName "Nudgerow, Inc.", domain nudgerow.com, appUrl app.nudgerow.com, supportEmail andrew@nudgerow.com. Visual identity (palette/type/wordmark) stays interim until the Phase 2 design pass. **Same-day actions with Andrew:** register nudgerow.com immediately (bare registration, auto-renew, WHOIS privacy, transfer lock, no upsells), optionally defensive nudgerow.io (both re-verified available 2026-08-06), plus 2–3 secondary sending domains for outbound warmup. **Counsel items opened:** trademark clearance for NUDGEROW (classes 9/42), incl. the memo's flagged neighbor — the defunct Nudge.ai (sales-tech) whose IP was absorbed by Affinity in 2020 — and live other-class Nudge marks. | Andrew |
+| 2026-08-06 | **Customer-#1 requirements recorded (Tier R)** | Andrew's founder-verification replies came back as product requirements rather than incumbent-usage descriptions — logged verbatim-in-substance in `docs/research/inputs/customer1-requirements.md` (Tier R, unconstrained; the Tier-F log stays empty). Headlines: **no telephony/SMS ever for customer #1** — replace with a "log external interaction" note type (deprioritizes the dialer/A2P clocks; Gate 11 remains for the market question); sequence intervals in **days + hours**; schedules need time windows, holiday skips, and stop-on-reply behavior; task queue must visibly re-rank on engagement and be visible on mobile (iPhone) [interpretation flagged]; OOO shows paused-with-return-date; reporting surface = bounces, finished sequences, replies (three reports, not sixteen); **data export must include sequence states, sequence-level metrics, prospect lists+states — and exclude email bodies**; sending-limit design to be decided from the cost model (fixed vs variable) — answered in chat: marginal send cost ≈ 0 (customer's own mailbox), so limits are deliverability-driven, not cost-driven. These flow into the Gate 3 cutline memo's dogfood section. | Andrew |
 | 2026-08-06 | **GATE 1 CLOSED: research account posture → B, founder-as-design-partner (split corpus)** | Repo verified **Private** on GitHub before closing (precondition, runbook 01). Tier F activates under protocol §1: Andrew may describe his licensed Engage-core usage and supply screenshots as internal-only F-ID entries in `docs/research/outreach/00b-founder-input-log.md`; F-material verifies and prioritizes but is never quotable, never reproduced, and never the sole source for a published claim; the agent never authenticates; unlicensed modules (dialer/CI/deals/forecast) stay Tier-P. Strict public-only (option A) remains the documented fallback posture, switchable by one decision-log row. Counsel question (Outreach ToS competitive-use/benchmarking clauses) stays flagged to the Phase 2 legal-counsel runbook. Memo: `docs/plan/gates/gate-01-research-account-posture.md`. | Andrew |
 | 2026-08-05 | Session-level calls: Connect vendored, apps deferred | The Vantrow Connect spec is vendored into this repo verbatim (`docs/specs/vantrow-connect/` + `PROVENANCE.md` with source SHA) so future sessions never depend on cross-repo attachment, with fixture validation wired into CI from the first commit — Eaverow specced Connect and built 0%, partly because its CI never checked the fixtures. `apps/site` and `apps/platform` are deferred to Phases 2/4: under the deliberate cadence the brand name exists before the site is built, so there is no reason to build brand-agnostic UI first. Brand-string discipline still applies from day 1 (grep check). | plan |
 | 2026-08-05 | **Gate ledger defined; Gate 1 = research account posture (not naming)** | Eaverow's Gate 1 was the name. Here the account posture must come first: research cannot start without knowing what the founder's paid account may be used for, while naming *wants* research (doc 10 collision input) before it. Naming is Gate 2 with the RDAP pre-screen as seed. Gates numbered globally, never reused (Eaverow's "Gate 2" name collision documented in its playbook). | plan |
@@ -33,3 +35,22 @@ Memo: `docs/plan/gates/gate-01-research-account-posture.md`.
   switchable by one decision-log row.
 - **Counsel follow-up:** _open — Outreach ToS competitive-use/benchmarking clause review
   goes into the legal-counsel runbook when written (Phase 2)_
+
+## Gate 2 record — brand name
+
+Memo: `docs/brand/naming-decision-memo.md` · evidence: `docs/legal/trademark-screens.md`.
+
+- **Chosen name: Nudgerow** (endorsed as "Nudgerow, a Vantrow company"), decided by
+  Andrew in chat 2026-08-06 from the ranked slate (#4; grade LOW).
+- **Applied to** `packages/brand/src/brand.config.ts` in the same commit as this
+  record — name, legalName "Nudgerow, Inc.", domain nudgerow.com, appUrl
+  app.nudgerow.com, supportEmail andrew@nudgerow.com. Visual identity (palette, type,
+  wordmark) interim pending the Phase 2 design pass.
+- **Domain registration:** _pending — Andrew registers nudgerow.com SAME DAY (both
+  .com and .io re-verified available 2026-08-06; availability decays hourly). Bare
+  registration; auto-renew, WHOIS privacy, transfer lock ON; decline all upsells.
+  Optional: defensive nudgerow.io; 2–3 secondary sending domains for warmup
+  (long-lead register)._
+- **Trademark clearance:** _pending — counsel opens NUDGEROW clearance (classes 9/42);
+  flagged neighbors from the memo: defunct Nudge.ai (sales-tech; IP absorbed by
+  Affinity 2020), live other-class Nudge marks. First-pass screens ≠ clearance._
