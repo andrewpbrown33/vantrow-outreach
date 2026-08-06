@@ -51,6 +51,23 @@ pipelinerow.com · replyrow.com · threadrow.com · inboxrow.com · leadrow.com 
 meetrow.com · bookrow.com · callrow.com · pingrow.com · relayrow.com · temporow.com ·
 echorow.com · winrow.com · coldrow.com
 
+## Generation round 2 — 2026-08-06 (Verisign RDAP, all `.com`)
+
+25 further candidates screened during the Phase 1 sprint (total generated: 56).
+
+**AVAILABLE (RDAP 404):** introrow · followrow · nudgerow · scriptrow · greetrow ·
+chaserow · torchrow
+
+**TAKEN (RDAP 200):** demorow · openrow · draftrow · playrow · talkrow · chatrow ·
+voicerow · hellorow · greetrow~~*~~ · huntrow · dealrow · sellrow · salesrow ·
+sparkrow · signalrow · beaconrow · northrow · forgerow · emberrow
+*(correction: greetrow returned 404 — listed available above)*
+
+Running available pool for the deep screen (18): pitchrow, touchrow, cadencerow,
+sequrow, closerow, campaignrow, warmrow, engagerow, funnelrow, quotarow, outreachrow
+(pre-flagged), introrow, followrow, nudgerow, scriptrow, greetrow, chaserow, torchrow.
+All lookups re-verify same-day at Gate 2 before registration.
+
 ## What the Phase 1 naming sprint must add per surviving candidate
 
 Rationale · sample tagline · fresh dated `.com`/`.io` evidence · collision findings
