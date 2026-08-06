@@ -13,8 +13,8 @@ program-plan rule).
 | R1 | Sending limits & cost model | Sending-limit design should follow the cost structure (fixed vs variable costs of sending). *Answered in chat: marginal send cost ≈ $0 — sends go through the customer's own connected mailbox (Gmail/Microsoft APIs, free at their provider); our real costs are fixed-ish infra (Supabase/Vercel), tracking storage, and per-use LLM calls. Limits are therefore **deliverability-driven** (provider caps: Workspace ~2k/day, Exchange 10k rcpt/day + 30 msg/min; warmup ramps; complaint thresholds), not cost-driven.* | Gate 3 cutline; doc 14 → engine throttle design |
 | R2 | Sequence intervals | Step waits are set in **days and hours** (not minutes/seconds). | Sequence-builder spec (Phase 3/4) |
 | R3 | Schedules | Sequences need **time windows**, **holiday skips**, and stop/halt behavior driven by events — **stop on reply** etc. | Engine spec: schedules + pause conditions |
-| R4 | Task queue | The daily task list must **visibly re-rank prospects on engagement** (opens/replies jump the queue) and be **visible on mobile (iPhone)** *(interpretation of "show one's iPhone through the cracks" — speech-to-text artifact; flagged for confirmation)*. | Gate 3 cutline: task queue; mobile = responsive web first |
-| R5 | Play-through flow | (Question not understood by Andrew — the one-task-at-a-time guided execution mode. Re-demo at the Phase 4 prototype rather than re-ask in prose.) | Phase 4 dogfood review |
+| R4 | Task queue + cracks view | The daily task list must **visibly re-rank prospects on engagement** (opens/replies jump the queue) AND **surface prospects that have slipped through the cracks — finished sequences with no reply, stalled enrollments** *(corrected by Andrew 2026-08-06; the earlier "iPhone" reading was a speech-to-text artifact and is withdrawn)*. | Gate 3 cutline: task queue + a first-class "cracks" surface |
+| R5 | Play-through flow | Confirmed 2026-08-06: evaluate at the Phase 4 prototype (the one-task-at-a-time guided execution mode) rather than in prose. | Phase 4 dogfood review |
 | R6 | Out-of-office | A prospect's OOO auto-reply shows the enrollment as **paused with a return date**. | Engine spec: OOO classification + timed resume |
 | R7 | Reporting | Reports actually wanted: **bounced emails · finished sequences · replies**. Three reports, not sixteen. | Gate 3 cutline: reporting scope |
 | R8 | Data export | Export must offer **sequence states, sequence-level metrics, prospect lists + their states** — and must **NOT offer email bodies**. | Platform spec: export surface; privacy stance |
@@ -25,8 +25,9 @@ program-plan rule).
 - The MVP channel set is **email + manual tasks + external-interaction logging**.
 - Telephony verification clocks (A2P 10DLC, STIR/SHAKEN) move to "not started /
   deprioritized — customer #1 requires none" in the long-lead register.
-- R4's mobile expectation is served by a responsive web app at MVP (native apps stay
-  Phase 7+), consistent with the family pattern.
+- R4's "cracks" surface (finished-no-reply + stalled prospects) is a first-class queue
+  view, not a report afterthought — it pairs with R7's finished-sequence report and is
+  a differentiator candidate (doc 12: simplicity pillar).
 - R1's answer becomes pricing-relevant at Gate 9: send volume is not a marginal-cost
   driver, so per-send pricing would be margin theater; limits exist to protect
   deliverability and tenant reputation.

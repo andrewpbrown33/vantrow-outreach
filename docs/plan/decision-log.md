@@ -46,11 +46,10 @@ Memo: `docs/brand/naming-decision-memo.md` · evidence: `docs/legal/trademark-sc
   record — name, legalName "Nudgerow, Inc.", domain nudgerow.com, appUrl
   app.nudgerow.com, supportEmail andrew@nudgerow.com. Visual identity (palette, type,
   wordmark) interim pending the Phase 2 design pass.
-- **Domain registration:** _pending — Andrew registers nudgerow.com SAME DAY (both
-  .com and .io re-verified available 2026-08-06; availability decays hourly). Bare
-  registration; auto-renew, WHOIS privacy, transfer lock ON; decline all upsells.
-  Optional: defensive nudgerow.io; 2–3 secondary sending domains for warmup
-  (long-lead register)._
+- **Domain registration:** ✅ **nudgerow.com purchased 2026-08-06, via Vercel**
+  (Andrew, same day as the gate — DNS auto-wires when the site project deploys).
+  Still open: optional defensive nudgerow.io; 2–3 secondary sending domains for
+  warmup (long-lead register).
 - **Trademark clearance:** _pending — counsel opens NUDGEROW clearance (classes 9/42);
   flagged neighbors from the memo: defunct Nudge.ai (sales-tech; IP absorbed by
   Affinity 2020), live other-class Nudge marks. First-pass screens ≠ clearance._
