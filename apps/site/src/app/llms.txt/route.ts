@@ -7,6 +7,9 @@ import { SITE } from "../../lib/seo";
  *  self-documenting. Every fact here must stay truthful to the pages —
  *  pre-launch framing included. */
 
+// Pure function of the brand config — prerender it.
+export const dynamic = "force-static";
+
 export function GET() {
   const body = `# ${brand.name}
 

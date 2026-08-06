@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Nudgerow favicon: simple N monogram (bar, diagonal, bar) on the brand
-       primary. Colors mirror packages/brand (primary #1f3a5f, accent #b45309,
-       background #f8fafc) — interim identity until the Phase-2 design pass. -->
+  <!-- Site favicon: simple N monogram (bar, diagonal, bar) on the brand
+       primary. Static asset, so colors mirror packages/brand by hand
+       (primary #1f3a5f, accent #b45309, background #f8fafc) — interim
+       identity until the Phase-2 design pass. -->
   <rect width="64" height="64" rx="14" fill="#1f3a5f"/>
   <rect x="17" y="17" width="9" height="30" rx="4.5" fill="#f8fafc"/>
   <rect x="38" y="17" width="9" height="30" rx="4.5" fill="#f8fafc"/>
