@@ -6,8 +6,8 @@
  *
  * Identity applied at Gate 2 (2026-08-06, decision log): Nudgerow /
  * nudgerow.com. Color/typography identity is interim until the Phase 2 design
- * pass. The launch-checklist grep (`grep -r "__BRAND__\|example.com" apps
- * packages`) proves no unbranded sentinel survives to production.
+ * pass. The launch checklist greps apps+packages for the unbranded placeholder
+ * sentinels (see the launch runbook) to prove none survives to production.
  *
  * Schema notes vs. subsidiary #1 (Eaverow): parent linkage, dark palette,
  * typography, and shape tokens are first-class here so later subsidiaries
