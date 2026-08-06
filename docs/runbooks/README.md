@@ -17,12 +17,12 @@ settings, legal). Policy, learned the hard way in subsidiary #1:
 
 | # | Runbook | Status |
 |---|---|---|
-| 01 | `01-repo-privacy.md` — flip this repo private | **ACTIVE — Gate 1 precondition** |
-| 02 | domain + branded email (buy the Gate 2 `.com`, DNS, mailboxes) | Planned — written at Phase 2 |
-| 03 | Vercel setup (site project, root directory, env vars, domain) | Planned — Phase 2 |
-| 04 | Supabase setup (project, migrations, keys) | Planned — Phase 2 |
-| 05 | legal-counsel checklist (trademark clearance, comparative-ad review, ToS/privacy, **Outreach ToS competitive-use review** flagged from Gate 1) | Planned — Phase 2 |
-| 06 | site-launch checklist (Gate 3 acceptance half) | Planned — Phase 2 |
+| 01 | `01-repo-privacy.md` — flip this repo private | ✅ Done 2026-08-06 (Gate 1 precondition) |
+| 02 | `02-domain-and-email.md` — Vercel domain (✅ purchased), Workspace email, SPF rule, secondary sending domains | **ACTIVE** |
+| 03 | `03-vercel-site.md` — site project, root directory `apps/site`, env vars, custom domain | **ACTIVE** |
+| 04 | `04-supabase-waitlist.md` — project, `0001_waitlist.sql`, keys → Vercel | **ACTIVE** |
+| 05 | `05-legal-counsel-checklist.md` — NUDGEROW clearance (Nudge.ai/Affinity flag), Outreach ToS review, comparative-ad + ToS/privacy sign-offs | **ACTIVE — item 1 opens now** |
+| 06 | `06-site-launch-checklist.md` — Gate 3 acceptance, site half | ACTIVE (runs at Gate 3) |
 | 07 | mailbox OAuth verification (Microsoft publisher verification; Google restricted-scope assessment if gated in) | Planned — Phase 3, per `docs/plan/long-lead-register.md` |
 | 08 | sending domains + warmup operations | Planned — Phase 3/4 |
 | 09 | Stripe billing activation (build-now-charge-at-GA switch) | Planned — Phase 5 |
