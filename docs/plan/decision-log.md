@@ -7,6 +7,8 @@ row. "Decided by" vocabulary: `Andrew` (founder ruling) · `Claude` (agent analy
 
 | Date | Decision | Detail | Decided by |
 |---|---|---|---|
+| 2026-08-06 | **GATE 3 (decision half) CLOSED: MVP scope → Option E, Auto-Email Core** | Andrew, verbatim intent: *"the MVP to just be setting up email campaigns that run and track and update automatically, ending when replying, pausing with auto replies, and identifying bounces etc."* Narrower than the memo's recommendation. Precise contract (matrix build-sequence mapping): items **1–7 and 9** in full (tenant substrate+RLS+suppression · one-way import CSV+Affinity-lite · templates+variables · sequence builder **auto-email steps as the primary mode** (per-step draft-vs-auto control retained per protocol §10) · the enrollment engine with schedules (days+hours intervals, time windows, holiday-skip defaults, stop-on-reply) · mailbox provider #1 with deliverability foundations · reply/bounce/OOO loop (reply ends, OOO pauses with return date, bounces classified+suppressed) · engagement telemetry), plus a **10-subset**: the three reports (bounces · finished sequences · replies) and **the R4 cracks surface** (finished-no-reply + stalled prospects) as the home monitoring view. **Deferred out of MVP** (v1.1+): the deep manual task-queue/play-through experience (the home view is campaign-monitoring, not a to-do grind), meetings/scheduling tail (item 11), AI draft assist (item 12), snippets/A-B/date-timing per the fast-follow list. External-interaction logging (R9) stays (tiny). Program overlays unchanged: Connect producer green in CI + per-org COGS from day one. Site-launch acceptance half of Gate 3 remains open (runbook 06). | Andrew |
+| 2026-08-06 | **Brand color direction recorded for the design pass** | Seven base colors + feel keywords from Andrew (Luxury #BE6A00 · Fear #E10600 · Clarity #F3DD6D · Insecurity #7E7D81 · Productivity #001489 · Calm #7DA1C4 · Elegance #006D46), to be combined with **the "row" color from Vantrow** (extract from the parent brand at design time) into 3–4 candidate palettes → option memo → Andrew picks → tokens+assets+log in one commit. Notes: `docs/brand/brand-direction-notes.md`. | Andrew |
 | 2026-08-06 | **GATE 2 CLOSED: brand name → Nudgerow** | Andrew chose **nudgerow** from the ranked slate (memo `docs/brand/naming-decision-memo.md`; ranked #4, grade LOW — chosen over the #1 recommendation pitchrow; founder preference rules at a decision gate). Applied to `packages/brand/src/brand.config.ts` in this same commit: name Nudgerow, legalName "Nudgerow, Inc.", domain nudgerow.com, appUrl app.nudgerow.com, supportEmail andrew@nudgerow.com. Visual identity (palette/type/wordmark) stays interim until the Phase 2 design pass. **Same-day actions with Andrew:** register nudgerow.com immediately (bare registration, auto-renew, WHOIS privacy, transfer lock, no upsells), optionally defensive nudgerow.io (both re-verified available 2026-08-06), plus 2–3 secondary sending domains for outbound warmup. **Counsel items opened:** trademark clearance for NUDGEROW (classes 9/42), incl. the memo's flagged neighbor — the defunct Nudge.ai (sales-tech) whose IP was absorbed by Affinity in 2020 — and live other-class Nudge marks. | Andrew |
 | 2026-08-06 | **Customer-#1 requirements recorded (Tier R)** | Andrew's founder-verification replies came back as product requirements rather than incumbent-usage descriptions — logged verbatim-in-substance in `docs/research/inputs/customer1-requirements.md` (Tier R, unconstrained; the Tier-F log stays empty). Headlines: **no telephony/SMS ever for customer #1** — replace with a "log external interaction" note type (deprioritizes the dialer/A2P clocks; Gate 11 remains for the market question); sequence intervals in **days + hours**; schedules need time windows, holiday skips, and stop-on-reply behavior; task queue must visibly re-rank on engagement and be visible on mobile (iPhone) [interpretation flagged]; OOO shows paused-with-return-date; reporting surface = bounces, finished sequences, replies (three reports, not sixteen); **data export must include sequence states, sequence-level metrics, prospect lists+states — and exclude email bodies**; sending-limit design to be decided from the cost model (fixed vs variable) — answered in chat: marginal send cost ≈ 0 (customer's own mailbox), so limits are deliverability-driven, not cost-driven. These flow into the Gate 3 cutline memo's dogfood section. | Andrew |
 | 2026-08-06 | **GATE 1 CLOSED: research account posture → B, founder-as-design-partner (split corpus)** | Repo verified **Private** on GitHub before closing (precondition, runbook 01). Tier F activates under protocol §1: Andrew may describe his licensed Engage-core usage and supply screenshots as internal-only F-ID entries in `docs/research/outreach/00b-founder-input-log.md`; F-material verifies and prioritizes but is never quotable, never reproduced, and never the sole source for a published claim; the agent never authenticates; unlicensed modules (dialer/CI/deals/forecast) stay Tier-P. Strict public-only (option A) remains the documented fallback posture, switchable by one decision-log row. Counsel question (Outreach ToS competitive-use/benchmarking clauses) stays flagged to the Phase 2 legal-counsel runbook. Memo: `docs/plan/gates/gate-01-research-account-posture.md`. | Andrew |
@@ -46,11 +48,22 @@ Memo: `docs/brand/naming-decision-memo.md` · evidence: `docs/legal/trademark-sc
   record — name, legalName "Nudgerow, Inc.", domain nudgerow.com, appUrl
   app.nudgerow.com, supportEmail andrew@nudgerow.com. Visual identity (palette, type,
   wordmark) interim pending the Phase 2 design pass.
-- **Domain registration:** _pending — Andrew registers nudgerow.com SAME DAY (both
-  .com and .io re-verified available 2026-08-06; availability decays hourly). Bare
-  registration; auto-renew, WHOIS privacy, transfer lock ON; decline all upsells.
-  Optional: defensive nudgerow.io; 2–3 secondary sending domains for warmup
-  (long-lead register)._
+- **Domain registration:** ✅ **nudgerow.com purchased 2026-08-06, via Vercel**
+  (Andrew, same day as the gate — DNS auto-wires when the site project deploys).
+  Still open: optional defensive nudgerow.io; 2–3 secondary sending domains for
+  warmup (long-lead register).
 - **Trademark clearance:** _pending — counsel opens NUDGEROW clearance (classes 9/42);
   flagged neighbors from the memo: defunct Nudge.ai (sales-tech; IP absorbed by
   Affinity 2020), live other-class Nudge marks. First-pass screens ≠ clearance._
+
+## Gate 3 record — MVP scope & cutline
+
+Memo: `docs/plan/gates/gate-03-mvp-scope-cutline.md` (decision banner at top).
+
+- **Decision half:** ✅ **Option E — Auto-Email Core** (Andrew, in chat, 2026-08-06;
+  his words quoted in the decision row above). Build contract = matrix items 1–7 + 9 +
+  the three-report/cracks 10-subset; manual-task depth, meetings tail, and AI assist
+  deferred to fast-follow; per-step draft-vs-auto control retained (protocol §10);
+  Connect producer + COGS overlays unchanged.
+- **Acceptance half (site launch):** _open — runbook 06 executes after the Phase 2 PR
+  merges and runbooks 02–04 are done; evidence attaches here._
