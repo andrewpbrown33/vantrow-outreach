@@ -7,7 +7,7 @@ code needs it. Reviewed at every gate alongside `hard-problems.md`.
 
 | Item | What it gates | Typical lead time | Trigger | Owner | Status |
 |---|---|---|---|---|---|
-| Repo → Private | All research content; Gate 1 | Minutes | Now (runbook 01) | Andrew | **OPEN — blocks Gate 1** |
+| Repo → Private | All research content; Gate 1 | Minutes | Now (runbook 01) | Andrew | ✅ Done 2026-08-06 |
 | Secondary sending domains + branded email | All real outbound (dogfood and beyond); DNS auth (SPF/DKIM/DMARC) | Same-day purchase; DNS hours | Gate 2 (buy alongside the brand `.com`) | Andrew | Pending Gate 2 |
 | Mailbox warmup | Trustworthy sends from new domains/mailboxes | **2–6 weeks per mailbox** | Immediately after domains exist | Andrew (infra) + platform (throttle honors warmup state) | Pending |
 | Microsoft publisher verification (Entra app) | Public/commercial M365 mailbox OAuth (dogfood can run on tenant-admin consent without it) | Days–weeks | Phase 3 (Gate 4 memo drafts the app registration) | Andrew | Pending |

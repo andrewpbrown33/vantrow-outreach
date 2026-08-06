@@ -1,8 +1,7 @@
 # Founder Input Log — Tier F
 
-> **DORMANT.** This log activates only if Gate 1 selects a posture that admits the
-> founder corpus (`docs/plan/gates/gate-01-research-account-posture.md`). If Gate 1
-> lands on strict public-only, this file stays empty forever.
+> **ACTIVE** since 2026-08-06 — Gate 1 selected **posture B, founder-as-design-partner
+> (split corpus)**; see the Gate 1 record in `docs/plan/decision-log.md`.
 
 Rules when active (protocol §1 Tier F):
 

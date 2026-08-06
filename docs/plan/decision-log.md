@@ -7,6 +7,7 @@ row. "Decided by" vocabulary: `Andrew` (founder ruling) · `Claude` (agent analy
 
 | Date | Decision | Detail | Decided by |
 |---|---|---|---|
+| 2026-08-06 | **GATE 1 CLOSED: research account posture → B, founder-as-design-partner (split corpus)** | Repo verified **Private** on GitHub before closing (precondition, runbook 01). Tier F activates under protocol §1: Andrew may describe his licensed Engage-core usage and supply screenshots as internal-only F-ID entries in `docs/research/outreach/00b-founder-input-log.md`; F-material verifies and prioritizes but is never quotable, never reproduced, and never the sole source for a published claim; the agent never authenticates; unlicensed modules (dialer/CI/deals/forecast) stay Tier-P. Strict public-only (option A) remains the documented fallback posture, switchable by one decision-log row. Counsel question (Outreach ToS competitive-use/benchmarking clauses) stays flagged to the Phase 2 legal-counsel runbook. Memo: `docs/plan/gates/gate-01-research-account-posture.md`. | Andrew |
 | 2026-08-05 | Session-level calls: Connect vendored, apps deferred | The Vantrow Connect spec is vendored into this repo verbatim (`docs/specs/vantrow-connect/` + `PROVENANCE.md` with source SHA) so future sessions never depend on cross-repo attachment, with fixture validation wired into CI from the first commit — Eaverow specced Connect and built 0%, partly because its CI never checked the fixtures. `apps/site` and `apps/platform` are deferred to Phases 2/4: under the deliberate cadence the brand name exists before the site is built, so there is no reason to build brand-agnostic UI first. Brand-string discipline still applies from day 1 (grep check). | plan |
 | 2026-08-05 | **Gate ledger defined; Gate 1 = research account posture (not naming)** | Eaverow's Gate 1 was the name. Here the account posture must come first: research cannot start without knowing what the founder's paid account may be used for, while naming *wants* research (doc 10 collision input) before it. Naming is Gate 2 with the RDAP pre-screen as seed. Gates numbered globally, never reused (Eaverow's "Gate 2" name collision documented in its playbook). | plan |
 | 2026-08-05 | **Stack: reuse the family stack; new platforms only via gates** | pnpm monorepo, Next 16 / React 19 / Tailwind 4, Supabase (auth+Postgres+RLS+storage), Stripe, Resend, Vercel ×2, Anthropic SDK, adapter-pattern env-gated stores, Vercel cron — per Andrew: avoid new accounts/platforms unless necessary. Unavoidable new dependencies for this vertical (mailbox OAuth; later possibly telephony, unified-mailbox vendors, workflow engines, STT) are explicit gate decisions with build-vs-buy options, never defaults. | Andrew |
@@ -20,11 +21,15 @@ row. "Decided by" vocabulary: `Andrew` (founder ruling) · `Claude` (agent analy
 
 ## Gate 1 record — research account posture
 
-_Pending. Memo: `docs/plan/gates/gate-01-research-account-posture.md`._
+Memo: `docs/plan/gates/gate-01-research-account-posture.md`.
 
-- **Precondition:** repo shows **Private** on GitHub (runbook 01) — _pending_
-- **Chosen posture:** _pending_
-- **Protocol activation:** _pending — the §1 Tier-F rules activate per the chosen
-  posture; logged here with date_
-- **Counsel follow-up:** _pending — competitive-use/benchmarking clause review logged to
-  the legal-counsel runbook when written (Phase 2)_
+- **Precondition:** ✅ repo shows **Private** on GitHub (flipped by Andrew; verified via
+  repo listing, 2026-08-06)
+- **Chosen posture:** ✅ **B — founder-as-design-partner, split corpus** (decided by
+  Andrew in chat, 2026-08-06; the memo's #1 pick)
+- **Protocol activation:** ✅ Tier-F rules of protocol §1 are ACTIVE;
+  `docs/research/outreach/00b-founder-input-log.md` header flipped in the same commit
+  as this record. Option A (strict public-only) remains the documented fallback,
+  switchable by one decision-log row.
+- **Counsel follow-up:** _open — Outreach ToS competitive-use/benchmarking clause review
+  goes into the legal-counsel runbook when written (Phase 2)_

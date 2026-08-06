@@ -14,9 +14,9 @@ this.
 > and internal decision memos (`docs/legal/clean-room-protocol.md` §4). Flip it before
 > any research lands: `docs/runbooks/01-repo-privacy.md`.
 
-**Program status: Phase 0 complete — awaiting Gate 1** (research account posture):
-`docs/plan/gates/gate-01-research-account-posture.md`. No research content exists yet,
-by design.
+**Program status: Phase 1 in progress** — clean-room teardown + naming sprint.
+Gate 1 closed 2026-08-06 (posture **B — founder-as-design-partner**, repo private);
+next gate: **Gate 2 — brand name**. Phase plan: `docs/plan/phase-1-plan.md`.
 
 ## Map
 
