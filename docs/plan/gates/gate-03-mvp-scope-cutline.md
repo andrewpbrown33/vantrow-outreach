@@ -1,5 +1,12 @@
 # Gate 3 — MVP Scope & Cutline
 
+> **DECIDED 2026-08-06 — Andrew ruled in his own words, narrower than every drafted
+> option: "the MVP to just be setting up email campaigns that run and track and update
+> automatically, ending when replying, pausing with auto replies, and identifying
+> bounces etc." Recorded as Option E — Auto-Email Core; precise mapping in the Gate 3
+> record (`docs/plan/decision-log.md`). The site-launch acceptance half remains open
+> (runbook 06). The options below stand as the historical analysis.**
+
 **Type:** Decision gate (+ site-launch acceptance rides with it).
 **Question:** what does the Nudgerow MVP build — exactly?
 **Inputs:** the 210-row matrix (`docs/research/outreach/11-copy-priority-matrix.md`,
