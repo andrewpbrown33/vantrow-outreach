@@ -4,11 +4,10 @@
  * The apps are 100% brand-agnostic: every brand string, color, font, and
  * domain they render comes from this package. To rebrand, edit this file only.
  *
- * Placeholder values are deliberate sentinels: `__BRAND__` and `example.com`
- * are what the launch-checklist grep (`grep -r "__BRAND__\|example.com" apps
- * packages`) hunts for, so an unbranded string can never reach production
- * unnoticed. Real values land at Gate 2 (brand name) in the same commit as the
- * decision-log gate record.
+ * Identity applied at Gate 2 (2026-08-06, decision log): Nudgerow /
+ * nudgerow.com. Color/typography identity is interim until the Phase 2 design
+ * pass. The launch checklist greps apps+packages for the unbranded placeholder
+ * sentinels (see the launch runbook) to prove none survives to production.
  *
  * Schema notes vs. subsidiary #1 (Eaverow): parent linkage, dark palette,
  * typography, and shape tokens are first-class here so later subsidiaries
@@ -76,21 +75,21 @@ export interface BrandConfig {
 }
 
 export const brand: BrandConfig = {
-  name: "__BRAND__",
-  legalName: "__BRAND__, Inc.",
+  name: "Nudgerow",
+  legalName: "Nudgerow, Inc.",
   tagline: "Sales outreach that runs itself",
   description:
-    "__BRAND__ is the AI-native sales-engagement platform: sequences, tasks, and outreach your whole team can actually use — with transparent pricing.",
-  domain: "example.com",
-  appUrl: "https://app.example.com",
-  supportEmail: "founder@example.com",
+    "Nudgerow is the AI-native sales-engagement platform: sequences, tasks, and outreach your whole team can actually use — with transparent pricing.",
+  domain: "nudgerow.com",
+  appUrl: "https://app.nudgerow.com",
+  supportEmail: "andrew@nudgerow.com",
   endorsement: "a Vantrow company",
   parentName: "Vantrow",
   parentUrl: "https://getvantrow.com",
   colors: {
-    // Placeholder neutral palette, AA-contrast on both schemes. The real
-    // identity is chosen at Gate 2 and applied here in the same commit that
-    // records the gate decision (no token drift — Eaverow lesson).
+    // Neutral interim palette, AA-contrast on both schemes. The Nudgerow
+    // visual identity (palette, type, wordmark) is a Phase 2 design decision;
+    // apply it here in the same commit that logs it (no token drift).
     light: {
       primary: "#1f3a5f",
       primaryDark: "#12233c",

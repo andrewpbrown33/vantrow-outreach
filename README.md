@@ -1,22 +1,24 @@
-# Vantrow Subsidiary #3 — a Vantrow company
+# Nudgerow — a Vantrow company
 
-Monorepo for Vantrow's third white-label vertical-SaaS subsidiary: a modern, AI-native,
-transparently priced competitor to **Outreach** (the sales-engagement platform —
-sequences, task queue, activity capture), connected to personalized client dashboards
-built through Vantrow. The family: Eaverow (roofing, vs AccuLynx) → Parcelrow (CRE) →
-this.
+Monorepo for **Nudgerow**, Vantrow's third white-label vertical-SaaS subsidiary: a
+modern, AI-native, transparently priced competitor to **Outreach** (the sales-engagement
+platform — sequences, task queue, activity capture), connected to personalized client
+dashboards built through Vantrow. The family: Eaverow (roofing, vs AccuLynx) →
+Parcelrow (CRE) → Nudgerow.
 
-> **Name status:** not yet chosen. The brand is a placeholder (`packages/brand`) until
-> **Gate 2** runs the domain-first naming sprint. Everything is built brand-agnostic;
-> the chosen name is a one-package diff.
+> **Name status:** "Nudgerow" chosen (Gate 2, 2026-08-06) pending same-day domain
+> registration and professional trademark clearance — see
+> `docs/brand/naming-decision-memo.md` and the Gate 2 record in
+> `docs/plan/decision-log.md`. Nothing here is legal clearance.
 
-> **This repository must be PRIVATE.** It will contain clean-room competitive research
-> and internal decision memos (`docs/legal/clean-room-protocol.md` §4). Flip it before
-> any research lands: `docs/runbooks/01-repo-privacy.md`.
+> **This repository is private and must stay private.** It contains clean-room
+> competitive research and internal decision memos
+> (`docs/legal/clean-room-protocol.md` §4).
 
-**Program status: Phase 1 in progress** — clean-room teardown + naming sprint.
-Gate 1 closed 2026-08-06 (posture **B — founder-as-design-partner**, repo private);
-next gate: **Gate 2 — brand name**. Phase plan: `docs/plan/phase-1-plan.md`.
+**Program status: Gates 1–2 closed** (posture B · name Nudgerow). Phase 1 teardown
+complete and merged. **Next: Phase 2** — synthesis & storefront (marketing site,
+`/vs-outreach`, launch runbooks) → **Gate 3: MVP scope & cutline**. Customer-#1
+requirements: `docs/research/inputs/customer1-requirements.md`.
 
 ## Map
 

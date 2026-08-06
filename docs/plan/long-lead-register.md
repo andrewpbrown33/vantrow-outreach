@@ -8,11 +8,12 @@ code needs it. Reviewed at every gate alongside `hard-problems.md`.
 | Item | What it gates | Typical lead time | Trigger | Owner | Status |
 |---|---|---|---|---|---|
 | Repo → Private | All research content; Gate 1 | Minutes | Now (runbook 01) | Andrew | ✅ Done 2026-08-06 |
-| Secondary sending domains + branded email | All real outbound (dogfood and beyond); DNS auth (SPF/DKIM/DMARC) | Same-day purchase; DNS hours | Gate 2 (buy alongside the brand `.com`) | Andrew | Pending Gate 2 |
+| **nudgerow.com registration** | The brand itself (Gate 2 closed 2026-08-06) | Same-day — availability decays hourly | **NOW** | Andrew | **OPEN — register today** (+optional defensive .io) |
+| Secondary sending domains + branded email | All real outbound (dogfood and beyond); DNS auth (SPF/DKIM/DMARC) | Same-day purchase; DNS hours | With the nudgerow.com purchase (e.g. getnudgerow.com, trynudgerow.com) | Andrew | **OPEN — buy with the .com** |
 | Mailbox warmup | Trustworthy sends from new domains/mailboxes | **2–6 weeks per mailbox** | Immediately after domains exist | Andrew (infra) + platform (throttle honors warmup state) | Pending |
 | Microsoft publisher verification (Entra app) | Public/commercial M365 mailbox OAuth (dogfood can run on tenant-admin consent without it) | Days–weeks | Phase 3 (Gate 4 memo drafts the app registration) | Andrew | Pending |
 | Google OAuth verification + restricted-scope security assessment (Gmail scopes) | *Commercial* Gmail connection (test-mode covers dogfood ≤100 users) | **Weeks–months; paid third-party assessment** | Phase 3 if Gmail is in scope at Gate 4 | Andrew | Pending |
-| A2P 10DLC brand + campaign registration | Any SMS step type; also relevant to dialer caller-ID reputation (STIR/SHAKEN) | Weeks | Only if/when SMS enters scope (Gate 11 family) | Andrew | Not started (post-MVP) |
+| A2P 10DLC brand + campaign registration | Any SMS step type; also relevant to dialer caller-ID reputation (STIR/SHAKEN) | Weeks | Only if/when SMS enters scope (Gate 11 family) | Andrew | Deprioritized 2026-08-06 — customer #1 requires no telephony/SMS (R9, `customer1-requirements.md`); revisit only as a market question |
 | Salesforce AppExchange security review | Listed Salesforce integration | **Months** | Only if Gate 8 picks Salesforce | Andrew | Not started |
 | Trademark clearance (counsel) | Safe use of the Gate 2 name; comparative-ad sign-off | Weeks | Gate 2 same-day open | Andrew | Pending Gate 2 |
 | Outreach ToS competitive-use review (counsel) | Confidence in the Gate 1 posture | Days | With the Phase 2 legal-counsel runbook | Andrew | Flagged (Gate 1 memo) |
