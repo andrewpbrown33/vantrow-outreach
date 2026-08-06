@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/metric.schema.json",
+  "title": "Metric",
+  "description": "v0 DRAFT. A named, pre-aggregated KPI computed by the producing platform for dashboard display (dashboards never re-aggregate raw data in v1). RECONCILE(doc-04/05): the standard metric key catalog against AccuLynx report primitives.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tenant_id",
+    "key",
+    "label",
+    "unit",
+    "value",
+    "currency",
+    "period",
+    "created_at",
+    "updated_at",
+    "extensions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^met_[0-9a-z]{8,32}$",
+      "description": "Prefixed metric identifier (stable per tenant+key)."
+    },
+    "tenant_id": { "type": "string", "pattern": "^ten_[0-9a-z]{8,32}$" },
+    "key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$",
+      "description": "Machine key, stable across time (e.g. \"revenue_mtd\"). Vertical-specific metrics are namespaced like extensions (e.g. \"roofing.claims_open\")."
+    },
+    "label": { "type": "string", "minLength": 1, "description": "Human-readable label for display." },
+    "unit": {
+      "type": "string",
+      "enum": ["currency_minor", "count", "days", "percent", "ratio"],
+      "description": "How to interpret value. currency_minor: value is minor units of `currency`."
+    },
+    "value": { "type": "number" },
+    "currency": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 code; required semantically when unit is currency_minor, null otherwise."
+    },
+    "period": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "to"],
+          "properties": {
+            "from": { "type": "string", "format": "date-time" },
+            "to": { "type": "string", "format": "date-time" }
+          }
+        },
+        { "type": "null" }
+      ],
+      "description": "Aggregation window; null for point-in-time snapshot metrics (as-of updated_at)."
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time", "description": "Last time the value was computed." },
+    "extensions": { "$ref": "extensions.schema.json" }
+  }
+}

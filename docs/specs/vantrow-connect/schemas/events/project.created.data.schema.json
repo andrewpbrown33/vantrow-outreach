@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/events/project.created.data.schema.json",
+  "title": "project.created data",
+  "description": "v0 DRAFT. Payload for project.created: the project as it existed at occurred_at (typically status \"lead\").",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project"],
+  "properties": {
+    "project": { "$ref": "../project.schema.json" }
+  }
+}

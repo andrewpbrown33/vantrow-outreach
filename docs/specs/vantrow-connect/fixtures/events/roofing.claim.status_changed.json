@@ -1,0 +1,28 @@
+{
+  "id": "evt_01jm6b5bh0xd3rmy",
+  "type": "roofing.claim.status_changed",
+  "occurred_at": "2026-06-12T19:15:02Z",
+  "tenant_id": "ten_01jm5wq0f8kavr3x",
+  "version": "v1",
+  "data": {
+    "project_id": "proj_01jm5y0c4t6hqe8v",
+    "previous_status": "inspection_scheduled",
+    "claim": {
+      "claim_number": "CLM-2026-048291",
+      "carrier": "Ridgeline Mutual Insurance",
+      "status": "approved",
+      "peril": "hail",
+      "date_of_loss": "2026-05-18",
+      "deductible": {
+        "amount": 150000,
+        "currency": "USD"
+      },
+      "approved_amount": {
+        "amount": 2841000,
+        "currency": "USD"
+      },
+      "adjuster_name": "T. Okafor",
+      "adjuster_phone": "+1-555-0163"
+    }
+  }
+}

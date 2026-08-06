@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/events/project.status_changed.data.schema.json",
+  "title": "project.status_changed data",
+  "description": "v0 DRAFT. Payload for project.status_changed: the project after the change, plus the prior core status. Fired when the core status changes; status_detail-only changes do not fire this event.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project", "previous_status", "previous_status_detail"],
+  "properties": {
+    "project": { "$ref": "../project.schema.json" },
+    "previous_status": {
+      "type": "string",
+      "enum": ["lead", "quoted", "approved", "in_progress", "completed", "closed", "canceled"],
+      "description": "Core status before the change."
+    },
+    "previous_status_detail": {
+      "type": ["string", "null"],
+      "description": "status_detail before the change."
+    }
+  }
+}

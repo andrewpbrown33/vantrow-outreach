@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/contact.schema.json",
+  "title": "Contact",
+  "description": "v0 DRAFT. A person or business the tenant works with (homeowner, property manager, referrer). RECONCILE(doc-04/05): whether a contact type/role field (lead vs customer vs company) belongs in core.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tenant_id",
+    "first_name",
+    "last_name",
+    "company_name",
+    "email",
+    "phone",
+    "address",
+    "created_at",
+    "updated_at",
+    "extensions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ctc_[0-9a-z]{8,32}$",
+      "description": "Prefixed contact identifier."
+    },
+    "tenant_id": { "type": "string", "pattern": "^ten_[0-9a-z]{8,32}$" },
+    "first_name": { "type": "string", "minLength": 1 },
+    "last_name": { "type": "string", "minLength": 1 },
+    "company_name": {
+      "type": ["string", "null"],
+      "description": "Business name when the contact represents a company; null for individuals."
+    },
+    "email": { "type": ["string", "null"], "format": "email" },
+    "phone": {
+      "type": ["string", "null"],
+      "description": "Display-formatted phone; producers SHOULD emit E.164 or E.164-with-separators."
+    },
+    "address": {
+      "anyOf": [{ "$ref": "address.schema.json" }, { "type": "null" }]
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "extensions": { "$ref": "extensions.schema.json" }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/money.schema.json",
+  "title": "Money",
+  "description": "Monetary value. `amount` is in minor units of `currency` (e.g. cents for USD): $1,250.00 => { \"amount\": 125000, \"currency\": \"USD\" }.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["amount", "currency"],
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "description": "Amount in minor units (e.g. cents). May be negative for credits/adjustments."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217 alphabetic currency code, uppercase."
+    }
+  }
+}

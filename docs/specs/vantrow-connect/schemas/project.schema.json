@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/project.schema.json",
+  "title": "Project",
+  "description": "v0 DRAFT. A unit of work for a customer. Verticals map their primary work object into this (roofing: \"job\" -> project). status is the small core enum every dashboard can rely on; status_detail carries the vertical's native stage verbatim. RECONCILE(doc-04/05): field list and the job-status state machine mapping.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tenant_id",
+    "name",
+    "status",
+    "status_detail",
+    "contact_id",
+    "address",
+    "contract_value",
+    "created_at",
+    "updated_at",
+    "extensions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^proj_[0-9a-z]{8,32}$",
+      "description": "Prefixed project identifier."
+    },
+    "tenant_id": { "type": "string", "pattern": "^ten_[0-9a-z]{8,32}$" },
+    "name": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["lead", "quoted", "approved", "in_progress", "completed", "closed", "canceled"],
+      "description": "Core lifecycle status. This enum is frozen within v1; verticals map their native stages onto it and put the native stage in status_detail."
+    },
+    "status_detail": {
+      "type": ["string", "null"],
+      "description": "Vertical-specific stage, free-form (e.g. \"build_scheduled\", \"supplement_pending\"). Dashboards display it verbatim; they MUST NOT branch on it."
+    },
+    "contact_id": {
+      "type": ["string", "null"],
+      "pattern": "^ctc_[0-9a-z]{8,32}$",
+      "description": "Primary customer contact, when known."
+    },
+    "address": {
+      "anyOf": [{ "$ref": "address.schema.json" }, { "type": "null" }],
+      "description": "Job-site address."
+    },
+    "contract_value": {
+      "anyOf": [{ "$ref": "money.schema.json" }, { "type": "null" }],
+      "description": "Current contract/estimate value; null before quoting."
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "extensions": { "$ref": "extensions.schema.json" }
+  }
+}

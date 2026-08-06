@@ -1,0 +1,49 @@
+{
+  "data": [
+    {
+      "id": "met_01jm6a0b2ce4qk7n",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "key": "revenue_mtd",
+      "label": "Revenue (month to date)",
+      "unit": "currency_minor",
+      "value": 18425000,
+      "currency": "USD",
+      "period": {
+        "from": "2026-07-01T00:00:00Z",
+        "to": "2026-07-15T00:00:00Z"
+      },
+      "created_at": "2026-05-01T00:00:00Z",
+      "updated_at": "2026-07-15T09:30:00Z",
+      "extensions": {}
+    },
+    {
+      "id": "met_01jm6a1p9dw5rm3s",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "key": "jobs_in_progress",
+      "label": "Jobs in progress",
+      "unit": "count",
+      "value": 14,
+      "currency": null,
+      "period": null,
+      "created_at": "2026-05-01T00:00:00Z",
+      "updated_at": "2026-07-15T09:30:00Z",
+      "extensions": {}
+    },
+    {
+      "id": "met_01jm6a2t6fx8vn5j",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "key": "avg_cycle_days",
+      "label": "Average job cycle time (days)",
+      "unit": "days",
+      "value": 41.3,
+      "currency": null,
+      "period": {
+        "from": "2026-04-16T00:00:00Z",
+        "to": "2026-07-15T00:00:00Z"
+      },
+      "created_at": "2026-05-01T00:00:00Z",
+      "updated_at": "2026-07-15T09:30:00Z",
+      "extensions": {}
+    }
+  ]
+}

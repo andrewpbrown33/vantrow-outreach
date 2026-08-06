@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/tenant.schema.json",
+  "title": "Tenant",
+  "description": "v0 DRAFT. A contractor account on a Vantrow-subsidiary platform. Every other entity is scoped to exactly one tenant via tenant_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tenant_id",
+    "name",
+    "vertical",
+    "timezone",
+    "currency",
+    "created_at",
+    "updated_at",
+    "extensions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^ten_[0-9a-z]{8,32}$",
+      "description": "Prefixed tenant identifier."
+    },
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^ten_[0-9a-z]{8,32}$",
+      "description": "Equal to id. Present so every entity in the model carries the same envelope fields."
+    },
+    "name": { "type": "string", "minLength": 1, "description": "Display name of the contractor business." },
+    "vertical": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Vertical slug of the producing platform (e.g. \"roofing\"). Doubles as the extension namespace root."
+    },
+    "timezone": { "type": "string", "minLength": 1, "description": "IANA timezone (e.g. \"America/New_York\"). Used to interpret business-day metrics." },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "description": "Default ISO 4217 currency for this tenant's Money values."
+    },
+    "created_at": { "type": "string", "format": "date-time", "description": "RFC 3339 timestamp." },
+    "updated_at": { "type": "string", "format": "date-time", "description": "RFC 3339 timestamp." },
+    "extensions": { "$ref": "extensions.schema.json" }
+  }
+}

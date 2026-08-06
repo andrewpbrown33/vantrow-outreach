@@ -1,0 +1,31 @@
+{
+  "id": "evt_01jm6b3zf8vb1pjw",
+  "type": "invoice.created",
+  "occurred_at": "2026-07-10T16:45:19Z",
+  "tenant_id": "ten_01jm5wq0f8kavr3x",
+  "version": "v1",
+  "data": {
+    "invoice": {
+      "id": "inv_01jm5z4k1x9snt7f",
+      "tenant_id": "ten_01jm5wq0f8kavr3x",
+      "project_id": "proj_01jm5y1d7g3jrf9w",
+      "contact_id": "ctc_01jm5xb7r3n8tk2q",
+      "number": "INV-1042",
+      "status": "open",
+      "total": {
+        "amount": 1434000,
+        "currency": "USD"
+      },
+      "amount_due": {
+        "amount": 1434000,
+        "currency": "USD"
+      },
+      "issued_at": "2026-07-10T16:45:19Z",
+      "due_at": "2026-07-24T00:00:00Z",
+      "paid_at": null,
+      "created_at": "2026-07-10T16:45:19Z",
+      "updated_at": "2026-07-10T16:45:19Z",
+      "extensions": {}
+    }
+  }
+}

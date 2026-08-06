@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://connect.vantrow.example/schemas/v0/invoice.schema.json",
+  "title": "Invoice",
+  "description": "v0 DRAFT. A bill issued by the tenant to a customer. RECONCILE(doc-04/05): status set (partial payments? uncollectible?) and whether line items belong in core or extensions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "tenant_id",
+    "project_id",
+    "contact_id",
+    "number",
+    "status",
+    "total",
+    "amount_due",
+    "issued_at",
+    "due_at",
+    "paid_at",
+    "created_at",
+    "updated_at",
+    "extensions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^inv_[0-9a-z]{8,32}$",
+      "description": "Prefixed invoice identifier."
+    },
+    "tenant_id": { "type": "string", "pattern": "^ten_[0-9a-z]{8,32}$" },
+    "project_id": {
+      "type": ["string", "null"],
+      "pattern": "^proj_[0-9a-z]{8,32}$",
+      "description": "Project this invoice bills against; null for standalone invoices."
+    },
+    "contact_id": {
+      "type": ["string", "null"],
+      "pattern": "^ctc_[0-9a-z]{8,32}$"
+    },
+    "number": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-facing invoice number, unique per tenant (e.g. \"INV-1042\")."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "open", "paid", "void"],
+      "description": "Core invoice status, frozen within v1. Partial payment is expressed via amount_due < total while status stays \"open\"."
+    },
+    "total": { "$ref": "money.schema.json" },
+    "amount_due": {
+      "$ref": "money.schema.json",
+      "description": "Remaining balance. 0 when paid."
+    },
+    "issued_at": { "type": ["string", "null"], "format": "date-time", "description": "When the invoice was sent to the customer; null while draft." },
+    "due_at": { "type": ["string", "null"], "format": "date-time" },
+    "paid_at": { "type": ["string", "null"], "format": "date-time", "description": "When amount_due reached 0; null otherwise." },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "extensions": { "$ref": "extensions.schema.json" }
+  }
+}
