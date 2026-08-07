@@ -66,6 +66,10 @@ const COMPETITORS: { name: string; re: RegExp }[] = [
   { name: "11x", re: /\b11x\b(?!\s*(faster|better|more|growth|improvement|return))/i },
   { name: "Artisan", re: /\bartisan\b(?=[^.!?]{0,60}(ai|sdr|sales|agent))/i },
   { name: "Instantly", re: /\binstantly\.ai\b/i },
+  // Founder-flagged direct competitor (2026-08-07): AI dialer/engagement
+  // platform actively marketing an "Outreach alternative". Generic word
+  // ("breakfast nooks") — context-gated like Outreach/Apollo.
+  { name: "Nooks", re: /\bnooks\.ai\b|\bNooks\b(?=[^.!?]{0,60}(dialer|sales|ai|outreach|alternative|platform|pricing))/i },
 ];
 
 /** The disclaimer the checklist requires verbatim on anything naming a

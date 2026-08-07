@@ -27,7 +27,8 @@ legal clearance.**
   warranted. (Research does not pause for this; any adjustment lands as a decision-log
   row.)
 
-## 3. Comparative advertising — before `/vs-outreach` goes live
+## 3. Comparative advertising — DORMANT (2026-08-07: the comparison page was
+## removed pre-launch; this section reactivates only if comparative content returns)
 
 - The page's claims table (claim → S-ID source → access date) goes to counsel with
   `docs/legal/comparative-advertising-checklist.md`.
@@ -43,8 +44,10 @@ legal clearance.**
 
 ## 5. Flag for later (not now)
 
-Product ToS + DPA (Phase 5/6, before commercial tenants) · entity formation
-("Nudgerow, Inc." vs d/b/a under Vantrow) · CAN-SPAM/CASL posture for the product's
+Product ToS + DPA (Phase 5/6, before commercial tenants) · **entity formation —
+deferred by founder decision 2026-08-07** (no entities registered yet; forms at
+first-customers + capital; early sales filed as individual for tax — accountant
+item when revenue nears) · CAN-SPAM/CASL posture for the product's
 outbound (the platform enforces one-click unsubscribe + suppression by design —
 protocol §10) · SOC 2 timing (Gate 9/10).
 

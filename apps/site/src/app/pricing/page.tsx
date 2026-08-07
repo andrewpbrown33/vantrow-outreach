@@ -12,7 +12,7 @@ export const metadata: Metadata = {
  *  product is pre-launch and inventing placeholder prices would be exactly
  *  the fabricated-claims failure the program forbids. The page sells the
  *  transparency commitment itself. The unnamed-incumbent line is sourced on
- *  /vs-outreach (S-PRC-001), where the competitor may be named. */
+ *  the research log (S-PRC-001); no competitor is named on the site. */
 
 const commitments = [
   "The full price list, published on this page at launch — visible before you ever talk to us",
@@ -82,18 +82,11 @@ export default function PricingPage() {
           Why lead with transparency?
         </h2>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Because in this category, prices are famously hard to see. As of
-          August 2026, the incumbent platform we compare ourselves against
-          publishes no prices at all &mdash; its pricing page ends in a quote
-          request. The sourced, dated details are in our comparison.
-        </p>
-        <p className="mt-4">
-          <Link
-            href={routes.compare}
-            className="text-sm font-semibold text-brand underline underline-offset-2 hover:text-brand-dark"
-          >
-            How we compare &rarr;
-          </Link>
+          Because in this category, prices are famously hard to see &mdash;
+          quote requests, sales calls, and per-seat math that only appears in
+          the contract. We think the price of software should be readable
+          before the first conversation, and ours will be: published on this
+          page the day the platform launches.
         </p>
       </div>
 

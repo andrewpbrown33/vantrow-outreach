@@ -1,21 +1,15 @@
 #!/usr/bin/env node
 /**
- * Claims lint for the marketing site (Phase-2 verification row: this script
- * exits 0 only when the site's marketing copy passes @vantrow/growth
- * legal-lint with zero "block" findings).
+ * Site copy lint for the marketing site (Phase-2 verification row: this
+ * script exits 0 only when the site's copy passes @vantrow/growth legal-lint
+ * with zero findings).
  *
- * Method — the linting itself lives in apps/site/src/lib/claims.test.ts,
- * which:
- *   (a) imports the /vs-outreach copy from its single source of truth
- *       (apps/site/src/lib/claims.ts) and runs legalLint over every claim row
- *       and over the assembled page copy (asserting approvable === true, the
- *       verbatim disclaimer, the "as of" date, >= 2 concession rows, S-ID
- *       footnotes, and zero [SHIP-GATE] markers), and
- *   (b) crudely extracts the user-visible string literals from every
- *       page.tsx under apps/site/src/app (JSX text nodes + prose-like string
- *       literals; extraction method documented in the test) and lints each
- *       page, additionally asserting that no page outside /vs-outreach names
- *       a competitor.
+ * Method — the linting itself lives in apps/site/src/lib/site-copy-lint.test.ts,
+ * which crudely extracts the user-visible string literals from every page.tsx
+ * under apps/site/src/app (JSX text nodes + prose-like string literals;
+ * extraction method documented in the test) and lints each page, asserting
+ * zero findings, no [SHIP-GATE] markers, and that NO page names a competitor
+ * (founder decision 2026-08-07: the comparison page was removed pre-launch).
  *
  * Running the lint inside vitest keeps this dependency-light: legal-lint.ts
  * is plain TypeScript and vitest (already a root devDependency, already run
@@ -30,7 +24,7 @@ const repoRoot = fileURLToPath(new URL("..", import.meta.url));
 
 const result = spawnSync(
   "npx",
-  ["vitest", "run", "apps/site/src/lib/claims.test.ts"],
+  ["vitest", "run", "apps/site/src/lib/site-copy-lint.test.ts"],
   { cwd: repoRoot, stdio: "inherit" },
 );
 

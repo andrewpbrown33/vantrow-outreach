@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { brand } from "@vantrow/brand";
 import { primaryNav, routes } from "../lib/nav";
+import { Wordmark } from "./wordmark";
 
 /** Pre-launch header: the CTA is early access, not app login — there is no
  *  product app yet. Swap to Log in / Start free when the platform ships. */
@@ -12,7 +12,7 @@ export function Header() {
           href={routes.home}
           className="text-lg font-bold tracking-tight text-brand-dark"
         >
-          {brand.name}
+          <Wordmark />
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-6 md:flex">

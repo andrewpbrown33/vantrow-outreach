@@ -1,11 +1,11 @@
 /**
  * Centralized route paths and nav labels.
  *
- * Note on brand policy: the competitor name "Outreach" appears here only as
- * the nominative label/path for the comparison page, and nowhere else in the
- * site outside that page (docs/legal/comparative-advertising-checklist.md;
- * family precedent: subsidiary #1's nav.ts). Everywhere else, links to the
- * comparison use neutral text such as "How we compare".
+ * Brand policy: no competitor is named anywhere on the site (founder decision
+ * 2026-08-07 — the comparison page was removed pre-launch; the claims
+ * machinery in docs/legal + @vantrow/growth stands ready if comparative
+ * content ever returns, and the site-copy lint enforces the absence
+ * meanwhile).
  *
  * There is no product app yet (pre-launch), so unlike subsidiary #1 this file
  * exports no appLinks — the primary CTA everywhere is /early-access. Add the
@@ -16,7 +16,6 @@
 export const routes = {
   home: "/",
   product: "/product",
-  compare: "/vs-outreach",
   pricing: "/pricing",
   about: "/about",
   earlyAccess: "/early-access",
@@ -32,7 +31,6 @@ export interface NavLink {
 /** Primary navigation shown in the header. */
 export const primaryNav: NavLink[] = [
   { href: routes.product, label: "Product" },
-  { href: routes.compare, label: "vs. Outreach" },
   { href: routes.pricing, label: "Pricing" },
   { href: routes.about, label: "About" },
 ];

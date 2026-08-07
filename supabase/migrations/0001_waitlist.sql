@@ -13,8 +13,12 @@
 -- on purpose. The site's API route writes with the service-role key, which
 -- bypasses RLS. The anon and authenticated roles therefore have no read or
 -- write access to this table by design — there is no client-side path to it.
+--
+-- Idempotent: safe to run more than once (a double-run in the SQL editor
+-- previously errored with 42P07 "relation already exists" — harmless, but
+-- alarming; every statement now guards with IF NOT EXISTS).
 
-create table public.waitlist_signups (
+create table if not exists public.waitlist_signups (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   name text not null,
@@ -38,9 +42,9 @@ alter table public.waitlist_signups enable row level security;
 -- No RLS policies: service-role key bypasses RLS; anon/authenticated have
 -- no access by design.
 
-create index waitlist_signups_created_at_idx
+create index if not exists waitlist_signups_created_at_idx
   on public.waitlist_signups (created_at);
 
-create index waitlist_signups_utm_source_idx
+create index if not exists waitlist_signups_utm_source_idx
   on public.waitlist_signups (utm_source)
   where utm_source is not null;

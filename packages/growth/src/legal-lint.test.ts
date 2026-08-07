@@ -143,3 +143,11 @@ describe("unshipped-feature warnings", () => {
     expect(r.findings.map((f) => f.code)).toContain("hype-vocabulary");
   });
 });
+
+describe("Nooks detection (founder-flagged competitor, 2026-08-07)", () => {
+  it("flags nooks.ai and product-context Nooks, not the generic noun", () => {
+    expect(lint("Compare us with nooks.ai before you decide.").competitors).toContain("Nooks");
+    expect(lint("Nooks sales platform pricing is seat-based.").competitors).toContain("Nooks");
+    expect(lint("Our office has cozy breakfast nooks everywhere.").competitors).toEqual([]);
+  });
+});
