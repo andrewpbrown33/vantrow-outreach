@@ -70,3 +70,7 @@ mark); calmest and most "trusted advisor" of the three.
    Eaverow's wordmark treats the suffix). Assets land in `packages/brand/assets/`.
 4. Decision = an option memo (anatomy per the program plan) → Andrew picks → tokens +
    assets + decision-log row in ONE commit.
+
+**Visual preview:** `docs/brand/palette-preview.html` (open in any browser) — the three
+candidates rendered as two-tone wordmarks (camel "row") on their own light/dark grounds
+with full token chips. Also published for review at the session artifact link.

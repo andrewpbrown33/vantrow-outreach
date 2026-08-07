@@ -1,0 +1,294 @@
+<title>Nudgerow — Palette Candidates</title>
+<style>
+  :root {
+    --bg: #F5F4F1;
+    --fg: #1A1916;
+    --muted: #75716A;
+    --hairline: #E3E0DA;
+    --card: #FDFCFA;
+    --camel: #B8956A;
+    --alert: #E10600;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131211;
+      --fg: #ECEAE6;
+      --muted: #97928A;
+      --hairline: #2A2825;
+      --card: #1B1A18;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131211;
+    --fg: #ECEAE6;
+    --muted: #97928A;
+    --hairline: #2A2825;
+    --card: #1B1A18;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 40px 20px 72px; }
+  header { border-bottom: 1px solid var(--hairline); padding-bottom: 28px; margin-bottom: 8px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--camel); font-weight: 600; margin: 0 0 10px;
+  }
+  h1 { font-size: clamp(26px, 4vw, 34px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 10px; text-wrap: balance; }
+  .lede { color: var(--muted); max-width: 62ch; margin: 0; font-size: 15px; }
+  .lede strong { color: var(--fg); font-weight: 600; }
+
+  .room { padding: 36px 0 40px; border-bottom: 1px solid var(--hairline); }
+  .room-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+  .room-letter {
+    font-size: 13px; font-weight: 700; color: var(--camel);
+    border: 1px solid var(--camel); border-radius: 999px;
+    width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+    align-self: center;
+  }
+  .room-name { font-size: 20px; font-weight: 750; letter-spacing: -0.01em; }
+  .room-feel { font-size: 13px; color: var(--muted); }
+  .room-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 22px; margin-top: 18px; }
+  @media (max-width: 760px) { .room-body { grid-template-columns: 1fr; } }
+
+  /* Wordmark specimens — each panel commits to its own palette ground */
+  .specimens { display: grid; gap: 12px; align-content: start; }
+  .panel { border-radius: 10px; padding: 30px 28px 26px; border: 1px solid var(--hairline); }
+  .mark { font-weight: 800; letter-spacing: -0.035em; font-size: clamp(38px, 6vw, 52px); line-height: 1.05; }
+  .mark .row-part { /* the family thread */ }
+  .mark-caps { font-weight: 800; letter-spacing: -0.02em; font-size: 19px; margin-top: 10px; }
+  .endorse { font-size: 12px; letter-spacing: 0.05em; margin-top: 14px; }
+  .endorse .tick { color: #B8956A; }
+  .panel-label {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 16px; opacity: 0.75;
+  }
+
+  /* Token chips */
+  .tokens { display: grid; gap: 14px; align-content: start; }
+  .token-set-label {
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin-bottom: 8px;
+  }
+  .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (max-width: 420px) { .chips { grid-template-columns: repeat(2, 1fr); } }
+  .chip { border: 1px solid var(--hairline); border-radius: 8px; overflow: hidden; background: var(--card); }
+  .chip .swatch { height: 44px; }
+  .chip .meta { padding: 6px 8px 8px; }
+  .chip .role { font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em; }
+  .chip .hex {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10.5px; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .verdict { font-size: 13px; color: var(--muted); margin-top: 2px; max-width: 58ch; }
+  .verdict strong { color: var(--fg); font-weight: 600; }
+
+  /* Shared rules footer */
+  .shared { padding-top: 32px; display: grid; gap: 16px; }
+  .shared h2 { font-size: 15px; font-weight: 700; margin: 0; }
+  .rule-row { display: flex; gap: 12px; align-items: flex-start; }
+  .rule-swatch { width: 34px; height: 34px; border-radius: 8px; flex: none; border: 1px solid var(--hairline); }
+  .rule-row p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 64ch; }
+  .rule-row p strong { color: var(--fg); font-weight: 600; }
+  .ask {
+    margin-top: 10px; border: 1px solid var(--camel); border-radius: 10px;
+    padding: 16px 18px; font-size: 14px; max-width: 640px;
+  }
+  .ask strong { font-weight: 700; }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Nudgerow · brand direction · 2026-08-07</p>
+    <h1>Three palette candidates, worn by the name</h1>
+    <p class="lede">In every option the wordmark is two-tone: <strong>nudge</strong> takes the palette's
+    primary, and <strong>row</strong> always wears the Vantrow camel <strong>#B8956A</strong> — the exact
+    gold in the parent's mark and in Eaverow's wordmark, so the family thread is literally in the name.
+    Each candidate is shown on its own light and dark grounds, with the full token set beside it.</p>
+  </header>
+
+  <!-- A — Emerald Standard -->
+  <section class="room">
+    <div class="room-head">
+      <span class="room-letter">A</span>
+      <span class="room-name">Emerald Standard</span>
+      <span class="room-feel">Elegance · Luxury — the emerald haven, with golden accents</span>
+    </div>
+    <div class="room-body">
+      <div class="specimens">
+        <div class="panel" style="background:#F8FAF8; border-color:#DCE5DF;">
+          <div class="panel-label" style="color:#5C6B64;">Light ground</div>
+          <div class="mark"><span style="color:#006D46;">nudge</span><span class="row-part" style="color:#B8956A;">row</span></div>
+          <div class="mark-caps"><span style="color:#006D46;">Nudge</span><span style="color:#B8956A;">row</span></div>
+          <p class="endorse" style="color:#5C6B64;"><span class="tick">◆</span> a Vantrow company</p>
+        </div>
+        <div class="panel" style="background:#0B1512; border-color:#1C2B24;">
+          <div class="panel-label" style="color:#93A39B;">Dark ground</div>
+          <div class="mark"><span style="color:#4CAF87;">nudge</span><span style="color:#B8956A;">row</span></div>
+          <p class="endorse" style="color:#93A39B;"><span class="tick">◆</span> a Vantrow company</p>
+        </div>
+      </div>
+      <div class="tokens">
+        <div>
+          <div class="token-set-label">Light tokens</div>
+          <div class="chips">
+            <div class="chip"><div class="swatch" style="background:#006D46;"></div><div class="meta"><div class="role">primary</div><div class="hex">#006D46</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#004A30;"></div><div class="meta"><div class="role">primary dark</div><div class="hex">#004A30</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#BE6A00;"></div><div class="meta"><div class="role">accent</div><div class="hex">#BE6A00</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#F8FAF8; border-bottom:1px solid #DCE5DF;"></div><div class="meta"><div class="role">background</div><div class="hex">#F8FAF8</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#10201A;"></div><div class="meta"><div class="role">foreground</div><div class="hex">#10201A</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#5C6B64;"></div><div class="meta"><div class="role">muted</div><div class="hex">#5C6B64</div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="token-set-label">Dark tokens</div>
+          <div class="chips">
+            <div class="chip"><div class="swatch" style="background:#4CAF87;"></div><div class="meta"><div class="role">primary</div><div class="hex">#4CAF87</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#7FC7A8;"></div><div class="meta"><div class="role">primary dark</div><div class="hex">#7FC7A8</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#D98A2B;"></div><div class="meta"><div class="role">accent</div><div class="hex">#D98A2B</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#0B1512;"></div><div class="meta"><div class="role">background</div><div class="hex">#0B1512</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#E4EDE8;"></div><div class="meta"><div class="role">foreground</div><div class="hex">#E4EDE8</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#93A39B;"></div><div class="meta"><div class="role">muted</div><div class="hex">#93A39B</div></div></div>
+          </div>
+        </div>
+        <p class="verdict"><strong>Reads as:</strong> established, calm wealth — instantly distinct in a category
+        of blue tools. Emerald + the camel row is a naturally rich pairing; the golden accent
+        keeps CTAs warm.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- B — Royal Signal -->
+  <section class="room">
+    <div class="room-head">
+      <span class="room-letter">B</span>
+      <span class="room-name">Royal Signal</span>
+      <span class="room-feel">Productivity · Clarity · Calm — two of your blues doing the work</span>
+    </div>
+    <div class="room-body">
+      <div class="specimens">
+        <div class="panel" style="background:#F7F8FC; border-color:#DDE1EE;">
+          <div class="panel-label" style="color:#5A6180;">Light ground</div>
+          <div class="mark"><span style="color:#001489;">nudge</span><span style="color:#B8956A;">row</span></div>
+          <div class="mark-caps"><span style="color:#001489;">Nudge</span><span style="color:#B8956A;">row</span></div>
+          <p class="endorse" style="color:#5A6180;"><span class="tick">◆</span> a Vantrow company</p>
+        </div>
+        <div class="panel" style="background:#0A0E24; border-color:#1B2140;">
+          <div class="panel-label" style="color:#8E96B5;">Dark ground</div>
+          <div class="mark"><span style="color:#7DA1C4;">nudge</span><span style="color:#B8956A;">row</span></div>
+          <p class="endorse" style="color:#8E96B5;"><span class="tick">◆</span> a Vantrow company</p>
+        </div>
+      </div>
+      <div class="tokens">
+        <div>
+          <div class="token-set-label">Light tokens</div>
+          <div class="chips">
+            <div class="chip"><div class="swatch" style="background:#001489;"></div><div class="meta"><div class="role">primary</div><div class="hex">#001489</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#000D5C;"></div><div class="meta"><div class="role">primary dark</div><div class="hex">#000D5C</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#F3DD6D;"></div><div class="meta"><div class="role">accent</div><div class="hex">#F3DD6D</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#F7F8FC; border-bottom:1px solid #DDE1EE;"></div><div class="meta"><div class="role">background</div><div class="hex">#F7F8FC</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#0C1030;"></div><div class="meta"><div class="role">foreground</div><div class="hex">#0C1030</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#5A6180;"></div><div class="meta"><div class="role">muted</div><div class="hex">#5A6180</div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="token-set-label">Dark tokens</div>
+          <div class="chips">
+            <div class="chip"><div class="swatch" style="background:#7DA1C4;"></div><div class="meta"><div class="role">primary</div><div class="hex">#7DA1C4</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#A5C0DA;"></div><div class="meta"><div class="role">primary dark</div><div class="hex">#A5C0DA</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#F3DD6D;"></div><div class="meta"><div class="role">accent</div><div class="hex">#F3DD6D</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#0A0E24;"></div><div class="meta"><div class="role">background</div><div class="hex">#0A0E24</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#E3E7F5;"></div><div class="meta"><div class="role">foreground</div><div class="hex">#E3E7F5</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#8E96B5;"></div><div class="meta"><div class="role">muted</div><div class="hex">#8E96B5</div></div></div>
+          </div>
+        </div>
+        <p class="verdict"><strong>Reads as:</strong> crisp, focused, get-it-done — your royal blue by day,
+        your calm dusty blue after dark, with the clarity yellow as the signal color.
+        Closest to "productivity software," which is both its strength and its risk (blue is
+        the category's crowded default).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- C — Vantrow House -->
+  <section class="room">
+    <div class="room-head">
+      <span class="room-letter">C</span>
+      <span class="room-name">Vantrow House</span>
+      <span class="room-feel">Elegance · Calm — the parent's own navy and camel, inherited</span>
+    </div>
+    <div class="room-body">
+      <div class="specimens">
+        <div class="panel" style="background:#FAF8F5; border-color:#E6E0D6;">
+          <div class="panel-label" style="color:#6E6D75;">Light ground</div>
+          <div class="mark"><span style="color:#1B2A4E;">nudge</span><span style="color:#B8956A;">row</span></div>
+          <div class="mark-caps"><span style="color:#1B2A4E;">Nudge</span><span style="color:#B8956A;">row</span></div>
+          <p class="endorse" style="color:#6E6D75;"><span class="tick">◆</span> a Vantrow company</p>
+        </div>
+        <div class="panel" style="background:#0D1220; border-color:#20293F;">
+          <div class="panel-label" style="color:#9B99A3;">Dark ground</div>
+          <div class="mark"><span style="color:#8FA3CE;">nudge</span><span style="color:#B8956A;">row</span></div>
+          <p class="endorse" style="color:#9B99A3;"><span class="tick">◆</span> a Vantrow company</p>
+        </div>
+      </div>
+      <div class="tokens">
+        <div>
+          <div class="token-set-label">Light tokens</div>
+          <div class="chips">
+            <div class="chip"><div class="swatch" style="background:#1B2A4E;"></div><div class="meta"><div class="role">primary</div><div class="hex">#1B2A4E</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#101A33;"></div><div class="meta"><div class="role">primary dark</div><div class="hex">#101A33</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#B8956A;"></div><div class="meta"><div class="role">accent</div><div class="hex">#B8956A</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#FAF8F5; border-bottom:1px solid #E6E0D6;"></div><div class="meta"><div class="role">background</div><div class="hex">#FAF8F5</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#14192B;"></div><div class="meta"><div class="role">foreground</div><div class="hex">#14192B</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#6E6D75;"></div><div class="meta"><div class="role">muted</div><div class="hex">#6E6D75</div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="token-set-label">Dark tokens</div>
+          <div class="chips">
+            <div class="chip"><div class="swatch" style="background:#8FA3CE;"></div><div class="meta"><div class="role">primary</div><div class="hex">#8FA3CE</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#B3C2E0;"></div><div class="meta"><div class="role">primary dark</div><div class="hex">#B3C2E0</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#B8956A;"></div><div class="meta"><div class="role">accent</div><div class="hex">#B8956A</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#0D1220;"></div><div class="meta"><div class="role">background</div><div class="hex">#0D1220</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#E8E6F0;"></div><div class="meta"><div class="role">foreground</div><div class="hex">#E8E6F0</div></div></div>
+            <div class="chip"><div class="swatch" style="background:#9B99A3;"></div><div class="meta"><div class="role">muted</div><div class="hex">#9B99A3</div></div></div>
+          </div>
+        </div>
+        <p class="verdict"><strong>Reads as:</strong> the trusted-advisor option — quietest of the three and the
+        strongest family statement: navy and camel are exactly the parent mark's two tones, so
+        Nudgerow looks born into the house, and the camel does double duty as accent <em>and</em>
+        wordmark thread.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="shared">
+    <h2>Rules shared by every option</h2>
+    <div class="rule-row">
+      <div class="rule-swatch" style="background:#B8956A;"></div>
+      <p><strong>The family thread.</strong> Camel #B8956A colors the "row" in the wordmark in all
+      three candidates and marks the "a Vantrow company" endorsement — sourced from the live
+      Vantrow mark, the same gold as Eaverow's wordmark.</p>
+    </div>
+    <div class="rule-row">
+      <div class="rule-swatch" style="background:#E10600;"></div>
+      <p><strong>Red is for alerts, not brand.</strong> Your intense red #E10600 becomes the in-app
+      semantic alert color — bounces, failures, urgent cracks — where "Fear" is exactly the right
+      instinct. It never leads the identity.</p>
+    </div>
+    <div class="rule-row">
+      <div class="rule-swatch" style="background:#7E7D81;"></div>
+      <p><strong>The gray-violet works quietly.</strong> #7E7D81 informed the muted tones across all
+      three palettes rather than appearing raw.</p>
+    </div>
+    <p class="ask"><strong>To decide:</strong> reply with A, B, or C — or a remix ("C, but with A's
+    emerald as the accent"). Second question, answerable from the specimens: wordmark case —
+    lowercase <strong>nudgerow</strong> or capitalized <strong>Nudgerow</strong>? The chosen palette
+    is applied to the brand tokens in one commit, and the whole site re-dresses itself.</p>
+  </div>
+</div>
