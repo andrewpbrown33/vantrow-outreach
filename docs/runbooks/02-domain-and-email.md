@@ -15,6 +15,16 @@ third. This runbook finishes the second and third.
 
 ## B. Branded email — Google Workspace (recommended, family precedent)
 
+> **Known trap (hit 2026-08-07):** Google rate-limits how many new accounts one phone
+> number can verify in a rolling window. If you recently verified another Workspace
+> (Eaverow's was 3 days before Nudgerow's), sign-in demands a phone and rejects yours
+> as "used too many times," and "Try another way" loops — a new account has no other
+> methods yet. Fixes, in order: try from your phone's browser on cellular (different
+> device+IP often passes with the same number) → wait ~24h for the cooldown → any
+> other real non-VoIP number (removable afterward under Security → Phone). The
+> half-created account is not lost; the wizard resumes. For subsidiary #4: space
+> Workspace signups days apart, or expect this.
+
 1. workspace.google.com → Get started → business name **Nudgerow** → domain
    `nudgerow.com` → create the user **andrew@nudgerow.com** (this is the address
    `packages/brand` already publishes as support).
