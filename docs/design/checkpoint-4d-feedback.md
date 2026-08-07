@@ -47,6 +47,25 @@ reference, never reproduced.
 - v1 deck stays in the repo as the checkpoint artifact; a redline banner points
   here. Deck v2 replaces it after the direction pick.
 
+## Direction plates — round-1 reactions (2026-08-07, same day)
+
+- **R-4D-8 · What landed:** Plate 3 (Studio)'s **icon chips** — the tinted circles
+  with glyphs beside each feed item (screenshot of the Studio feed attached in
+  chat). Plate 2 (Mission Deck)'s **live-console feel and darker background**.
+- **R-4D-9 · What didn't:** Mission Deck reads **too "codey"** — the product must
+  be loved across many industries, not feel engineer-flavored. Consequence: no
+  monospace body text, no terminal idioms (snake-case names, log-tail syntax) in
+  any surviving direction; mono survives only as tiny numeric texture, if at all.
+- **R-4D-10 · The target, in his words:** *"effortless AND like an always-on
+  dashboard. the feed itself should be darker background, but rest of contents
+  does not necessarily need to be."*
+- **R-4D-11 · Asked for:** 2–3 additional directions plus the direct synthesis of
+  this feedback. Delivered as round 2 on `direction-plates.html`: **The Lantern**
+  (the synthesis: dark feed pane in a light room), **The Sidecar** (feed as a
+  persistent dark left column), **The Marquee** (light cards floating on a dark
+  band), **The Crown** (inversion control: dark dashboard crown, light feed —
+  tests whether "dark" wants to live in the chrome instead of the feed).
+
 ## Sequence from here
 
 1. Andrew picks a direction plate (or hybrid).
