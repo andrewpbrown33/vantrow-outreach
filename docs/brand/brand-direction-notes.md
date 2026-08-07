@@ -26,7 +26,62 @@ Plus: **the "row" color from Vantrow** — sourced 2026-08-07 from the live pare
 shared thread) with **deep navy `#1B2A4E`** as its companion tone; the page also uses
 darker camel shades `#A9875D` and `#6F5733`.
 
-## Candidate palettes (built 2026-08-07 — Andrew picks; tokens map to BrandConfig)
+## ~~Candidate palettes — round 1 (A/B/C)~~ REJECTED 2026-08-07
+
+Andrew's critique, on the record: round 1 ignored the "build from them all"
+instruction (each palette led with 1–2 colors and benched the rest) and every option
+resembled an existing brand — **A (emerald+golden) ≈ Eaverow's pine+camel, C ≈
+Vantrow's navy+camel, B ≈ the category's default blue.** Kept below for history
+(supersede-don't-delete); round 2 replaces it.
+
+## Candidate palettes — round 2 (D/E/F), built 2026-08-07 after the critique
+
+**Structure change that answers the critique:** every candidate carries the SAME
+full role sheet — all eight colors have a job in every option — and only the LEAD
+rotates, through the colors the family does NOT already own:
+
+| Color | Job in every candidate |
+|---|---|
+| `#E10600` red | Alert/danger (bounces, failures, urgent cracks) — except in E, where it leads |
+| `#006D46` emerald | Success/positive (replies, delivered, warmed-up) — never a lead (ceded to Eaverow's pine territory) |
+| `#7DA1C4` dusty blue | Info/neutral states, empty states, charts-secondary |
+| `#F3DD6D` clarity yellow | Highlight/selection (selected rows, cracked-prospect flags) — leads in F |
+| `#7E7D81` gray-violet | The neutral spine — muted text and borders derive from it |
+| `#BE6A00` golden | Warm secondary/hover — leads in D |
+| `#B8956A` camel (Vantrow row) | The family thread: the "row" in the wordmark + the endorsement lockup, always |
+| `#001489` royal | Deep counter-accent (focus rings, links-on-cream) — never a lead (blue ceded) |
+
+**Distinctness rule:** no candidate leads with navy+camel (Vantrow), green+gold
+(Eaverow), or plain blue (the category default).
+
+| Token | D — "Golden Hour" (Luxury·Calm) | E — "Signal" (bold; Fear put to work) | F — "Clarity Ink" (Clarity·Insecurity-gray as sophistication) |
+|---|---|---|---|
+| light.primary | `#BE6A00` golden (UI elements) | `#E10600` red | `#4A4952` deep gray-violet ink |
+| light.primaryDark | `#8F4F00` (text duties, wordmark) | `#A80400` | `#201F24` |
+| light.accent | `#001489` royal counter-pop | `#001489` royal | `#F3DD6D` clarity yellow (ink text on chips) |
+| light.background | `#FBF7F0` golden-cast cream | `#F5F4F6` violet-cast paper | `#FDFBF2` yellow-cast cream |
+| light.foreground | `#2A1F14` deep brown | `#1C1B1E` | `#201F24` |
+| light.muted | `#6F6E74` (from #7E7D81) | `#7E7D81` raw | `#7E7D81` raw |
+| dark.primary | `#D98E33` | `#F0554A` | `#F3DD6D` (yellow pops on dark) |
+| dark.primaryDark | `#E8AC5C` | `#F5837A` | `#F7E794` |
+| dark.accent | `#7DA1C4` (royal illegible on dark → info-blue takes over) | `#7DA1C4` | `#7DA1C4` |
+| dark.background | `#191410` warm brown-black | `#17161A` violet-black | `#16151A` |
+| dark.foreground | `#F2EAE0` | `#ECEBEE` | `#EFEDE6` |
+| dark.muted | `#9A948E` | `#97949B` | `#9B99A3` |
+
+Feel summary: **D** — warm, moneyed, unhurried; amber/gold is unclaimed territory in
+sales tech; royal blue appears only as the sharp counter-accent. **E** — the bold one:
+red as brand energy (urgency is the product's subject), disciplined by violet-grays;
+highest risk, highest memorability. **F** — editorial ink + clarity yellow; the
+gray-violet finally stars as sophistication rather than filler; yellow highlight IS
+the product's "surface what's slipping" gesture.
+
+Wordmark note: the two-tone rule holds (lead color + camel `row`); D's wordmark uses
+`#8F4F00` for "nudge" so the gold lead never muddies against the camel row.
+BrandConfig gains semantic tokens (alert/success/info/highlight) at token-apply time
+so every color's job ships into the product, not just the memo.
+
+### Round 1 record (rejected — see critique above)
 
 **All three share:** red `#E10600` (Fear) is the **semantic alert color** in-app
 (bounces, failures, urgent cracks) — never a brand lead; the camel `#B8956A` family
