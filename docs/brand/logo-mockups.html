@@ -1,0 +1,395 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nudgerow — Logo Exploration, Round 1</title>
+<style>
+  :root{
+    --bg:#FDFBF2; --fg:#201F24; --mut:#7E7D81; --line:#E6E1D2;
+    --card:#FFFEF9; --accent:#F3DD6D; --ink2:#4A4952; --camel:#B8956A;
+    --camel-ink:#856540; --code:#5B5964;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#16151A; --fg:#EFEDE6; --mut:#9B99A3; --line:#2E2D35;
+      --card:#1C1B21; --camel-ink:#C8A87E; --code:#B7B5BE;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#16151A; --fg:#EFEDE6; --mut:#9B99A3; --line:#2E2D35;
+    --card:#1C1B21; --camel-ink:#C8A87E; --code:#B7B5BE;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:"Helvetica Neue",Helvetica,Arial,ui-sans-serif,sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px; margin:0 auto; padding:0 28px}
+  header.page{padding:56px 0 8px}
+  .eyebrow{
+    display:inline-block; font-size:12px; font-weight:700; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--fg);
+    border-bottom:3px solid var(--accent); padding-bottom:4px; margin-bottom:18px;
+  }
+  h1{font-size:clamp(30px,4.6vw,44px); font-weight:700; letter-spacing:-.02em; margin:0 0 10px; text-wrap:balance}
+  h1 .row{color:var(--camel)}
+  .lede{max-width:62ch; color:var(--mut); font-size:16.5px; margin:0 0 6px}
+  h2{font-size:22px; font-weight:700; letter-spacing:-.01em; margin:0 0 6px}
+  h3{font-size:17px; font-weight:700; margin:0}
+  section{padding:38px 0 6px}
+  .rule{border:0; border-top:1px solid var(--line); margin:34px 0 0}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:12.5px; color:var(--code)}
+  .muted{color:var(--mut)}
+  p{margin:.5em 0 1em}
+
+  /* family strip */
+  .family{display:flex; flex-wrap:wrap; gap:14px; margin-top:18px}
+  .fam{
+    flex:1 1 180px; border:1px solid var(--line); background:var(--card);
+    border-radius:10px; padding:18px 16px 14px; text-align:center;
+  }
+  .fam .tile{display:flex; align-items:center; justify-content:center; height:96px}
+  .fam figcaption{font-size:13px; color:var(--mut); margin-top:8px}
+  .fam figcaption b{color:var(--fg); font-weight:700}
+
+  /* laws */
+  .laws{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:10px 26px; margin-top:14px; padding:0; list-style:none; counter-reset:law}
+  .laws li{
+    counter-increment:law; padding:10px 0 10px 40px; position:relative;
+    border-top:1px solid var(--line); font-size:14.5px;
+  }
+  .laws li::before{
+    content:counter(law,decimal-leading-zero); position:absolute; left:0; top:11px;
+    font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:12px; font-weight:700;
+    color:var(--camel-ink);
+  }
+  .laws b{font-weight:700}
+
+  /* candidate cards */
+  .cand{
+    border:1px solid var(--line); background:var(--card); border-radius:14px;
+    padding:26px 26px 20px; margin-top:26px;
+  }
+  .cand-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+  .cand-letter{
+    font-family:ui-monospace,"SF Mono",Menlo,monospace; font-weight:700; font-size:13px;
+    background:var(--accent); color:#201F24; border-radius:6px; padding:3px 9px;
+  }
+  .cand-story{max-width:70ch; color:var(--mut); font-size:15px; margin:.5em 0 1.1em}
+  .cand-story b{color:var(--fg)}
+  .spec-row{display:flex; flex-wrap:wrap; gap:14px}
+  .spec{border-radius:10px; padding:14px; text-align:center; border:1px solid var(--line)}
+  .spec .cap{font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; margin-top:10px; font-weight:600}
+  .spec-light{background:#FDFBF2; flex:1 1 190px}
+  .spec-light .cap{color:#7E7D81}
+  .spec-dark{background:#16151A; flex:1 1 190px; border-color:#2E2D35}
+  .spec-dark .cap{color:#9B99A3}
+  .spec-fav{background:#FDFBF2; flex:0 1 150px}
+  .spec-fav .cap{color:#7E7D81}
+  .spec-sizes{flex:2 1 260px; background:#FDFBF2; display:flex; flex-direction:column; justify-content:center}
+  .sizes-in{display:flex; align-items:flex-end; justify-content:center; gap:22px; min-height:104px}
+  .sizes-in .s{display:flex; flex-direction:column; align-items:center; gap:7px}
+  .sizes-in .s span{font-family:ui-monospace,Menlo,monospace; font-size:10.5px; color:#7E7D81}
+  .spec svg{display:block; margin:0 auto}
+  .hero-svg{width:132px; height:132px}
+  .lockup{
+    display:flex; align-items:center; gap:12px; margin-top:16px; padding:13px 16px;
+    border:1px solid var(--line); border-radius:10px; background:#FDFBF2; overflow-x:auto;
+  }
+  .lockup svg{width:30px; height:30px; flex:none}
+  .wm{font-weight:800; font-size:24px; letter-spacing:-.02em; white-space:nowrap}
+  .wm .stem{color:#4A4952}
+  .wm .rowc{color:#B8956A}
+  .by{font-size:12px; color:#7E7D81; white-space:nowrap; margin-left:2px}
+  .lockup.on-dark{background:#16151A; border-color:#2E2D35}
+  .lockup.on-dark .stem{color:#EFEDE6}
+  .lockup.on-dark .by{color:#9B99A3}
+  .weak{font-size:14px; color:var(--mut); margin:14px 0 0; padding-top:12px; border-top:1px dashed var(--line)}
+  .weak b{color:var(--fg)}
+
+  /* case section */
+  .case-grid{display:flex; gap:14px; flex-wrap:wrap; margin-top:14px}
+  .case-card{flex:1 1 300px; border:1px solid var(--line); border-radius:10px; background:#FDFBF2; padding:22px 18px; text-align:center}
+  .case-card .wm{font-size:30px}
+  .case-card .note{font-size:13px; color:#7E7D81; margin-top:10px}
+
+  /* verdict */
+  table{border-collapse:collapse; width:100%; font-size:14.5px; margin-top:14px}
+  th,td{text-align:left; padding:9px 12px 9px 0; border-top:1px solid var(--line); vertical-align:top}
+  th{font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut); border-top:0; padding-bottom:6px}
+  td.g{font-family:ui-monospace,Menlo,monospace; font-size:13px; white-space:nowrap}
+  .next{
+    border-left:4px solid var(--accent); background:var(--card); border-radius:0 10px 10px 0;
+    padding:16px 20px; margin:26px 0 60px;
+  }
+  .next ol{margin:.4em 0 .2em; padding-left:20px}
+  .next li{margin:.35em 0}
+  .tablewrap{overflow-x:auto}
+  footer.pg{padding:0 0 46px; color:var(--mut); font-size:13px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- A · The Cadence — hero cut (stroke 8) and small cut (stroke 9) -->
+    <symbol id="a-hero" viewBox="0 0 100 100">
+      <path d="M20 30 H40 V50 H56 V70 H78" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="square" stroke-linejoin="round"/>
+      <circle cx="70" cy="56.5" r="9.5" fill="#B8956A"/>
+    </symbol>
+    <symbol id="a-small" viewBox="0 0 100 100">
+      <path d="M18 30 H39 V50 H55 V70 H80" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="round"/>
+      <circle cx="70" cy="55.5" r="10" fill="#B8956A"/>
+    </symbol>
+    <!-- B · The Nudge — dominoes -->
+    <symbol id="b-hero" viewBox="0 0 100 100">
+      <rect x="20" y="30" width="13" height="40" rx="2" fill="none" stroke="currentColor" stroke-width="7" transform="rotate(18 33 70)"/>
+      <rect x="43.5" y="30" width="13" height="40" rx="2" fill="none" stroke="currentColor" stroke-width="7"/>
+      <rect x="67" y="30" width="13" height="40" rx="2" fill="#B8956A"/>
+    </symbol>
+    <symbol id="b-small" viewBox="0 0 100 100">
+      <rect x="18" y="28" width="14" height="44" rx="2" fill="none" stroke="currentColor" stroke-width="8" transform="rotate(18 32 72)"/>
+      <rect x="43" y="28" width="14" height="44" rx="2" fill="none" stroke="currentColor" stroke-width="8"/>
+      <rect x="67" y="28" width="15" height="44" rx="2" fill="#B8956A"/>
+    </symbol>
+    <!-- C · The Return — send loop back to the camel dot -->
+    <symbol id="c-hero" viewBox="0 0 100 100">
+      <path d="M20 64 H56 A14 14 0 0 0 56 36 H46" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="square" stroke-linejoin="round"/>
+      <circle cx="34" cy="36" r="10.5" fill="#B8956A"/>
+    </symbol>
+    <symbol id="c-small" viewBox="0 0 100 100">
+      <path d="M18 64 H56 A15 15 0 0 0 56 34 H47" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="round"/>
+      <circle cx="34" cy="34" r="11" fill="#B8956A"/>
+    </symbol>
+    <!-- D · The N Frame -->
+    <symbol id="d-hero" viewBox="0 0 100 100">
+      <path d="M28 75 V25 L72 75 V25" fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="56" cy="32" r="10.5" fill="#B8956A"/>
+    </symbol>
+    <symbol id="d-small" viewBox="0 0 100 100">
+      <path d="M27 76 V24 L73 76 V24" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="56" cy="31" r="11" fill="#B8956A"/>
+    </symbol>
+    <!-- family reference marks -->
+    <symbol id="vantrow" viewBox="0 0 100 100">
+      <path d="M26 22 L50 83.5 L74 22" fill="none" stroke="#1B2A4E" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="50" cy="23" r="10.5" fill="#B8956A"/>
+    </symbol>
+    <symbol id="parcelrow" viewBox="0 0 100 100">
+      <rect x="22" y="22" width="56" height="56" fill="none" stroke="#4a72a0" stroke-width="8" stroke-linejoin="round"/>
+      <line x1="50" y1="22" x2="50" y2="78" stroke="#4a72a0" stroke-width="7"/>
+      <line x1="22" y1="50" x2="78" y2="50" stroke="#4a72a0" stroke-width="7"/>
+      <rect x="53.5" y="25.5" width="21" height="21" fill="#b8956a"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+<header class="page">
+  <span class="eyebrow">Nudgerow · Brand — Round 3 · Logo exploration · 2026-08-07</span>
+  <h1>Four marks for <span>Nudge</span><span class="row">row</span></h1>
+  <p class="lede">Candidate brandmarks built on the family's construction grammar, extracted from
+  Parcelrow's mark files (the strongest reference, per your direction) and Vantrow's duo mark.
+  Every candidate obeys the same laws, so whichever wins already belongs next to its siblings.</p>
+</header>
+
+<section>
+  <h2>The family, as built</h2>
+  <p class="muted" style="max-width:66ch">Read from the shipped assets: Vantrow's V cradles a camel ball. Eaverow is two-tone type.
+  Parcelrow's "Quarter Section" claims one quarter in camel — and its SVG files carry explicit construction law in comments.</p>
+  <div class="family">
+    <figure class="fam" style="margin:0">
+      <div class="tile"><svg width="76" height="76"><use href="#vantrow"/></svg></div>
+      <figcaption><b>Vantrow</b> — the V &amp; ball<br>navy #1B2A4E · camel ball</figcaption>
+    </figure>
+    <figure class="fam" style="margin:0">
+      <div class="tile"><span class="wm" style="font-size:34px"><span style="color:#1B4965">Eave</span><span class="rowc">row</span></span></div>
+      <figcaption><b>Eaverow</b> — two-tone wordmark<br>pine-navy #1B4965 · camel "row"</figcaption>
+    </figure>
+    <figure class="fam" style="margin:0">
+      <div class="tile"><svg width="76" height="76"><use href="#parcelrow"/></svg></div>
+      <figcaption><b>Parcelrow</b> — the Quarter Section<br>cornflower #4a72a0 · camel quarter</figcaption>
+    </figure>
+  </div>
+
+  <ol class="laws">
+    <li><b>One named concept</b> from the product's own world, drawn geometrically on a 100-unit grid, live area ≈ 20–80.</li>
+    <li><b>Two colors, ever.</b> Structure strokes in the brand's primary; exactly one element filled in family camel <span class="mono">#B8956A</span>. Parcelrow's law verbatim: "gold NEVER moves, gold fills only."</li>
+    <li><b>Two cuts.</b> Hero (≥28px, strokes 8/7) and small (&lt;28px, strokes one step heavier, geometry widened for optical weight).</li>
+    <li><b>Dark law.</b> On dark grounds structure flips to the warm light neutral; the camel element never changes. Nudgerow's dark structure: <span class="mono">#EFEDE6</span> on <span class="mono">#16151A</span>.</li>
+    <li><b>Favicon convention.</b> The geometry on an rx-22 cream tile — Nudgerow's cream is <span class="mono">#FDFBF2</span>.</li>
+    <li><b>Nav lockup.</b> Small mark + lowercase two-tone wordmark + "a Vantrow company" byline (Parcelrow's shipped pattern). Wordmark face per Parcelrow's law: <b>Manrope 800</b>, −0.02em, self-hosted in production (never a font CDN) — this page previews it in Helvetica Neue. Lockup ratio: mark height = wordmark ascender height; gap = 40% of mark width.</li>
+  </ol>
+  <p class="muted" style="font-size:14px">One deliberate restraint: clarity yellow <span class="mono">#F3DD6D</span> stays out of the mark.
+  It is Nudgerow's <em>surface</em> accent (buttons, highlights, section rules); the mark keeps the two-color family law. Structure strokes use brand ink <span class="mono">#4A4952</span>.</p>
+  <hr class="rule">
+</section>
+
+<section>
+  <h2>Candidates</h2>
+
+  <!-- A -->
+  <article class="cand">
+    <div class="cand-head"><span class="cand-letter">A</span><h3>The Cadence</h3><span class="muted" style="font-size:14px">steps + the family ball</span></div>
+    <p class="cand-story">A sequence is a schedule that descends step by step — day 1, day 4, day 9 — and the engine
+    carries the prospect down it automatically until something lands. The stair is the cadence;
+    <b>the camel ball is Vantrow's own ball</b>, arrived safely at the last step: the reply.
+    Parent and child share an object, not just a color.</p>
+    <div class="spec-row">
+      <div class="spec spec-light"><svg class="hero-svg" style="color:#4A4952"><use href="#a-hero"/></svg><div class="cap">Hero · light</div></div>
+      <div class="spec spec-dark"><svg class="hero-svg" style="color:#EFEDE6"><use href="#a-small"/></svg><div class="cap">Dark cut</div></div>
+      <div class="spec spec-fav">
+        <svg class="hero-svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#FDFBF2" stroke="#E6E1D2"/><g style="color:#4A4952"><use href="#a-small"/></g></svg>
+        <div class="cap">Favicon tile</div>
+      </div>
+      <div class="spec spec-sizes">
+        <div class="sizes-in" style="color:#4A4952">
+          <div class="s"><svg width="48" height="48"><use href="#a-hero"/></svg><span>48</span></div>
+          <div class="s"><svg width="32" height="32"><use href="#a-small"/></svg><span>32</span></div>
+          <div class="s"><svg width="24" height="24"><use href="#a-small"/></svg><span>24</span></div>
+          <div class="s"><svg width="16" height="16"><use href="#a-small"/></svg><span>16</span></div>
+        </div>
+        <div class="cap" style="color:#7E7D81">Size ladder</div>
+      </div>
+    </div>
+    <div class="lockup"><svg style="color:#4A4952"><use href="#a-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <div class="lockup on-dark"><svg style="color:#EFEDE6"><use href="#a-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <p class="weak"><b>Biggest weakness:</b> at 16px the three treads compress toward a zig-zag squiggle — the small cut leans on its heavier stroke to hold; the ball keeps it legible.</p>
+  </article>
+
+  <!-- B -->
+  <article class="cand">
+    <div class="cand-head"><span class="cand-letter">B</span><h3>The Nudge</h3><span class="muted" style="font-size:14px">a row of dominoes, one push</span></div>
+    <p class="cand-story">The name, literally: <b>one nudge, and the row carries itself</b>. The first tile is mid-tip,
+    just touching the second; the camel tile at the end is the one that falls last — the prospect who answers.
+    Auto-running sequences in a single image: you push once, the system does the rest.</p>
+    <div class="spec-row">
+      <div class="spec spec-light"><svg class="hero-svg" style="color:#4A4952"><use href="#b-hero"/></svg><div class="cap">Hero · light</div></div>
+      <div class="spec spec-dark"><svg class="hero-svg" style="color:#EFEDE6"><use href="#b-small"/></svg><div class="cap">Dark cut</div></div>
+      <div class="spec spec-fav">
+        <svg class="hero-svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#FDFBF2" stroke="#E6E1D2"/><g style="color:#4A4952"><use href="#b-small"/></g></svg>
+        <div class="cap">Favicon tile</div>
+      </div>
+      <div class="spec spec-sizes">
+        <div class="sizes-in" style="color:#4A4952">
+          <div class="s"><svg width="48" height="48"><use href="#b-hero"/></svg><span>48</span></div>
+          <div class="s"><svg width="32" height="32"><use href="#b-small"/></svg><span>32</span></div>
+          <div class="s"><svg width="24" height="24"><use href="#b-small"/></svg><span>24</span></div>
+          <div class="s"><svg width="16" height="16"><use href="#b-small"/></svg><span>16</span></div>
+        </div>
+        <div class="cap" style="color:#7E7D81">Size ladder</div>
+      </div>
+    </div>
+    <div class="lockup"><svg style="color:#4A4952"><use href="#b-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <div class="lockup on-dark"><svg style="color:#EFEDE6"><use href="#b-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <p class="weak"><b>Biggest weakness:</b> the 18° tilt is the story, and the first thing tiny sizes blur away —
+    at 16px it can read as three plain bars; and falling dominoes carry a faint "collapse" connotation a sales tool may not want.</p>
+  </article>
+
+  <!-- C -->
+  <article class="cand">
+    <div class="cand-head"><span class="cand-letter">C</span><h3>The Return</h3><span class="muted" style="font-size:14px">the send that comes back</span></div>
+    <p class="cand-story">Every other email tool draws the send — the arrow, the paper plane, outbound forever.
+    Nudgerow's whole engine is built around the moment the mail <b>comes back</b>: stop-on-reply, the cracks view,
+    finished-no-reply. The stroke goes out, turns, and returns to the camel dot — home, answered.</p>
+    <div class="spec-row">
+      <div class="spec spec-light"><svg class="hero-svg" style="color:#4A4952"><use href="#c-hero"/></svg><div class="cap">Hero · light</div></div>
+      <div class="spec spec-dark"><svg class="hero-svg" style="color:#EFEDE6"><use href="#c-small"/></svg><div class="cap">Dark cut</div></div>
+      <div class="spec spec-fav">
+        <svg class="hero-svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#FDFBF2" stroke="#E6E1D2"/><g style="color:#4A4952"><use href="#c-small"/></g></svg>
+        <div class="cap">Favicon tile</div>
+      </div>
+      <div class="spec spec-sizes">
+        <div class="sizes-in" style="color:#4A4952">
+          <div class="s"><svg width="48" height="48"><use href="#c-hero"/></svg><span>48</span></div>
+          <div class="s"><svg width="32" height="32"><use href="#c-small"/></svg><span>32</span></div>
+          <div class="s"><svg width="24" height="24"><use href="#c-small"/></svg><span>24</span></div>
+          <div class="s"><svg width="16" height="16"><use href="#c-small"/></svg><span>16</span></div>
+        </div>
+        <div class="cap" style="color:#7E7D81">Size ladder</div>
+      </div>
+    </div>
+    <div class="lockup"><svg style="color:#4A4952"><use href="#c-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <div class="lockup on-dark"><svg style="color:#EFEDE6"><use href="#c-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <p class="weak"><b>Biggest weakness:</b> it lives one neighborhood over from the email-arrow cliché — the return
+    hook keeps it honest, but of the four it is the least distant from what the category already draws.</p>
+  </article>
+
+  <!-- D -->
+  <article class="cand">
+    <div class="cand-head"><span class="cand-letter">D</span><h3>The N Frame</h3><span class="muted" style="font-size:14px">the letterform twin</span></div>
+    <p class="cand-story">Vantrow's mark is its letter — a V cradling the ball. The most direct kinship available:
+    <b>Nudgerow takes its N</b>, drawn in the same round-capped stroke voice, with the ball tucked into the letter's
+    upper pocket. Instantly monogram, instantly family.</p>
+    <div class="spec-row">
+      <div class="spec spec-light"><svg class="hero-svg" style="color:#4A4952"><use href="#d-hero"/></svg><div class="cap">Hero · light</div></div>
+      <div class="spec spec-dark"><svg class="hero-svg" style="color:#EFEDE6"><use href="#d-small"/></svg><div class="cap">Dark cut</div></div>
+      <div class="spec spec-fav">
+        <svg class="hero-svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#FDFBF2" stroke="#E6E1D2"/><g style="color:#4A4952"><use href="#d-small"/></g></svg>
+        <div class="cap">Favicon tile</div>
+      </div>
+      <div class="spec spec-sizes">
+        <div class="sizes-in" style="color:#4A4952">
+          <div class="s"><svg width="48" height="48"><use href="#d-hero"/></svg><span>48</span></div>
+          <div class="s"><svg width="32" height="32"><use href="#d-small"/></svg><span>32</span></div>
+          <div class="s"><svg width="24" height="24"><use href="#d-small"/></svg><span>24</span></div>
+          <div class="s"><svg width="16" height="16"><use href="#d-small"/></svg><span>16</span></div>
+        </div>
+        <div class="cap" style="color:#7E7D81">Size ladder</div>
+      </div>
+    </div>
+    <div class="lockup"><svg style="color:#4A4952"><use href="#d-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <div class="lockup on-dark"><svg style="color:#EFEDE6"><use href="#d-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <p class="weak"><b>Biggest weakness:</b> it borrows the <em>parent's</em> trick rather than standing beside it —
+    a subsidiary wearing Vantrow's letterform device reads as a division badge, not a product with its own story;
+    and it says nothing about what Nudgerow does.</p>
+  </article>
+
+  <hr class="rule">
+</section>
+
+<section>
+  <h2>The open case question, answered by family precedent</h2>
+  <p class="muted" style="max-width:66ch">Held open since the palette decision: lowercase or capitalized wordmark?
+  The family already splits the job — Parcelrow's shipped nav is lowercase <span class="mono">parcel·row</span> while every sentence writes "Parcelrow."</p>
+  <div class="case-grid">
+    <div class="case-card">
+      <span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span>
+      <div class="note"><b style="color:#201F24">Lockup case — recommended.</b> Lowercase in the nav/logo lockup: softer, product-like, and Parcelrow's exact precedent. A nudge shouldn't shout.</div>
+    </div>
+    <div class="case-card">
+      <span class="wm"><span class="stem">Nudge</span><span class="rowc">row</span></span>
+      <div class="note"><b style="color:#201F24">Prose case.</b> Capitalized everywhere in sentences, titles, legal — matching "Parcelrow"/"Eaverow" in running text.</div>
+    </div>
+  </div>
+  <p style="font-size:14.5px; margin-top:14px"><b>Recommendation:</b> adopt both, split by role — lowercase in the drawn lockup, capitalized in prose. This closes the open item with zero invention: it is exactly what the reference sibling ships.</p>
+  <hr class="rule">
+</section>
+
+<section>
+  <h2>Verdict</h2>
+  <div class="tablewrap">
+  <table>
+    <tr><th>#</th><th>Mark</th><th>Product story</th><th>Family fit</th><th>Small-size survival</th><th>Distinctiveness</th></tr>
+    <tr><td class="g">A</td><td><b>The Cadence</b></td><td class="g">A</td><td class="g">A+ (shares the ball)</td><td class="g">B+</td><td class="g">A</td></tr>
+    <tr><td class="g">B</td><td><b>The Nudge</b></td><td class="g">A− (name-true)</td><td class="g">A−</td><td class="g">B−</td><td class="g">A−</td></tr>
+    <tr><td class="g">C</td><td><b>The Return</b></td><td class="g">A− (stop-on-reply)</td><td class="g">B+</td><td class="g">A−</td><td class="g">B−</td></tr>
+    <tr><td class="g">D</td><td><b>The N Frame</b></td><td class="g">C (says nothing)</td><td class="g">B (copies, not rhymes)</td><td class="g">A</td><td class="g">B</td></tr>
+  </table>
+  </div>
+  <p style="margin-top:16px"><b>Ranked: A · B · C · D.</b>&nbsp; <b>#1 pick — A, The Cadence.</b>
+  It is the only candidate that is simultaneously true to the product (the descending schedule),
+  true to the name's second half (a stepped <em>row</em>), and true to the family in the deepest way available —
+  it inherits Vantrow's actual ball, the way Parcelrow inherited the camel as its claimed quarter.
+  B is the charming runner-up if you want the name told literally; C if reply-centricity should lead; D is the safety.</p>
+
+  <blockquote class="next" style="margin-left:0;margin-right:0">
+    <b>Next steps — in order</b>
+    <ol>
+      <li><b>Andrew:</b> pick a letter (or redirect — tilt angles, ball position, stroke weight are all adjustable within the laws). Also confirm the case split (lowercase lockup / capitalized prose).</li>
+      <li><b>Agent:</b> cut the winner into <span class="mono">packages/brand/assets/</span> as mark.svg · mark-small.svg · mark-dark.svg · icon.svg with Parcelrow-style construction-law comments; swap the site header + favicon; decision-log row.</li>
+      <li><b>Agent:</b> fold the mark into the R11 site redesign (hero, OG images, empty states) — scoped in the Phase 4 plan.</li>
+    </ol>
+  </blockquote>
+</section>
+
+<footer class="pg">Nudgerow · internal brand exploration · specimens render on fixed light/dark grounds by design — flip your theme and the page chrome follows while specimens hold.</footer>
+</div>
