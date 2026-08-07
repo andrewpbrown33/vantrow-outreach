@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="bg-gradient-to-b from-white to-background">
+      <section className="bg-background">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold uppercase tracking-wider text-brand">
@@ -93,7 +93,7 @@ export default function HomePage() {
             {pillars.map((prop) => (
               <article
                 key={prop.title}
-                className="rounded-lg border border-foreground/10 bg-white p-6 shadow-sm"
+                className="rounded-lg border border-foreground/10 bg-white p-6"
               >
                 <h3 className="text-lg font-semibold text-brand-dark">
                   {prop.title}

@@ -1,0 +1,444 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nudgerow — Checkpoint 4-D Mockups</title>
+<style>
+  /* Deck pinned to the light product ground (the app's paper). The night
+     variant is an exhibit inside view 03, not a page theme. */
+  :root{
+    --bg:#FDFBF2; --panel:#FFFFFF; --ink:#201F24; --sub:#4A4952; --mut:#7E7D81;
+    --line:#E6E1D2; --accent:#F3DD6D; --camel:#B8956A;
+    --st-draft:#6E6C77; --st-sched:#3E6FA3; --st-active:#0F7D8C; --st-paused:#986200;
+    --st-replied:#1E7A3C; --st-fnr:#6D4FA6; --st-bounced:#B3261E;
+    --w-draft:#EAE9EC; --w-sched:#E3EBF5; --w-active:#DFEEF1; --w-paused:#F3E8D4;
+    --w-replied:#DFEEE4; --w-fnr:#E9E3F4; --w-bounced:#F6DDDB;
+    --night:#16151A; --night2:#1C1B21; --night-fg:#EFEDE6; --night-line:#2E2D35;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,ui-sans-serif,sans-serif;line-height:1.5}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  header.deck{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:26px 0 18px;border-bottom:1px solid var(--line)}
+  .lockup{display:flex;align-items:center;gap:10px}
+  .lockup svg{width:30px;height:30px}
+  .wm{font-weight:800;font-size:23px;letter-spacing:-.02em}
+  .wm .stem{color:var(--sub)} .wm .rowc{color:var(--camel)}
+  .by{font-size:12px;color:var(--mut)}
+  .tag{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.14em;
+    background:var(--accent);color:var(--ink);padding:5px 10px;border-radius:4px;font-weight:700}
+  .deckmeta{font-size:12.5px;color:var(--mut);padding:10px 0 0}
+
+  .tabs{display:flex;gap:8px;padding:18px 0;flex-wrap:wrap}
+  .tab{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;letter-spacing:.06em;
+    border:1px solid var(--line);background:var(--panel);color:var(--sub);
+    padding:9px 14px;border-radius:6px;cursor:pointer}
+  .tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+  .view{display:none;padding:6px 0 40px}
+  .view.on{display:block}
+  .stage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+  @media (max-width:960px){.stage{grid-template-columns:1fr}}
+
+  /* the mocked screen */
+  .screen{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+  .appbar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .appbar svg{width:20px;height:20px}
+  .appbar .awm{font-weight:800;font-size:15px;letter-spacing:-.02em}
+  .appbar nav{display:flex;gap:14px;margin-left:22px;font-size:13px;color:var(--mut)}
+  .appbar nav b{color:var(--ink);font-weight:600;border-bottom:2px solid var(--accent);padding-bottom:2px}
+  .appbar .mb{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mut)}
+  .plateno{display:block;text-align:right;font-family:ui-monospace,Menlo,monospace;font-size:10px;
+    letter-spacing:.18em;color:var(--mut);padding:8px 16px 0}
+  .body{padding:14px 16px 20px}
+
+  h1.scr{font-size:21px;font-weight:700;letter-spacing:-.01em;margin:2px 0 2px}
+  .sub{font-size:13px;color:var(--mut);margin:0 0 14px}
+  .eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--sub);font-weight:700}
+
+  .statstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 16px}
+  @media (max-width:700px){.statstrip{grid-template-columns:repeat(2,1fr)}}
+  .stat{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panel)}
+  .stat .n{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:11px;color:var(--mut);letter-spacing:.04em;text-transform:uppercase}
+  .stat.link .l::after{content:" →";color:var(--sub)}
+
+  .chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+  .c-draft{color:var(--st-draft);background:var(--w-draft)} .c-sched{color:var(--st-sched);background:var(--w-sched)}
+  .c-active{color:var(--st-active);background:var(--w-active)} .c-paused{color:var(--st-paused);background:var(--w-paused)}
+  .c-replied{color:var(--st-replied);background:var(--w-replied)} .c-fnr{color:var(--st-fnr);background:var(--w-fnr)}
+  .c-bounced{color:var(--st-bounced);background:var(--w-bounced)}
+
+  table.grid{width:100%;border-collapse:collapse;font-size:13px}
+  table.grid th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);
+    text-align:left;font-weight:700;padding:7px 10px 7px 0;border-bottom:1px solid var(--line)}
+  table.grid td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:middle}
+  table.grid .who b{font-weight:600}
+  table.grid .who span{display:block;font-size:11.5px;color:var(--mut)}
+  .num{font-variant-numeric:tabular-nums}
+  .prov{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--mut)}
+  .act{font-size:12px;color:var(--sub);text-decoration:underline;text-underline-offset:2px;cursor:pointer;white-space:nowrap}
+
+  .filters{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+  .flt{font-size:12px;border:1px solid var(--line);background:var(--panel);border-radius:99px;
+    padding:4px 12px;cursor:pointer;color:var(--sub)}
+  .flt.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+
+  .btn{display:inline-block;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--ink)}
+  .btn-y{background:var(--accent);color:var(--ink)}
+  .btn-q{background:var(--panel);color:var(--ink)}
+
+  /* sequence detail */
+  .seqhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .schedule{display:flex;gap:14px;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;
+    background:var(--bg);padding:10px 14px;margin:12px 0;font-size:12.5px}
+  .schedule b{font-weight:700}
+  .schedule .pl{color:var(--mut)}
+  .steps{margin:14px 0 4px;display:grid;gap:10px}
+  .step{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;
+    grid-template-columns:74px minmax(0,1fr) auto;gap:12px;align-items:center}
+  @media (max-width:700px){.step{grid-template-columns:1fr;gap:6px}}
+  .when{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--sub);font-weight:700}
+  .when span{display:block;color:var(--mut);font-weight:400}
+  .step .subj b{font-weight:600}
+  .step .subj span{display:block;font-size:12px;color:var(--mut)}
+  .modewrap{display:flex;align-items:center;gap:8px}
+  .mode{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+    border:1px solid var(--line);border-radius:99px;padding:4px 11px;cursor:pointer;user-select:none}
+  .mode.auto{background:var(--w-active);color:var(--st-active);border-color:transparent}
+  .mode.draft{background:var(--w-paused);color:var(--st-paused);border-color:transparent}
+  .stopline{display:flex;gap:8px;align-items:center;border-left:3px solid var(--accent);
+    background:var(--bg);padding:9px 12px;margin:12px 0;font-size:12.5px}
+
+  /* board + first-run */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:12px 0}
+  .card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--panel)}
+  .card h3{margin:0 0 2px;font-size:14.5px;font-weight:700}
+  .card .from{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mut);margin-bottom:8px}
+  .bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:8px 0 6px;background:var(--w-draft)}
+  .bar i{display:block;height:100%}
+  .card .nums{display:flex;gap:10px;font-size:11.5px;color:var(--mut)}
+  .card .nums b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .firstrun{border:1px dashed var(--line);border-radius:8px;padding:16px;margin-top:16px;background:var(--bg)}
+  .frsteps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+  @media (max-width:700px){.frsteps{grid-template-columns:1fr}}
+  .fr{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:12px}
+  .fr .k{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--camel);font-weight:700}
+  .fr b{display:block;font-size:13.5px;margin:4px 0 2px}
+  .fr span{font-size:12px;color:var(--mut)}
+  .demo{display:flex;gap:8px;align-items:center;font-size:12px;background:var(--w-sched);
+    color:var(--st-sched);border-radius:6px;padding:8px 12px;margin-top:14px;font-weight:600}
+
+  /* night exhibit */
+  .nightbox{background:var(--night);border-radius:10px;padding:16px;margin-top:16px;border:1px solid var(--night-line)}
+  .nightbox .eyebrow{color:#9B99A3}
+  .nrow{display:flex;justify-content:space-between;gap:10px;align-items:center;
+    border-bottom:1px solid var(--night-line);padding:9px 2px;font-size:13px;color:var(--night-fg)}
+  .nrow:last-child{border-bottom:0}
+  .nrow .who span{color:#9B99A3;font-size:11.5px;display:block}
+  .nchip{font-size:11px;font-weight:700}
+
+  /* rationale rail */
+  .rail{display:grid;gap:12px}
+  .note{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+    background:var(--panel);padding:11px 13px;font-size:12.5px}
+  .note b{display:block;font-size:12.5px;margin-bottom:3px}
+  .note .src{display:block;margin-top:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--camel)}
+
+  footer.deck{border-top:1px solid var(--line);padding:22px 0 46px;font-size:13px;color:var(--sub)}
+  footer.deck h2{font-size:15px;margin:0 0 8px;color:var(--ink)}
+  footer.deck ul{margin:6px 0;padding-left:20px}
+  footer.deck li{margin:4px 0}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="mk" viewBox="0 0 100 100">
+    <path d="M18 30 H39 V50 H55 V70 H80" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="round"/>
+    <circle cx="70" cy="55.5" r="10" fill="#B8956A"/>
+  </symbol>
+</defs></svg>
+
+<div class="wrap">
+<header class="deck">
+  <span class="lockup"><svg style="color:var(--sub)"><use href="#mk"/></svg>
+    <span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span></span>
+  <span class="by">a Vantrow company</span>
+  <span class="tag">CHECKPOINT 4-D · ILLUSTRATIVE DATA</span>
+</header>
+<p class="deckmeta">Phase 4 · workstream A1 (`docs/plan/phase-4-plan.md` §2) · 2026-08-07 · single-file,
+zero dependencies — every number, name, and company below is invented. Mark shown is <b>candidate A</b>
+(pending the logo pick); type is a preview stand-in pending the design pass. Rationale notes sit beside
+each screen; sources cited in small type.</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab on" data-v="v1">01 · CRACKS HOME</button>
+  <button class="tab" data-v="v2">02 · SEQUENCE DETAIL</button>
+  <button class="tab" data-v="v3">03 · BOARD &amp; FIRST-RUN</button>
+</div>
+
+<!-- ============ VIEW 1 · CRACKS HOME ============ -->
+<section class="view on" id="v1">
+<div class="stage">
+  <div class="screen">
+    <span class="plateno">PLATE 1 · CRACKS HOME · ILLUSTRATIVE DATA</span>
+    <div class="appbar"><svg style="color:var(--sub)"><use href="#mk"/></svg>
+      <span class="awm"><span class="stem" style="color:var(--sub)">nudge</span><span style="color:var(--camel)">row</span></span>
+      <nav><b>Home</b><span>Sequences</span><span>Prospects</span><span>Reports</span><span>Settings</span></nav>
+      <span class="mb">andrew@getvantrow.com ▾</span>
+    </div>
+    <div class="body">
+      <h1 class="scr">Through the cracks</h1>
+      <p class="sub">Prospects your sequences finished or stalled on — nothing here answered on its own.
+        <span class="prov">AS OF TODAY 6:00 AM · REPLIES INFERRED FROM MAILBOX THREADS</span></p>
+
+      <div class="statstrip">
+        <div class="stat"><div class="n">4</div><div class="l">Active sequences</div></div>
+        <div class="stat"><div class="n num">61</div><div class="l">Sends this week</div></div>
+        <div class="stat link"><div class="n num" style="color:var(--st-replied)">9</div><div class="l">Replies</div></div>
+        <div class="stat link"><div class="n num" style="color:var(--st-fnr)">13</div><div class="l">Through the cracks</div></div>
+      </div>
+
+      <div class="filters">
+        <button class="flt on" data-f="all">All · 13</button>
+        <button class="flt" data-f="fnr">Finished, no reply · 8</button>
+        <button class="flt" data-f="stalled">Stalled · 5</button>
+      </div>
+
+      <table class="grid">
+        <tr><th>Prospect</th><th>State</th><th>Sequence</th><th>Last touch</th><th></th></tr>
+        <tr data-k="fnr"><td class="who"><b>D. Okafor</b><span>Meridian Fasteners · COO</span></td>
+          <td><span class="chip c-fnr">Finished · no reply</span></td>
+          <td>Vantrow intro — industrials</td><td class="num">Step 5 of 5 · 6d ago</td>
+          <td><span class="act">Re-enroll</span> · <span class="act">Log external</span></td></tr>
+        <tr data-k="fnr"><td class="who"><b>S. Lindqvist</b><span>Cobalt Freight · CFO</span></td>
+          <td><span class="chip c-fnr">Finished · no reply</span></td>
+          <td>Eaverow founders — logistics</td><td class="num">Step 4 of 4 · 2d ago</td>
+          <td><span class="act">Re-enroll</span> · <span class="act">Log external</span></td></tr>
+        <tr data-k="stalled"><td class="who"><b>M. Reyes</b><span>Harbor &amp; Pine · Principal</span></td>
+          <td><span class="chip c-paused">Paused</span></td>
+          <td>Vantrow intro — industrials</td><td class="num">OOO · returns Mon <span class="prov">(parsed from auto-reply)</span></td>
+          <td><span class="act">Resume now</span></td></tr>
+        <tr data-k="stalled"><td class="who"><b>K. Whitfield</b><span>Bluegate Systems · VP Sales</span></td>
+          <td><span class="chip c-sched">Scheduled</span></td>
+          <td>Parcelrow county openers</td><td class="num">Step 2 deferred — daily cap <span class="prov">(resumes 9:00)</span></td>
+          <td><span class="act">View schedule</span></td></tr>
+        <tr data-k="fnr"><td class="who"><b>A. Duval</b><span>Stonebriar Group · Partner</span></td>
+          <td><span class="chip c-bounced">Bounced</span></td>
+          <td>Eaverow founders — logistics</td><td class="num">Hard bounce · suppressed <span class="prov">(classified from headers)</span></td>
+          <td><span class="act">Fix address</span></td></tr>
+      </table>
+      <p class="sub" style="margin-top:10px">Showing 5 of 13 · <span class="act">See all</span> ·
+        <span class="prov">SUPPRESSED ADDRESSES NEVER RE-ENTER — ENGINE LAW I3</span></p>
+    </div>
+  </div>
+
+  <aside class="rail">
+    <div class="note"><b>Home is monitoring, not a to-do grind.</b> Gate 3 cut the manual task-queue
+      depth; what earns the home slot is the one thing automation can't fix alone — prospects who fell
+      through. <span class="src">GATE 3 DECISION · R4 CRACKS REQUIREMENT</span></div>
+    <div class="note"><b>The stat strip is the whole reporting surface.</b> Replies and Cracks are links —
+      they ARE two of the three reports (bounces lives under Reports). No dashboard sprawl.
+      <span class="src">R-REQ: THREE REPORTS, NOT SIXTEEN</span></div>
+    <div class="note"><b>Provenance rides every inferred value.</b> "Parsed from auto-reply",
+      "classified from headers", the as-of stamp — the calc is shown, never asserted.
+      <span class="src">PARCELROW PORT #9 · AUDIT §5f</span></div>
+    <div class="note"><b>States are never color-only.</b> Every chip carries its label; the palette is
+      the pinned data set, distinct from brand chrome — camel never encodes data.
+      <span class="src">TWO-PALETTE LAW · check-state-palette.mjs</span></div>
+    <div class="note"><b>One-line recoveries.</b> Re-enroll, log an external touch (R9 note type), fix
+      the address — each crack row proposes its own next move.
+      <span class="src">R9 EXTERNAL-INTERACTION LOG</span></div>
+  </aside>
+</div>
+</section>
+
+<!-- ============ VIEW 2 · SEQUENCE DETAIL ============ -->
+<section class="view" id="v2">
+<div class="stage">
+  <div class="screen">
+    <span class="plateno">PLATE 2 · SEQUENCE DETAIL · ILLUSTRATIVE DATA</span>
+    <div class="appbar"><svg style="color:var(--sub)"><use href="#mk"/></svg>
+      <span class="awm"><span class="stem" style="color:var(--sub)">nudge</span><span style="color:var(--camel)">row</span></span>
+      <nav><span>Home</span><b>Sequences</b><span>Prospects</span><span>Reports</span><span>Settings</span></nav>
+      <span class="mb">andrew@getvantrow.com ▾</span>
+    </div>
+    <div class="body">
+      <div class="seqhead">
+        <h1 class="scr">Vantrow intro — industrials</h1>
+        <span class="chip c-active">Active</span>
+        <span class="prov">SENDS AS ANDREW@GETVANTROW.COM</span>
+      </div>
+      <div class="schedule">
+        <span><span class="pl">Window</span> <b>Tue–Fri · 8:30–11:30</b> <span class="pl">prospect's timezone</span></span>
+        <span><span class="pl">Holidays</span> <b>skipped (US federal)</b></span>
+        <span><span class="pl">Daily cap</span> <b>30/mailbox</b> <span class="pl">deferrals never drop</span></span>
+      </div>
+      <div class="stopline"><b>Stops itself.</b>&nbsp;A reply cancels every remaining step instantly —
+        engine law, not a setting. OOO pauses with the return date instead.</div>
+
+      <p class="eyebrow">Steps · per-step control</p>
+      <div class="steps">
+        <div class="step"><span class="when">DAY 0<span>on enroll</span></span>
+          <span class="subj"><b>“{{firstName}}, a quiet question on {{company}}”</b>
+            <span>Template: intro-industrials-1 · variables resolve at send</span></span>
+          <span class="modewrap"><button class="mode auto">AUTO-SEND</button></span></div>
+        <div class="step"><span class="when">+3 DAYS<span>2h jitter</span></span>
+          <span class="subj"><b>“Re: a quiet question”</b>
+            <span>Threads under step 1 · skipped if bounced</span></span>
+          <span class="modewrap"><button class="mode auto">AUTO-SEND</button></span></div>
+        <div class="step"><span class="when">+5 DAYS<span>+4 hours</span></span>
+          <span class="subj"><b>“The {{industry}} angle, in one paragraph”</b>
+            <span>Intervals in days + hours — founder requirement</span></span>
+          <span class="modewrap"><button class="mode draft">DRAFT FIRST</button></span></div>
+        <div class="step"><span class="when">+9 DAYS<span>final</span></span>
+          <span class="subj"><b>“Closing the loop”</b>
+            <span>No reply after this → prospect lands in Cracks</span></span>
+          <span class="modewrap"><button class="mode auto">AUTO-SEND</button></span></div>
+      </div>
+
+      <p class="eyebrow" style="margin-top:16px">Enrollments · 41</p>
+      <table class="grid">
+        <tr><th>Prospect</th><th>State</th><th>Next</th><th>Opens</th></tr>
+        <tr><td class="who"><b>T. Nakamura</b><span>Foundry &amp; Co</span></td>
+          <td><span class="chip c-active">Active</span></td>
+          <td class="num">Step 3 · Thu 9:10 <span class="prov">(their tz)</span></td><td class="num">4</td></tr>
+        <tr><td class="who"><b>R. Osei</b><span>Latticework Capital</span></td>
+          <td><span class="chip c-replied">Replied</span></td>
+          <td>— stopped at step 2</td><td class="num">6</td></tr>
+        <tr><td class="who"><b>M. Reyes</b><span>Harbor &amp; Pine</span></td>
+          <td><span class="chip c-paused">Paused</span></td>
+          <td class="num">Resumes Mon <span class="prov">(OOO return date)</span></td><td class="num">2</td></tr>
+        <tr><td class="who"><b>J. Alvarez</b><span>Kestrel Marine</span></td>
+          <td><span class="chip c-sched">Scheduled</span></td>
+          <td class="num">Step 1 · tomorrow 8:45</td><td class="num">—</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <aside class="rail">
+    <div class="note"><b>Auto is the primary mode; draft is a per-step choice.</b> Click the pills —
+      the Gate 3 contract keeps founder control per step without making the product a to-do grind.
+      <span class="src">GATE 3 · PROTOCOL §10 · INTERACTIVE</span></div>
+    <div class="note"><b>The schedule is furniture, not a settings page.</b> Window, holidays, caps,
+      and the stop promise sit on the sequence itself — the engine's invariants written where you work.
+      <span class="src">ENGINE INVARIANTS I2 · I4 · I5</span></div>
+    <div class="note"><b>Days + hours, verbatim.</b> “+5 days +4 hours” is a first-class interval,
+      not a workaround. <span class="src">R-REQ: INTERVALS IN DAYS+HOURS</span></div>
+    <div class="note"><b>Deferrals are visible.</b> A capped send says when it resumes; nothing
+      silently drops. <span class="src">ENGINE INVARIANT I5</span></div>
+    <div class="note"><b>Engagement stays light.</b> Opens count in a quiet column; this product's
+      goal state is Replied, so that's the loud chip. <span class="src">POSITIONING DOC 12 · CALM COMPETENCE</span></div>
+  </aside>
+</div>
+</section>
+
+<!-- ============ VIEW 3 · BOARD & FIRST-RUN ============ -->
+<section class="view" id="v3">
+<div class="stage">
+  <div class="screen">
+    <span class="plateno">PLATE 3 · SEQUENCES BOARD + FIRST-RUN · ILLUSTRATIVE DATA</span>
+    <div class="appbar"><svg style="color:var(--sub)"><use href="#mk"/></svg>
+      <span class="awm"><span class="stem" style="color:var(--sub)">nudge</span><span style="color:var(--camel)">row</span></span>
+      <nav><span>Home</span><b>Sequences</b><span>Prospects</span><span>Reports</span><span>Settings</span></nav>
+      <span class="mb">3 mailboxes ▾</span>
+    </div>
+    <div class="body">
+      <h1 class="scr">Sequences</h1>
+      <p class="sub">Every running play, one card each — sends attributed to the mailbox that owns them.</p>
+      <div class="cards">
+        <div class="card"><h3>Vantrow intro — industrials</h3><div class="from">andrew@getvantrow.com</div>
+          <span class="chip c-active">Active</span>
+          <div class="bar"><i style="width:22%;background:var(--st-replied)"></i><i style="width:14%;background:var(--st-fnr)"></i><i style="width:48%;background:var(--st-active)"></i></div>
+          <div class="nums"><span><b>41</b> enrolled</span><span><b>9</b> replied</span><span><b>6</b> cracks</span></div></div>
+        <div class="card"><h3>Eaverow founders — logistics</h3><div class="from">andrew@eaverow.com</div>
+          <span class="chip c-active">Active</span>
+          <div class="bar"><i style="width:12%;background:var(--st-replied)"></i><i style="width:22%;background:var(--st-fnr)"></i><i style="width:38%;background:var(--st-active)"></i></div>
+          <div class="nums"><span><b>28</b> enrolled</span><span><b>3</b> replied</span><span><b>6</b> cracks</span></div></div>
+        <div class="card"><h3>Parcelrow county openers</h3><div class="from">andrew@parcelrow.com</div>
+          <span class="chip c-paused">Paused</span>
+          <div class="bar"><i style="width:8%;background:var(--st-replied)"></i><i style="width:6%;background:var(--st-fnr)"></i><i style="width:20%;background:var(--st-paused)"></i></div>
+          <div class="nums"><span><b>17</b> enrolled</span><span><b>1</b> replied</span><span><b>1</b> crack</span></div></div>
+        <div class="card"><h3>Dormant re-warm — Q3</h3><div class="from">andrew@getvantrow.com</div>
+          <span class="chip c-draft">Draft</span>
+          <div class="bar"></div>
+          <div class="nums"><span><b>0</b> enrolled</span><span>starts when you say so</span></div></div>
+      </div>
+
+      <div class="firstrun">
+        <p class="eyebrow">First run · what an empty org shows</p>
+        <div class="frsteps">
+          <div class="fr"><span class="k">STEP 1</span><b>Connect a mailbox</b>
+            <span>Any Google Workspace or Gmail address — this product is standalone; your brands,
+            your senders. Microsoft next.</span></div>
+          <div class="fr"><span class="k">STEP 2</span><b>Bring prospects</b>
+            <span>CSV or Affinity import — deduped, suppression-screened on entry, bodies never required.</span></div>
+          <div class="fr"><span class="k">STEP 3</span><b>Start a sequence</b>
+            <span>Steps, windows, stop-on-reply — then it runs itself and you watch the cracks.</span></div>
+        </div>
+        <div class="demo">◇ DEMO MODE — no keys configured, so this org is seeded with illustrative data.
+          Everything is walkable; nothing sends.</div>
+      </div>
+
+      <div class="nightbox">
+        <span class="eyebrow">Exhibit · the night question (open)</span>
+        <div class="nrow"><span class="who" style="font-weight:600">D. Okafor<span>Meridian Fasteners</span></span>
+          <span class="nchip" style="color:var(--st-fnr);filter:none"><span style="color:#A98BD9">Finished · no reply</span></span></div>
+        <div class="nrow"><span class="who" style="font-weight:600">R. Osei<span>Latticework Capital</span></span>
+          <span class="nchip"><span style="color:#66BB7A">Replied</span></span></div>
+        <div class="nrow"><span class="who" style="font-weight:600">A. Duval<span>Stonebriar Group</span></span>
+          <span class="nchip"><span style="color:#E5726A">Bounced</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="rail">
+    <div class="note"><b>Standalone, brand-level, multi-mailbox.</b> The three cards send as three
+      different brands from one org — the R10 principle made visible. Mailbox badges are mono
+      micro-labels, not logos. <span class="src">R10 · GATE 4 RECORD</span></div>
+    <div class="note"><b>The bar is the sequence's whole story.</b> Replied (green) · cracks (violet) ·
+      in motion (teal) against the neutral remainder — state palette only, read left to right.
+      <span class="src">TWO-PALETTE LAW</span></div>
+    <div class="note"><b>Empty states are product copy.</b> The first-run panel is what a new org
+      actually sees — three steps, each one sentence, no tour overlay. Failure messages get the same
+      care (six distinct auth messages, Parcelrow's standard). <span class="src">PARCELROW PORT #7 · AUDIT §5c</span></div>
+    <div class="note"><b>Demo mode is a feature.</b> Zero keys → seeded walkable org. It's also our
+      screenshot source and Playwright fixture. <span class="src">PHASE 4 PLAN §2·A6</span></div>
+    <div class="note"><b>Open question for Andrew:</b> is dark a <i>place</i> (Parcelrow: the signed-in
+      world) or a <i>preference</i> (palette F has a full dark scheme)? The night exhibit shows the
+      pinned dark state colors either way. <span class="src">AUDIT PORT #10 · DECIDE AT CHECKPOINT</span></div>
+  </aside>
+</div>
+</section>
+
+<footer class="deck">
+  <h2>What this deck decides (Checkpoint 4-D)</h2>
+  <ul>
+    <li><b>Approve or redline the three surfaces</b> — information architecture, tone, and texture;
+      app UI is built only from an approved deck (Parcelrow's sequencing).</li>
+    <li><b>The night question</b> — dark as place vs preference (view 03 exhibit).</li>
+    <li><b>Rides along:</b> logo pick A–D + wordmark case (`docs/brand/logo-mockups.html`) — this deck
+      wears candidate A so you can judge it in situ.</li>
+  </ul>
+  <p class="mono" style="font-size:10.5px;color:var(--mut)">NUDGEROW · CHECKPOINT 4-D · ILLUSTRATIVE DATA THROUGHOUT ·
+  STATE COLORS = PINNED SET 2026-08-07 · TYPE IS A PREVIEW STAND-IN</p>
+</footer>
+</div>
+
+<script>
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === t));
+    document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === t.dataset.v));
+  }));
+  document.querySelectorAll(".mode").forEach(m => m.addEventListener("click", () => {
+    const auto = m.classList.toggle("auto");
+    m.classList.toggle("draft", !auto);
+    m.textContent = auto ? "AUTO-SEND" : "DRAFT FIRST";
+  }));
+  document.querySelectorAll(".flt").forEach(f => f.addEventListener("click", () => {
+    document.querySelectorAll(".flt").forEach(x => x.classList.toggle("on", x === f));
+    const k = f.dataset.f;
+    document.querySelectorAll('#v1 table.grid tr[data-k]').forEach(r =>
+      r.style.display = (k === "all" || r.dataset.k === k) ? "" : "none");
+  }));
+</script>

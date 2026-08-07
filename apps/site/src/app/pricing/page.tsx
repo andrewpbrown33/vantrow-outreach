@@ -40,7 +40,7 @@ export default function PricingPage() {
         can publish now is the commitment itself.
       </p>
 
-      <div className="mt-10 rounded-lg border border-brand/20 bg-white p-6 shadow-sm sm:p-8">
+      <div className="mt-10 rounded-lg border border-brand/20 bg-white p-6 sm:p-8">
         <h2 className="text-xl font-bold text-brand-dark">
           What we&rsquo;re committing to
         </h2>
@@ -56,7 +56,7 @@ export default function PricingPage() {
         </ul>
       </div>
 
-      <div className="mt-6 rounded-lg border border-foreground/10 bg-white p-6 shadow-sm sm:p-8">
+      <div className="mt-6 rounded-lg border border-foreground/10 bg-white p-6 sm:p-8">
         <h2 className="text-xl font-bold text-brand-dark">
           What we&rsquo;re designing toward
         </h2>
@@ -90,7 +90,7 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <div className="mt-12 rounded-lg border-2 border-brand-accent bg-white p-6 shadow-sm sm:p-8">
+      <div className="mt-12 rounded-lg border-2 border-brand-accent bg-white p-6 sm:p-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-brand-accent">
           Founding teams
         </p>

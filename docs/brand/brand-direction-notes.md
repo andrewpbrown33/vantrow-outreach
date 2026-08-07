@@ -161,7 +161,15 @@ confirm): lowercase `nudge|row` in the drawn lockup, capitalized "Nudgerow" in p
 exactly Parcelrow's shipped split. Wordmark face per Parcelrow law: Manrope 800,
 −0.02em, self-hosted.
 
-**Pending Andrew:** pick a letter (or redirect), confirm the case split. Then the
-winner is cut to `packages/brand/assets/` as mark/mark-small/mark-dark/icon SVGs with
-construction-law comments, the site header + favicon swap to it, and the decision log
-gets the row.
+**Round 2 (same day, at Andrew's request — "give me 5 more, right now A is my
+favorite"):** five challengers added to the same page/artifact — **E The Climb**
+(A's ascending mirror), **F The Closed Loop** (stop-on-reply as geometry), **G The
+Momentum** (the ball pushed by three arcs — strongest challenger), **H The Burndown**
+(staggered rows), **I The Prompt** (forward chevron sheltering the ball) — plus a
+**"sharpening A" strip**: A2 mid-carry and **A3 two-step** (best 16px survivor in the
+set). Standing: **A · G · F · E · B · C · H · I · D**; recommendation A as-is or A3.
+
+**Pending Andrew:** final pick (a letter, "A as-is", or "A3"), confirm the case split.
+Then the winner is cut to `packages/brand/assets/` as mark/mark-small/mark-dark/icon
+SVGs with construction-law comments, the site header + favicon swap to it, and the
+decision log gets the row.
