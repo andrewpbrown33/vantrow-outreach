@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- Site favicon: the Signal on the family rx-22 cream tile. Verbatim copy
-       of packages/brand/assets/icon.svg (static asset — Next serves this file
-       directly; keep in sync with the brand package, never redraw). -->
+  <!-- Nudgerow favicon: the Signal on an rx-22 cream tile — the family's
+       favicon convention (brand geometry on a cream tile, same construction
+       as Eaverow's and Parcelrow's icons). Nudgerow cream #FDFBF2. -->
   <rect width="100" height="100" rx="22" fill="#FDFBF2"/>
   <path d="M46.5 33.9 A21 21 0 0 1 46.5 66.1" fill="none" stroke="#4A4952" stroke-width="8" stroke-linecap="round"/>
   <path d="M58.4 32.2 A31 31 0 0 1 58.4 67.8" fill="none" stroke="#4A4952" stroke-width="8" stroke-linecap="round"/>

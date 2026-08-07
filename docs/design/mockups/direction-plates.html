@@ -1,0 +1,275 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nudgerow — Direction Plates</title>
+<style>
+  /* Neutral viewing-room chrome; every plate paints its own fixed ground. */
+  body{margin:0;background:#EDECEF;color:#232228;font-family:"Helvetica Neue",Helvetica,Arial,ui-sans-serif,sans-serif;line-height:1.5}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  .wrap{max-width:1150px;margin:0 auto;padding:0 24px}
+  header.room{padding:44px 0 10px}
+  .stamp{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.14em;font-weight:700;background:#232228;color:#EDECEF;padding:5px 10px;border-radius:4px}
+  h1{font-size:clamp(28px,4vw,40px);letter-spacing:-.02em;margin:14px 0 8px}
+  .lede{max-width:70ch;color:#6C6A74;font-size:15.5px}
+  .platecard{margin:34px 0;border-radius:14px;overflow:hidden;border:1px solid #D8D6DC;background:#fff}
+  .platehead{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;padding:18px 22px;border-bottom:1px solid #E5E3E8}
+  .pnum{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:12px;background:#232228;color:#fff;border-radius:6px;padding:3px 9px}
+  .platehead h2{margin:0;font-size:20px;letter-spacing:-.01em}
+  .platehead .thesis{color:#6C6A74;font-size:14px}
+  .keeps{padding:14px 22px 20px;font-size:13px;color:#55535D;border-top:1px solid #E5E3E8}
+  .keeps b{color:#232228}
+  footer.room{padding:10px 0 60px;font-size:13.5px;color:#55535D;max-width:74ch}
+  a{cursor:pointer}
+
+  /* ============ P1 · THE WIRE ============ */
+  .p1{background:#FFFFFF;color:#141414;padding:26px 30px;font-family:Georgia,"Times New Roman",serif}
+  .p1 .bar{display:flex;align-items:baseline;gap:12px;border-bottom:3px double #141414;padding-bottom:10px}
+  .p1 .bar svg{width:24px;height:24px;align-self:center}
+  .p1 .masthead{font-size:21px;font-weight:700;letter-spacing:-.01em;font-family:Georgia,serif}
+  .p1 .masthead .rw{color:#B8956A}
+  .p1 .bar .ed{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.16em;color:#8A2A20}
+  .p1 .flt{display:flex;gap:0;margin:12px 0 4px;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.1em}
+  .p1 .flt span{padding:5px 12px;border:1px solid #141414;border-right:none;cursor:pointer}
+  .p1 .flt span:last-child{border-right:1px solid #141414}
+  .p1 .flt .on{background:#141414;color:#fff}
+  .p1 .dateslug{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.22em;color:#8A2A20;font-weight:700;margin:18px 0 2px}
+  .p1 .item{display:grid;grid-template-columns:64px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid #E2DFD8;font-size:15px}
+  .p1 .t{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#8B8578;padding-top:4px}
+  .p1 .item a{color:#141414;font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+  .p1 .item a.seq{color:#8A2A20;font-weight:400;font-style:italic}
+  .p1 .item .k{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.12em;padding:1px 6px;border:1px solid currentColor;border-radius:2px;margin-right:8px;vertical-align:2px}
+  .p1 .k.rep{color:#1E6B34}.p1 .k.adv{color:#141414}.p1 .k.fin{color:#6D4FA6}.p1 .k.bnc{color:#8A2A20}
+  .p1 .ovh{margin:22px 0 0;border-top:3px double #141414;padding-top:12px;display:flex;gap:26px;flex-wrap:wrap;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+  .p1 .ovh b{font-size:19px;display:block;font-family:Georgia,serif}
+  .p1 .seqrow{display:flex;gap:14px;justify-content:space-between;border-bottom:1px solid #E2DFD8;padding:9px 0;font-size:14.5px;flex-wrap:wrap}
+  .p1 .seqrow .cts{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:#55534D}
+
+  /* ============ P2 · MISSION DECK ============ */
+  .p2{background:#101014;color:#D9D7DE;padding:26px 30px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  .p2 .bar{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid #26252C}
+  .p2 .bar svg{width:22px;height:22px}
+  .p2 .mast{font-size:14px;font-weight:700;letter-spacing:.04em;color:#F3DD6D}
+  .p2 .mast .rw{color:#B8956A}
+  .p2 .live{margin-left:auto;font-size:10px;letter-spacing:.18em;color:#5ED08A}
+  .p2 .live::before{content:"●";margin-right:6px;animation:none}
+  .p2 .flt{display:flex;gap:8px;margin:14px 0 6px;font-size:10.5px;letter-spacing:.08em}
+  .p2 .flt span{padding:4px 10px;border:1px solid #33323B;border-radius:3px;color:#8F8D99;cursor:pointer}
+  .p2 .flt .on{border-color:#F3DD6D;color:#F3DD6D}
+  .p2 .dateslug{font-size:10px;letter-spacing:.22em;color:#5B5964;margin:16px 0 4px}
+  .p2 .item{display:grid;grid-template-columns:52px 14px 1fr;gap:10px;padding:7px 0;font-size:12.5px;align-items:baseline}
+  .p2 .t{color:#5B5964;font-size:10.5px}
+  .p2 .dot{font-size:11px}
+  .p2 .d-rep{color:#5ED08A}.p2 .d-adv{color:#7DA1C4}.p2 .d-fin{color:#A98BD9}.p2 .d-bnc{color:#E5726A}.p2 .d-sys{color:#5B5964}
+  .p2 .item a{color:#EFEDE6;font-weight:700;text-decoration:none;border-bottom:1px solid #4A4952}
+  .p2 .item a.seq{color:#F3DD6D;font-weight:400}
+  .p2 .ov{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:20px}
+  .p2 .cell{border:1px solid #26252C;border-radius:4px;padding:8px 10px}
+  .p2 .cell b{display:block;font-size:18px;color:#EFEDE6}
+  .p2 .cell span{font-size:9.5px;letter-spacing:.14em;color:#8F8D99}
+  .p2 .cell.hot b{color:#F3DD6D}
+  .p2 .seqrow{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #26252C;padding:8px 2px;font-size:12px;flex-wrap:wrap}
+  .p2 .seqrow a{color:#EFEDE6;border-bottom:1px solid #4A4952;text-decoration:none}
+  .p2 .seqrow .cts{color:#8F8D99;font-size:10.5px}
+
+  /* ============ P3 · STUDIO ============ */
+  .p3{background:#FAF9FC;color:#2B2933;padding:26px 30px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+  .p3 .bar{display:flex;align-items:center;gap:10px}
+  .p3 .bar svg{width:26px;height:26px}
+  .p3 .mast{font-size:17px;font-weight:800;letter-spacing:-.02em;color:#4A4952}
+  .p3 .mast .rw{color:#B8956A}
+  .p3 .nav{display:flex;gap:18px;margin-left:26px;font-size:13.5px;color:#8F8D99}
+  .p3 .nav b{color:#2B2933;background:#F0EDDA;border-radius:99px;padding:4px 12px;font-weight:600}
+  .p3 h3{font-size:22px;letter-spacing:-.02em;margin:20px 0 4px}
+  .p3 .flt{display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap}
+  .p3 .flt span{font-size:12.5px;padding:6px 14px;border-radius:99px;background:#fff;border:1px solid #E4E2EA;color:#55535D;cursor:pointer}
+  .p3 .flt .on{background:#F3DD6D;border-color:#F3DD6D;color:#2B2933;font-weight:600}
+  .p3 .dateslug{position:sticky;top:0;font-size:12px;font-weight:700;color:#8F8D99;margin:18px 0 8px}
+  .p3 .card{background:#fff;border:1px solid #ECEAF1;border-radius:14px;padding:13px 16px;margin:8px 0;display:flex;gap:12px;align-items:flex-start;font-size:14px}
+  .p3 .ic{width:30px;height:30px;border-radius:99px;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .p3 .i-rep{background:#DFEEE4;color:#1E7A3C}.p3 .i-adv{background:#E3EBF5;color:#3E6FA3}
+  .p3 .i-fin{background:#E9E3F4;color:#6D4FA6}.p3 .i-bnc{background:#F6DDDB;color:#B3261E}
+  .p3 .card a{color:#2B2933;font-weight:700;text-decoration:none;border-bottom:2px solid #F3DD6D}
+  .p3 .card a.seq{color:#6D5FA8;font-weight:600;border-bottom:2px solid #E4E2EA}
+  .p3 .card .sub{display:block;color:#8F8D99;font-size:12.5px;margin-top:2px}
+  .p3 .ovrow{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .p3 .pillstat{background:#fff;border:1px solid #ECEAF1;border-radius:12px;padding:10px 16px;font-size:12px;color:#8F8D99}
+  .p3 .pillstat b{display:block;font-size:20px;color:#2B2933;font-weight:800}
+  .p3 .seqcard{background:#fff;border:1px solid #ECEAF1;border-radius:14px;padding:12px 16px;margin-top:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px}
+  .p3 .seqcard a{font-weight:700;color:#2B2933;text-decoration:none;border-bottom:2px solid #F3DD6D}
+  .p3 .seqcard .cts{font-size:12px;color:#8F8D99}
+
+  /* ============ P4 · TICKER TAPE ============ */
+  .p4{background:#F4F1E8;color:#232019;padding:26px 30px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  .p4 .frame{display:grid;grid-template-columns:1fr 300px;gap:26px}
+  @media (max-width:900px){.p4 .frame{grid-template-columns:1fr}}
+  .p4 .tape{background:#FFFEF8;border-left:1px dashed #B8956A;border-right:1px dashed #B8956A;padding:16px 22px;max-width:560px;margin:0 auto;width:100%}
+  .p4 .tapehead{text-align:center;border-bottom:2px solid #232019;padding-bottom:10px;font-size:12px;letter-spacing:.12em}
+  .p4 .tapehead svg{width:26px;height:26px;display:block;margin:0 auto 6px}
+  .p4 .dateslug{text-align:center;font-size:10px;letter-spacing:.26em;color:#98917E;margin:16px 0 6px}
+  .p4 .dateslug::before,.p4 .dateslug::after{content:" · · · "}
+  .p4 .item{padding:8px 0;border-bottom:1px dotted #D8D2C0;font-size:12.5px;line-height:1.65}
+  .p4 .t{color:#98917E;font-size:10px;display:block}
+  .p4 .item a{color:#232019;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+  .p4 .item a.seq{color:#7A5C33;font-weight:400}
+  .p4 .k{font-size:9px;letter-spacing:.14em;padding:1px 5px;border:1px solid;border-radius:2px;margin-right:6px}
+  .p4 .k-rep{color:#1E6B34}.p4 .k-adv{color:#3E5E8C}.p4 .k-fin{color:#6D4FA6}.p4 .k-bnc{color:#A6362C}
+  .p4 .rail{font-size:11.5px}
+  .p4 .railbox{background:#FFFEF8;border:1px solid #DDD6C2;border-radius:6px;padding:12px 14px;margin-bottom:12px}
+  .p4 .railbox h4{margin:0 0 8px;font-size:10px;letter-spacing:.2em;color:#7A5C33}
+  .p4 .st{display:flex;justify-content:space-between;padding:3px 0}
+  .p4 .st b{font-size:13px}
+  .p4 .flt{display:flex;flex-wrap:wrap;gap:6px}
+  .p4 .flt span{border:1px solid #232019;padding:3px 9px;font-size:10px;letter-spacing:.08em;cursor:pointer}
+  .p4 .flt .on{background:#232019;color:#F4F1E8}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="sig" viewBox="0 0 100 100">
+    <path d="M46.5 33.9 A21 21 0 0 1 46.5 66.1" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+    <path d="M58.4 32.2 A31 31 0 0 1 58.4 67.8" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+    <path d="M70.2 32.7 A41 41 0 0 1 70.2 67.3" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="33" cy="50" r="14" fill="#B8956A"/>
+  </symbol>
+</defs></svg>
+
+<div class="wrap">
+<header class="room">
+  <span class="stamp">DIRECTION PLATES · UNCONSTRAINED · ILLUSTRATIVE DATA</span>
+  <h1>Four ways Nudgerow could feel</h1>
+  <p class="lede">Per your ask: these follow <b>no pre-set guidelines</b> — not the family grammar, not the
+  design law, not Clarity Ink's current application. Each plate rebuilds your redlined home (activity feed,
+  date-segmented, filters-as-reports, everything linked) and the sequences overview in a different language.
+  All names/numbers invented; links are styled, not wired. The Signal mark rides along in each plate's colors.
+  Pick one — or name a hybrid — and deck v2 gets rebuilt in it, with the design law amended to match.</p>
+</header>
+
+<!-- ================= PLATE 1 ================= -->
+<div class="platecard">
+  <div class="platehead"><span class="pnum">PLATE 1</span><h2>The Wire</h2>
+    <span class="thesis">your outreach as a newswire — serif dispatches, mono timestamps, double-rule gravitas. Built for scanning 40 events in 20 seconds.</span></div>
+  <div class="p1">
+    <div class="bar"><svg style="color:#141414"><use href="#sig"/></svg>
+      <span class="masthead">nudge<span class="rw">row</span></span>
+      <span class="ed">THE MORNING WIRE · 3 MAILBOXES · LIVE</span></div>
+    <div class="flt"><span class="on">ALL</span><span>REPLIES</span><span>SENDS</span><span>FINISHED</span><span>BOUNCES</span></div>
+    <div class="dateslug">TODAY — THURSDAY</div>
+    <div class="item"><span class="t">9:41A</span><span><span class="k rep">REPLY</span>You received an email from <a>Derek Smith</a> — step 3 (Auto Email) of <a class="seq">Vantrow intro — industrials</a>.</span></div>
+    <div class="item"><span class="t">9:12A</span><span><span class="k rep">REPLY</span>You received an email from <a>Hugo Lachance</a> — step 6 (Auto Email) of <a class="seq">Investor Referral</a>.</span></div>
+    <div class="item"><span class="t">8:30A</span><span><span class="k adv">ADV</span><a>Nathan Roseman</a> advanced to step 8 (Auto Email) of <a class="seq">General Outreach</a>.</span></div>
+    <div class="dateslug">YESTERDAY</div>
+    <div class="item"><span class="t">4:55P</span><span><span class="k fin">FIN</span><a>Bob Rose</a> finished <a class="seq">Investor Referral</a> — five steps, no reply. Filed to the cracks.</span></div>
+    <div class="item"><span class="t">2:10P</span><span><span class="k bnc">BNC</span><a>A. Duval</a> hard-bounced — address suppressed, enrollment halted.</span></div>
+    <div class="ovh">
+      <span><b>4</b>ACTIVE</span><span><b>1</b>PAUSED</span><span><b>3</b>FAILED</span><span><b>12</b>BOUNCED</span><span><b>208</b>FINISHED</span>
+    </div>
+    <div class="seqrow"><span><a>Vantrow intro — industrials</a></span><span class="cts">41 ACT · 9 REP · 6 CRACKS · sends as getvantrow.com</span></div>
+    <div class="seqrow"><span><a>Investor Referral</a></span><span class="cts">28 ACT · 3 REP · 6 CRACKS · sends as eaverow.com</span></div>
+  </div>
+  <div class="keeps"><b>Keeps:</b> camel thread, cream-adjacent paper, hairlines, mono micro-labels. <b>Breaks:</b> serif body (law bans nothing here, but Clarity Ink never specced serif) · red as a working accent color · yellow demoted entirely. <b>Risk:</b> most formal of the four — gravitas can read as distance.</div>
+</div>
+
+<!-- ================= PLATE 2 ================= -->
+<div class="platecard">
+  <div class="platehead"><span class="pnum">PLATE 2</span><h2>Mission Deck</h2>
+    <span class="thesis">a dark ops console that's always on — the feed as a live tail, yellow as the command color. Built for leaving open on a second monitor all day.</span></div>
+  <div class="p2">
+    <div class="bar"><svg style="color:#F3DD6D"><use href="#sig"/></svg>
+      <span class="mast">nudge<span class="rw">row</span></span>
+      <span class="live">LIVE · 3 MAILBOXES · 22 QUEUED</span></div>
+    <div class="flt"><span class="on">ALL</span><span>REPLIES</span><span>SENDS</span><span>FINISHED</span><span>BOUNCES</span></div>
+    <div class="dateslug">— TODAY —</div>
+    <div class="item"><span class="t">09:41</span><span class="dot d-rep">●</span><span>reply from <a>Derek Smith</a> · step 3/5 · <a class="seq">vantrow-intro-industrials</a> — enrollment stopped, timers cancelled</span></div>
+    <div class="item"><span class="t">09:12</span><span class="dot d-rep">●</span><span>reply from <a>Hugo Lachance</a> · step 6/8 · <a class="seq">investor-referral</a></span></div>
+    <div class="item"><span class="t">08:30</span><span class="dot d-adv">●</span><span><a>Nathan Roseman</a> → step 8/8 (auto email) · <a class="seq">general-outreach</a></span></div>
+    <div class="item"><span class="t">08:30</span><span class="dot d-sys">●</span><span>send window open · 22 emails scheduled across 3 mailboxes · caps clear</span></div>
+    <div class="dateslug">— YESTERDAY —</div>
+    <div class="item"><span class="t">16:55</span><span class="dot d-fin">●</span><span><a>Bob Rose</a> finished <a class="seq">investor-referral</a> · 5 steps · no reply → cracks</span></div>
+    <div class="item"><span class="t">14:10</span><span class="dot d-bnc">●</span><span><a>A. Duval</a> hard bounce · suppressed · enrollment halted</span></div>
+    <div class="ov">
+      <div class="cell hot"><b>4</b><span>ACTIVE</span></div>
+      <div class="cell"><b>1</b><span>PAUSED</span></div>
+      <div class="cell"><b>3</b><span>FAILED</span></div>
+      <div class="cell"><b>12</b><span>BOUNCED</span></div>
+      <div class="cell"><b>208</b><span>FINISHED</span></div>
+    </div>
+    <div class="seqrow" style="margin-top:10px"><a>vantrow-intro-industrials</a><span class="cts">41 act · 9 rep · 6 crk · getvantrow.com</span></div>
+    <div class="seqrow"><a>investor-referral</a><span class="cts">28 act · 3 rep · 6 crk · eaverow.com</span></div>
+  </div>
+  <div class="keeps"><b>Keeps:</b> palette F's dark scheme honestly (yellow-led dark, state palette dark values), camel thread, mono texture. <b>Breaks:</b> dark becomes the PRIMARY ground, not a variant · density over whitespace · green "live" signal color added. <b>Risk:</b> intense for a first-run user; marketing site would need a light face regardless.</div>
+</div>
+
+<!-- ================= PLATE 3 ================= -->
+<div class="platecard">
+  <div class="platehead"><span class="pnum">PLATE 3</span><h2>Studio</h2>
+    <span class="thesis">soft, roomy, friendly — feed items as cards, filters as pills, yellow as the touch color. Built to make a solo founder's admin hour feel light.</span></div>
+  <div class="p3">
+    <div class="bar"><svg style="color:#4A4952"><use href="#sig"/></svg>
+      <span class="mast">nudge<span class="rw">row</span></span>
+      <span class="nav"><b>Activity</b><span>Sequences</span><span>Prospects</span><span>Settings</span></span></div>
+    <h3>Activity</h3>
+    <div class="flt"><span class="on">Everything</span><span>Replies</span><span>Sends</span><span>Finished</span><span>Bounces</span></div>
+    <div class="dateslug">Today</div>
+    <div class="card"><span class="ic i-rep">↩</span><span>You received an email from <a>Derek Smith</a>
+      <span class="sub">Step 3 (Auto Email) of <a class="seq">Vantrow intro — industrials</a> · 9:41 am · sequence stopped itself</span></span></div>
+    <div class="card"><span class="ic i-rep">↩</span><span>You received an email from <a>Hugo Lachance</a>
+      <span class="sub">Step 6 (Auto Email) of <a class="seq">Investor Referral</a> · 9:12 am</span></span></div>
+    <div class="card"><span class="ic i-adv">→</span><span><a>Nathan Roseman</a> advanced to Step 8
+      <span class="sub">Auto Email of <a class="seq">General Outreach</a> · 8:30 am</span></span></div>
+    <div class="dateslug">Yesterday</div>
+    <div class="card"><span class="ic i-fin">✓</span><span><a>Bob Rose</a> finished <a class="seq">Investor Referral</a>
+      <span class="sub">5 steps, no reply — waiting in Cracks · 4:55 pm</span></span></div>
+    <div class="card"><span class="ic i-bnc">!</span><span><a>A. Duval</a> hard-bounced
+      <span class="sub">Address suppressed, enrollment halted · 2:10 pm</span></span></div>
+    <div class="ovrow">
+      <span class="pillstat"><b>4</b>Active</span><span class="pillstat"><b>1</b>Paused</span>
+      <span class="pillstat"><b>3</b>Failed</span><span class="pillstat"><b>12</b>Bounced</span>
+      <span class="pillstat"><b>208</b>Finished</span>
+    </div>
+    <div class="seqcard"><a>Vantrow intro — industrials</a><span class="cts">41 active · 9 replied · 6 cracks · andrew@getvantrow.com</span></div>
+    <div class="seqcard"><a>Investor Referral</a><span class="cts">28 active · 3 replied · 6 cracks · andrew@eaverow.com</span></div>
+  </div>
+  <div class="keeps"><b>Keeps:</b> Clarity Ink hues, state washes, yellow accents, lowercase lockup. <b>Breaks:</b> the radius cap (14px cards) and the hairline-only depth rule · icon chips reintroduce glyphs the law's emoji ban skirts (drawn glyphs, not emoji — lawful but softer than anything shipped). <b>Risk:</b> closest to category-standard SaaS — comfortable, least distinctive of the four.</div>
+</div>
+
+<!-- ================= PLATE 4 ================= -->
+<div class="platecard">
+  <div class="platehead"><span class="pnum">PLATE 4</span><h2>Ticker Tape</h2>
+    <span class="thesis">the feed as a literal tape spooling out of the machine — centered, dated, torn edges; everything else lives in the margins. Built to make the feed itself the brand.</span></div>
+  <div class="p4">
+    <div class="frame">
+      <div class="tape">
+        <div class="tapehead"><svg style="color:#232019"><use href="#sig"/></svg>NUDGEROW · ACTIVITY TAPE<br>3 MAILBOXES · CUT DAILY 6:00A</div>
+        <div class="dateslug">TODAY</div>
+        <div class="item"><span class="t">9:41A</span><span class="k k-rep">REPLY</span>email received from <a>DEREK SMITH</a> · step 3 (auto email) of <a class="seq">VANTROW INTRO — INDUSTRIALS</a> · sequence stopped</div>
+        <div class="item"><span class="t">9:12A</span><span class="k k-rep">REPLY</span>email received from <a>HUGO LACHANCE</a> · step 6 (auto email) of <a class="seq">INVESTOR REFERRAL</a></div>
+        <div class="item"><span class="t">8:30A</span><span class="k k-adv">ADVANCE</span><a>NATHAN ROSEMAN</a> → step 8 (auto email) of <a class="seq">GENERAL OUTREACH</a></div>
+        <div class="dateslug">YESTERDAY</div>
+        <div class="item"><span class="t">4:55P</span><span class="k k-fin">FINISHED</span><a>BOB ROSE</a> completed <a class="seq">INVESTOR REFERRAL</a> · no reply · filed to cracks</div>
+        <div class="item"><span class="t">2:10P</span><span class="k k-bnc">BOUNCE</span><a>A. DUVAL</a> hard bounce · suppressed</div>
+      </div>
+      <div class="rail">
+        <div class="railbox"><h4>FILTER THE TAPE</h4>
+          <div class="flt"><span class="on">ALL</span><span>REPLIES</span><span>SENDS</span><span>FINISHED</span><span>BOUNCES</span></div></div>
+        <div class="railbox"><h4>SEQUENCES — THE HOUSE</h4>
+          <div class="st"><span>ACTIVE</span><b>4</b></div>
+          <div class="st"><span>PAUSED</span><b>1</b></div>
+          <div class="st"><span>FAILED</span><b>3</b></div>
+          <div class="st"><span>BOUNCED</span><b>12</b></div>
+          <div class="st"><span>FINISHED</span><b>208</b></div></div>
+        <div class="railbox"><h4>TOP OF THE BOOK</h4>
+          <div class="st"><span>VANTROW INTRO</span><b>9 REP</b></div>
+          <div class="st"><span>INVESTOR REFERRAL</span><b>3 REP</b></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="keeps"><b>Keeps:</b> camel (the tape's dashed selvage), warm paper, mono bones, provenance stamps. <b>Breaks:</b> everything about conventional SaaS layout — single-column feed as the entire center of the product. <b>Risk:</b> charming or gimmicky depending on the day; margins get tight when the app grows features.</div>
+</div>
+
+<footer class="room">
+  <b>How to choose:</b> Wire if the product should feel like a private intelligence service ·
+  Mission Deck if it should feel like an always-on console · Studio if it should feel effortless ·
+  Ticker Tape if the feed itself should be the identity. Hybrids are legal and cheap — e.g. "Studio
+  layout, Wire typography" or "Studio light + Mission Deck as the dark scheme." Name it and deck v2
+  is rebuilt in that language, the design law is amended by a decision-log row, and the state palette
+  re-validates against the new grounds.
+</footer>
+</div>

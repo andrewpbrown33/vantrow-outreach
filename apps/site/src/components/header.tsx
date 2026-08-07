@@ -1,18 +1,24 @@
 import Link from "next/link";
 import { primaryNav, routes } from "../lib/nav";
+import { Mark } from "./mark";
 import { Wordmark } from "./wordmark";
 
 /** Pre-launch header: the CTA is early access, not app login — there is no
- *  product app yet. Swap to Log in / Start free when the platform ships. */
+ *  product app yet. Swap to Log in / Start free when the platform ships.
+ *  Lockup per the family nav convention: mark + lowercase wordmark + byline. */
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-foreground/10 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
         <Link
           href={routes.home}
-          className="text-lg font-bold tracking-tight text-brand-dark"
+          className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-brand-dark"
         >
+          <Mark className="text-brand-dark" />
           <Wordmark />
+          <span className="hidden text-xs font-normal text-muted lg:inline">
+            a Vantrow company
+          </span>
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-6 md:flex">
