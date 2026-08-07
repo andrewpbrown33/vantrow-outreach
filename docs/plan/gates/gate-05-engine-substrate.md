@@ -1,5 +1,7 @@
 # Gate 5 — Sequence-Engine Substrate
 
+> **DECIDED 2026-08-07 — Option A (Postgres durable timers), Andrew deferring to the recommendation.** Record: decision log.
+
 **Type:** Decision gate.
 **Question:** what runs the enrollment engine — the durable-timer, exactly-once,
 reply-race-cancelling heart of the product (hard problems #1/#4)?

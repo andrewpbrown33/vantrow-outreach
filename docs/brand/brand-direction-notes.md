@@ -131,3 +131,37 @@ candidates rendered as two-tone wordmarks (camel "row") on their own light/dark 
 with full token chips. Also published for review at the session artifact link.
 
 ## DECIDED 2026-08-07: **F — Clarity Ink** (see decision log). D and E archived as runners-up. Wordmark case still open.
+
+## Round 3 (2026-08-07): logo exploration — R11 design directive
+
+Andrew's directive: the work so far "looks too simple and similar to Eaverow"; raise
+design/branding/UI/first-experience to **Parcelrow's** bar, with family-consistent
+**logo mockups** for his review. Parcelrow's repo was attached and audited
+(`docs/research/family/parcelrow-design-audit.md`) — its mark files encode the family
+construction grammar (100-unit grid · brand-ink strokes + one camel `#B8956A` fill
+that never moves · hero/small cuts · dark law: structure flips light, camel stays ·
+rx-22 cream favicon tile · lowercase two-tone nav lockup + "a Vantrow company" byline).
+
+**Deliverable:** `docs/brand/logo-mockups.html` (also published as a session
+artifact) — four candidates built on that grammar, each with light hero, dark cut,
+favicon tile, 16–48px size ladder, and nav lockups on both grounds:
+
+- **A · The Cadence** — descending sequence steps with the family ball (Vantrow's own
+  camel ball) resting at the last step: the schedule carries the prospect to reply.
+  **Ranked #1.**
+- **B · The Nudge** — a domino row, first tile mid-tip, camel tile last: one push,
+  the row does the rest.
+- **C · The Return** — the outbound stroke that loops back to a camel dot:
+  stop-on-reply as identity.
+- **D · The N Frame** — Vantrow's letterform trick applied to N (ranked last: badge,
+  not story).
+
+**Wordmark case recommendation** (closes the open item above, pending Andrew's
+confirm): lowercase `nudge|row` in the drawn lockup, capitalized "Nudgerow" in prose —
+exactly Parcelrow's shipped split. Wordmark face per Parcelrow law: Manrope 800,
+−0.02em, self-hosted.
+
+**Pending Andrew:** pick a letter (or redirect), confirm the case split. Then the
+winner is cut to `packages/brand/assets/` as mark/mark-small/mark-dark/icon SVGs with
+construction-law comments, the site header + favicon swap to it, and the decision log
+gets the row.
