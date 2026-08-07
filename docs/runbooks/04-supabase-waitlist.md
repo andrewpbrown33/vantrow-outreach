@@ -10,6 +10,16 @@ this is done). **Time:** ~10 min. You do NOT have to touch any code.
    `supabase/migrations/0001_waitlist.sql` from the repo → **Run**. Expect "Success".
    (The table deliberately has RLS enabled with NO policies — only the service-role
    key can write. That is the intended posture, not a mistake.)
+   - Seeing `42P07: relation "waitlist_signups" already exists`? The script already
+     ran once — that error is harmless (current versions of the file are re-run-safe).
+     Verify with:
+     ```sql
+     select
+       (select count(*) from pg_indexes where tablename = 'waitlist_signups')  as index_count,
+       (select relrowsecurity from pg_class where relname = 'waitlist_signups') as rls_enabled,
+       (select count(*) from pg_policies where tablename = 'waitlist_signups')  as policy_count;
+     ```
+     Expected: `3 · true · 0`. If it matches, continue to step 3.
 3. **Project Settings → API**: copy **Project URL** and the **service_role** key
    (secret — never the anon key for this) into the Vercel project's environment
    variables (runbook 03 step 3), then **Redeploy** the site from Vercel.
