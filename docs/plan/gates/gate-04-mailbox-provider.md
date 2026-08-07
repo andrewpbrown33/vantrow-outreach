@@ -1,5 +1,7 @@
 # Gate 4 — Mailbox Provider & Connection Path
 
+> **DECIDED 2026-08-07 — Gmail/Google Workspace first (the conditional resolved to the B mirror):** Andrew's sending mailboxes are all Google (his brand accounts, not PEAK's tenant), and the standalone any-mailbox principle is now product requirement R10. Dogfood = OAuth test mode; the CASA clock starts now; Microsoft = Gate 12. Record: decision log.
+
 **Type:** Decision gate.
 **Question:** which mailbox provider does the MVP connect first, and by what path?
 **Why it's first among the architecture gates:** there is no product without a sending

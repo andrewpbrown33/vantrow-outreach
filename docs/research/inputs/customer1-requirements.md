@@ -19,6 +19,8 @@ program-plan rule).
 | R7 | Reporting | Reports actually wanted: **bounced emails · finished sequences · replies**. Three reports, not sixteen. | Gate 3 cutline: reporting scope |
 | R8 | Data export | Export must offer **sequence states, sequence-level metrics, prospect lists + their states** — and must **NOT offer email bodies**. | Platform spec: export surface; privacy stance |
 | R9 | Channels | **No phone calls, no SMS/messaging — at all** for customer #1. Instead: let users **log interactions that happened outside the platform** (a manual note/interaction type). | MAJOR scope: dialer/A2P clocks deprioritized (long-lead register); "external interaction" logging added to the data model; Gate 11 remains only as a future *market* question |
+| R10 | Standalone, brand-level sending | The product is standalone like the incumbent: Andrew connects ANY mailbox he wants — concretely his brand Gmail accounts (andrew@getvantrow.com, andrew@eaverow.com, andrew@parcelrow.com), not PEAK's tenant. An org connects N mailboxes / sender identities from day one; nothing assumes a single corporate tenant. *(Recorded at Gate 4, 2026-08-07.)* | Data model: Mailbox entity N-per-org; Gate 4 record |
+| R11 | Design bar & first experience | The product must be **more robust and more thoughtful on design, branding, UI, and the overall first experience** than the current draft — Andrew judged the Phase 2/3 output "too simple and similar to Eaverow" and set **Parcelrow's work as the reference bar** (review its repo drafting process; reference its design work more). *(Recorded 2026-08-07.)* | Site redesign + app-shell design pass (Phase 4 plan); logo/brandmark work opened same day |
 
 ## Standing implications adopted now
 
@@ -31,3 +33,6 @@ program-plan rule).
 - R1's answer becomes pricing-relevant at Gate 9: send volume is not a marginal-cost
   driver, so per-send pricing would be margin theater; limits exist to protect
   deliverability and tenant reputation.
+- R11 sets the design bar for every user-facing surface from Phase 4 on:
+  Parcelrow-level thoughtfulness on branding, UI, and first-run experience.
+  "Ship the narrow scope" (Gate 3) never means "ship it plain."

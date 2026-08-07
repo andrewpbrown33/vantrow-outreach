@@ -1,5 +1,7 @@
 # Gate 6 — Vantrow Connect `outreach.*` Mapping
 
+> **DECIDED 2026-08-07 — Option C, project = sequence (Andrew overruled the campaign recommendation: "organize outreach by sequences overall").** Plus: the dashboard connection is a paid per-client add-on (Gate 9 input). Record: decision log.
+
 **Type:** Decision gate.
 **Question:** how does Nudgerow map onto the Connect core model — above all, **what is
 `project`** for a sales-engagement platform? (Producer-from-MVP is a locked decision;
