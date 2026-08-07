@@ -42,6 +42,15 @@ describe("brand config shape", () => {
     expectValidPalette(brand.colors.dark);
   });
 
+  it("gives every founder color a semantic job and carries the row thread", () => {
+    expect(brand.semantic.alert).toMatch(HEX);
+    expect(brand.semantic.success).toMatch(HEX);
+    expect(brand.semantic.info).toMatch(HEX);
+    expect(brand.semantic.highlight).toMatch(HEX);
+    // The family thread is the Vantrow camel, by definition.
+    expect(brand.rowThread.toUpperCase()).toBe("#B8956A");
+  });
+
   it("has non-empty typography, radius, and spacing tokens", () => {
     expect(brand.typography.sans.length).toBeGreaterThan(0);
     expect(brand.typography.display.length).toBeGreaterThan(0);
@@ -66,5 +75,13 @@ describe("brandCssVars", () => {
     expect(css).toContain("--brand-font-sans:");
     expect(css).toContain("--brand-radius-md:");
     expect(css).toContain("--brand-spacing-unit:");
+  });
+
+  it("emits semantic and row-thread tokens", () => {
+    const css = brandCssVars(brand);
+    expect(css).toContain(`--brand-alert:${brand.semantic.alert};`);
+    expect(css).toContain(`--brand-success:${brand.semantic.success};`);
+    expect(css).toContain(`--brand-highlight:${brand.semantic.highlight};`);
+    expect(css).toContain(`--brand-row-thread:${brand.rowThread};`);
   });
 });

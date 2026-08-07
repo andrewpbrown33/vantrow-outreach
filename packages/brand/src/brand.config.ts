@@ -53,6 +53,27 @@ export interface BrandConfig {
     light: BrandPalette;
     dark: BrandPalette;
   };
+  /**
+   * Semantic colors — every founder base color holds a product job (palette
+   * round 2 rule, decision log 2026-08-07). Constant across schemes; in-app
+   * components may derive lifted variants for dark grounds.
+   */
+  semantic: {
+    /** Bounces, failures, urgent cracks. */
+    alert: string;
+    /** Replies, delivered, warmed-up. */
+    success: string;
+    /** Neutral/info states, empty states, secondary charts. */
+    info: string;
+    /** Selection + the cracked-prospect flag — the signature gesture. */
+    highlight: string;
+  };
+  /**
+   * The Vantrow family thread: the camel that colors the "row" in every
+   * subsidiary wordmark and the endorsement tick (sourced from the parent
+   * mark, getvantrow.com).
+   */
+  rowThread: string;
   /** CSS font-family stacks (system-stack placeholders until Gate 2 picks type). */
   typography: {
     sans: string;
@@ -90,26 +111,34 @@ export const brand: BrandConfig = {
   parentName: "Vantrow",
   parentUrl: "https://getvantrow.com",
   colors: {
-    // Neutral interim palette, AA-contrast on both schemes. The Nudgerow
-    // visual identity (palette, type, wordmark) is a Phase 2 design decision;
-    // apply it here in the same commit that logs it (no token drift).
+    // "Clarity Ink" — palette F, chosen by Andrew 2026-08-07 (decision log;
+    // specimens in docs/brand/palette-preview.html). Violet-gray ink on
+    // yellow-cast cream; the clarity yellow is the signature highlight and
+    // takes the wordmark after dark.
     light: {
-      primary: "#1f3a5f",
-      primaryDark: "#12233c",
-      accent: "#b45309",
-      background: "#f8fafc",
-      foreground: "#0f172a",
-      muted: "#64748b",
+      primary: "#4A4952",
+      primaryDark: "#201F24",
+      accent: "#F3DD6D",
+      background: "#FDFBF2",
+      foreground: "#201F24",
+      muted: "#7E7D81",
     },
     dark: {
-      primary: "#7ea4d4",
-      primaryDark: "#a9c4e4",
-      accent: "#d97706",
-      background: "#0b1220",
-      foreground: "#e2e8f0",
-      muted: "#94a3b8",
+      primary: "#F3DD6D",
+      primaryDark: "#F7E794",
+      accent: "#7DA1C4",
+      background: "#16151A",
+      foreground: "#EFEDE6",
+      muted: "#9B99A3",
     },
   },
+  semantic: {
+    alert: "#E10600",
+    success: "#006D46",
+    info: "#7DA1C4",
+    highlight: "#F3DD6D",
+  },
+  rowThread: "#B8956A",
   typography: {
     sans: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
     display: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
@@ -153,6 +182,11 @@ export function brandCssVars(b: BrandConfig): string {
     `--brand-radius-md:${b.radius.md};`,
     `--brand-radius-lg:${b.radius.lg};`,
     `--brand-spacing-unit:${b.spacingUnit};`,
+    `--brand-alert:${b.semantic.alert};`,
+    `--brand-success:${b.semantic.success};`,
+    `--brand-info:${b.semantic.info};`,
+    `--brand-highlight:${b.semantic.highlight};`,
+    `--brand-row-thread:${b.rowThread};`,
   ].join("");
   return [
     ":root{",

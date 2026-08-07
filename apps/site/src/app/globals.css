@@ -23,6 +23,11 @@
   --color-background: var(--brand-background);
   --color-foreground: var(--brand-foreground);
   --color-muted: var(--brand-muted);
+  --color-alert: var(--brand-alert);
+  --color-success: var(--brand-success);
+  --color-info: var(--brand-info);
+  --color-highlight: var(--brand-highlight);
+  --color-row-thread: var(--brand-row-thread);
   --font-sans: var(--brand-font-sans);
   --font-display: var(--brand-font-display);
   --font-mono: var(--brand-font-mono);

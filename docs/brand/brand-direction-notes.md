@@ -129,3 +129,5 @@ mark); calmest and most "trusted advisor" of the three.
 **Visual preview:** `docs/brand/palette-preview.html` (open in any browser) — the three
 candidates rendered as two-tone wordmarks (camel "row") on their own light/dark grounds
 with full token chips. Also published for review at the session artifact link.
+
+## DECIDED 2026-08-07: **F — Clarity Ink** (see decision log). D and E archived as runners-up. Wordmark case still open.
