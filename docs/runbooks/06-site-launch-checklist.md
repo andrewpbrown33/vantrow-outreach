@@ -7,8 +7,8 @@ first failing item.
 
 - [ ] Phase 2 PR merged; CI green on `main`.
 - [ ] Sentinel grep clean: no unbranded placeholders in `apps` or `packages`.
-- [ ] Claims test green (`legal-lint`: zero `block` findings on site copy; disclaimer
-      + as-of dates present on `/vs-outreach`; ≥2 concession rows).
+- [ ] Site-copy lint green (`legal-lint`: zero findings on every page; no
+      competitor named anywhere — founder decision 2026-08-07).
 - [ ] Decision log carries the Gate 3 record (scope decision + this checklist's date).
 
 ## Infrastructure (runbooks 02–04 done)
@@ -20,7 +20,6 @@ first failing item.
 ## Legal / content — blocking
 
 - [ ] `/privacy` and `/terms` de-drafted by counsel (05 §4).
-- [ ] `/vs-outreach` claims table reviewed by counsel (05 §3).
 - [ ] No competitor screenshots/logos anywhere; nominative plain text only.
 
 ## End-to-end verification (the launch test)
@@ -36,8 +35,8 @@ first failing item.
 
 - [ ] LinkedIn/network announcement (your own account — agent drafts on request,
       draft → your approval, per protocol §10).
-- [ ] Calendar reminder: **re-verify every dated `/vs-outreach` claim every 90 days**
-      (comparative-advertising checklist "Current" rule).
+- [ ] (Dormant while no comparative content exists: the 90-day claim
+      re-verification reminder reactivates with it.)
 
 ## You're done when
 

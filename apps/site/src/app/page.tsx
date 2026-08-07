@@ -4,8 +4,8 @@ import { routes } from "../lib/nav";
 
 /** Home. Copy rules: pre-launch honesty (design commitments, never shipped-
  *  feature claims — "designed to / built to / we're building"), no hype
- *  vocabulary, no deliverability promises, and no competitor names outside
- *  /vs-outreach. Enforced by src/lib/claims.test.ts. */
+ *  vocabulary, no deliverability promises, and no competitor named anywhere
+ *  (founder decision 2026-08-07). Enforced by src/lib/site-copy-lint.test.ts. */
 
 const pillars = [
   {
@@ -144,34 +144,6 @@ export default function HomePage() {
               Get early access
             </Link>
           </p>
-        </div>
-      </section>
-
-      {/* Comparison teaser — neutral link text; the competitor is named only
-          on the comparison page itself (brand policy in lib/nav.ts). */}
-      <section aria-labelledby="comparison-heading">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <div className="rounded-lg border border-foreground/10 bg-white p-8 shadow-sm sm:p-10">
-            <h2
-              id="comparison-heading"
-              className="text-2xl font-bold text-brand-dark"
-            >
-              Sizing us up against the incumbent?
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-              We keep an honest comparison &mdash; factual, dated, and sourced,
-              including the places where the incumbent is genuinely ahead of us
-              today. Read it and decide for yourself.
-            </p>
-            <p className="mt-6">
-              <Link
-                href={routes.compare}
-                className="inline-block rounded-md bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-              >
-                How we compare
-              </Link>
-            </p>
-          </div>
         </div>
       </section>
 

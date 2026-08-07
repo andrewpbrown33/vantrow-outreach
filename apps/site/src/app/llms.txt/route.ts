@@ -1,5 +1,4 @@
 import { brand } from "@vantrow/brand";
-import { requiredDisclaimer } from "@vantrow/growth";
 import { SITE } from "../../lib/seo";
 
 /** /llms.txt — the emerging convention giving LLMs a curated, plain-markdown
@@ -25,7 +24,6 @@ list will be published on the pricing page at launch — no quote wall.
 
 - [Home](${SITE}/): What ${brand.name} is and who it serves.
 - [Product](${SITE}/product): What we're building — sequences, the daily queue and cracks view, templates, deliverability foundations, three reports, imports.
-- [${brand.name} vs. Outreach](${SITE}/vs-outreach): Dated, sourced comparison, including where Outreach leads today. ${requiredDisclaimer("Outreach", brand.name)}
 - [Pricing](${SITE}/pricing): The transparent-pricing commitment and founding-customer terms (no numbers until launch — deliberately).
 - [About](${SITE}/about): The company and its parent, ${brand.parentName}.
 - [Early access](${SITE}/early-access): Join the founding-team list or request a demo.

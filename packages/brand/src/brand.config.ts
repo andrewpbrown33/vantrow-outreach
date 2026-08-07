@@ -76,7 +76,10 @@ export interface BrandConfig {
 
 export const brand: BrandConfig = {
   name: "Nudgerow",
-  legalName: "Nudgerow, Inc.",
+  // Entity formation is deferred (founder decision 2026-08-07) — no "Inc."
+  // exists yet, so the legal name is the plain brand name until an entity is
+  // formed; the copyright line and legal pages render this truthfully.
+  legalName: "Nudgerow",
   tagline: "Sales outreach that runs itself",
   description:
     "Nudgerow is the AI-native sales-engagement platform: sequences, tasks, and outreach your whole team can actually use — with transparent pricing.",

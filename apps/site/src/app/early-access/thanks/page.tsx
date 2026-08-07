@@ -35,10 +35,10 @@ export default function EarlyAccessThanksPage() {
           What we&rsquo;re building
         </Link>
         <Link
-          href={routes.compare}
+          href={routes.pricing}
           className="rounded-md border border-brand px-6 py-3 text-base font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
         >
-          How we compare
+          Our pricing commitment
         </Link>
       </div>
     </section>
