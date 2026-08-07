@@ -5,7 +5,8 @@
   "main": "./src/brand.config.ts",
   "types": "./src/brand.config.ts",
   "exports": {
-    ".": "./src/brand.config.ts"
+    ".": "./src/brand.config.ts",
+    "./state-palette": "./src/state-palette.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p ."

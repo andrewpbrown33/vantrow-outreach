@@ -8,6 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Design law + state-palette pin run before install — no deps needed, fast fail.
+      - run: bash scripts/check-design-law.sh
+      - run: node scripts/check-state-palette.mjs
       - uses: pnpm/action-setup@v4 # version comes from packageManager in package.json
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
