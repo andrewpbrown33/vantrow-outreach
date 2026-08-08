@@ -54,6 +54,12 @@ check "radius over cap" -E '\brounded-(3xl|\[)'
 # 5 · No shadows: raw box-shadow or Tailwind shadow utilities (shadow-none ok).
 check "shadow" -E 'box-shadow:|\bshadow-(2xs|xs|sm|md|lg|xl|2xl|inner)\b'
 
+# 6 · No eyebrow texture: uppercase+tracked micro-labels, anything classed
+#     "eyebrow", and raw uppercase transforms are banned on product surfaces —
+#     founder ruling, decision log 2026-08-08 ("looks low quality"). This
+#     revokes the Parcelrow port of that texture for this product.
+check "eyebrow texture" -E 'uppercase[^"]*tracking-|tracking-[^"]*uppercase|\beyebrow\b|text-transform:\s*uppercase'
+
 if [ "$fail" -ne 0 ]; then
   say ""
   say "Design law failed. The law lives in this script; docs/plan/phase-4-plan.md §2·A2"

@@ -17,7 +17,7 @@ export default function AboutPage() {
       <h1 className="text-4xl font-bold tracking-tight text-brand-dark">
         About {brand.name}
       </h1>
-      <p className="mt-2 text-sm font-semibold uppercase tracking-wider text-brand">
+      <p className="mt-2 text-sm font-medium text-muted">
         {brand.name} is {brand.endorsement}
       </p>
 

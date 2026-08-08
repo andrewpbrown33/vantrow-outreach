@@ -5,8 +5,8 @@
   /* Deck v2.1 sits on the two VALIDATED grounds so the pinned state palette holds
      without a re-stamp: the room is the light product paper (#FDFBF2), the feed
      pane is the night ground (#16151A). Dark is a PLACE (the pane), not a theme.
-     Round-4 strengthening: deeper ink, firmer hairlines, camel eyebrows — the
-     grounds and the pinned state colors are untouched. */
+     Round-4 strengthening: deeper ink, firmer hairlines — the grounds and the
+     pinned state colors are untouched. Round-5: eyebrow texture banned. */
   :root{
     --bg:#FDFBF2; --panel:#FFFFFF; --ink:#1A1920; --sub:#403F49; --mut:#7E7D81;
     --line:#DCD6C2; --accent:#F3DD6D; --camel:#B8956A;
@@ -69,8 +69,7 @@
     letter-spacing:.18em;color:var(--mut);padding:8px 16px 0}
   .body{padding:14px 16px 20px}
   h1.scr{font-size:21px;font-weight:800;letter-spacing:-.01em;margin:2px 0 2px}
-  .eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--camel);font-weight:700}
+  .seclabel{font-size:13px;font-weight:800;color:var(--ink);margin:0 0 4px}
   .prov{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--mut)}
 
   /* link grammar — two destinations, two underline colors (chrome, not state):
@@ -249,10 +248,13 @@
 to <b>the Lantern (9B)</b> per R-4D-10 and the plate's verdict; the light 9A cut stays one word away.
 <b>Round-4 redlines applied same day (v2.1):</b> the home combines feed (primary) + a sequences overview
 side panel · the stacked bars are gone — <b>dot strips</b>, one dot = one person in play · engagement
-scores removed from every surface · palette <i>application</i> strengthened (deeper ink, firmer lines,
-camel eyebrows — tokens and validated grounds untouched; say the word and a bolder palette round opens) ·
+scores removed from every surface · palette <i>application</i> strengthened (deeper ink, firmer lines —
+tokens and validated grounds untouched; say the word and a bolder palette round opens) ·
 screens carry no self-description — a dedicated <b>onboarding phase</b> (workstream A6) owns first use.
-v1 archived (<span class="mono">checkpoint-4d-mockups.html</span>); law amendments in the decision log.</p>
+<b>Round-5 verdict (post-merge):</b> accepted as the <b>serviceable framework</b> — setup proceeds
+(engine next), then a <b>phased per-page UI elevation</b> once everything is set up; <b>eyebrow text
+removed on every page</b> (founder ruling, now design-law rule 6). v1 archived
+(<span class="mono">checkpoint-4d-mockups.html</span>); law amendments in the decision log.</p>
 <p class="deckmeta">Phase 4 · workstream A1 deck v2.1 (<span class="mono">docs/plan/phase-4-plan.md</span> §2)
 · 2026-08-08 · single-file, zero dependencies — every name and number invented. Direction source:
 <span class="mono">direction-plates.html</span> (Plate 9 × Plate 5) · redline rounds:
@@ -473,7 +475,7 @@ v1 archived (<span class="mono">checkpoint-4d-mockups.html</span>); law amendmen
       <div class="seqhead">
         <h1 class="scr">Vantrow intro — industrials</h1>
         <span class="chip c-active">Active</span>
-        <span class="prov">SENDS AS ANDREW@GETVANTROW.COM</span>
+        <span class="prov">sends as andrew@getvantrow.com</span>
       </div>
 
       <div class="drawer" id="drawer">
@@ -488,7 +490,7 @@ v1 archived (<span class="mono">checkpoint-4d-mockups.html</span>); law amendmen
         </div>
       </div>
 
-      <p class="eyebrow">Steps · per-step control</p>
+      <p class="seclabel" style="margin-top:14px">Steps</p>
       <div class="steps">
         <div class="step"><span class="when">DAY 0<span>on enroll</span></span>
           <span class="subj"><b>"{{firstName}}, a quiet question on {{company}}"</b>
@@ -508,7 +510,7 @@ v1 archived (<span class="mono">checkpoint-4d-mockups.html</span>); law amendmen
           <span class="modewrap"><button class="mode auto">AUTO-SEND</button></span></div>
       </div>
 
-      <p class="eyebrow" style="margin-top:16px">Enrollments · 41</p>
+      <p class="seclabel" style="margin-top:16px">Enrollments · 41</p>
       <div>
         <div class="enr"><span class="mg m-adv">TN</span><span>
           <span class="lk-p">T. Nakamura</span> <span class="esub">Foundry &amp; Co · next: Step 3 · Thu 9:10 <span class="prov">(their tz)</span></span></span>
@@ -544,15 +546,15 @@ v1 archived (<span class="mono">checkpoint-4d-mockups.html</span>); law amendmen
 </section>
 
 <footer class="deck">
-  <h2>What deck v2.1 asks (checkpoint re-review)</h2>
+  <h2>Where the re-review landed (round 5)</h2>
   <ul>
-    <li><b>Approve or redline the round-4 cut</b> — this deck is the contract for workstream C; app UI
-      is built only from an approved deck. On approval, the onboarding flow (A6) gets designed as its
-      own small deck.</li>
+    <li><b>Accepted as the serviceable framework</b> — setup proceeds: engine (B1–B2) next, then app UI
+      (workstream C) on this deck's structure, then a <b>phased per-page UI elevation</b> once everything
+      is set up. The onboarding flow (A6) gets designed as its own small deck along the way.</li>
     <li><b>The palette</b> — this cut strengthens the <i>application</i> (deeper ink, firmer hairlines,
-      heavier weights, camel eyebrows) with tokens and validated grounds untouched. If Clarity Ink still
-      feels weak, say the word: a bolder palette round opens (one decision row), and it would re-step the
-      two color-blind-close state pairs the validator flagged while it's at it.</li>
+      heavier weights) with tokens and validated grounds untouched. A bolder palette round (one decision
+      row) rides the phased per-page elevation if Clarity Ink still feels weak — and would re-step the
+      two color-blind-close state pairs the validator flagged.</li>
     <li><b>The "failed" vocabulary question</b> — does step-level failure need its own state, or do
       Bounced + retry policy cover it? (One decision row either way.)</li>
   </ul>
