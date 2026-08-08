@@ -72,7 +72,10 @@ Tailwind — the laws port; the no-framework architecture does not).
   Working hovers/toggles, `ILLUSTRATIVE DATA` stamps, flanking rationale notes citing
   sources (doc-10 teardown patterns, Parcelrow practices, R-requirements). Andrew
   reviews in a browser before any app UI is built. This is a mid-phase checkpoint,
-  not a numbered gate.
+  not a numbered gate. **Deck v2 (2026-08-08):** rebuilt after the 4-D redlines in
+  the picked direction — **Lantern × Pulse** (`deck-v2.html`; plates, pick, and
+  resolution in `docs/design/checkpoint-4d-feedback.md`) — Activity feed home,
+  sequences overview, sequence detail; its approval is what unlocks workstream C.
 - **A2 · Design law as CI.** `tools/check-design-law.sh` on every PR, tuned to
   Clarity Ink: banned typefaces (Inter, Roboto, Open Sans, Poppins, Montserrat,
   DM Sans, Space Grotesk, Playfair), no gradients, no emoji on product surfaces,
@@ -166,7 +169,10 @@ the producer emits from MVP regardless so the contract is proven.
 
 ## §7 — Open items pending Andrew
 
-1. **Logo pick** (A–D, or redirect) + **wordmark case confirm** — `docs/brand/logo-mockups.html`.
-2. Checkpoint 4-D deck review when it lands.
+1. ~~Logo pick + wordmark case confirm~~ **done 2026-08-07** — "the Signal" (G
+   flipped), case split applied (decision log).
+2. ~~Checkpoint 4-D deck review~~ → redlined 2026-08-07; direction picked
+   2026-08-08 ("9" → Lantern × Pulse). **Live item: deck v2 re-review**
+   (`deck-v2.html`) + the "failed" vocabulary question in its overview rail.
 3. Google Cloud project access for the Gmail OAuth app (dogfood test mode) when B3
    starts — agent will prepare exact console steps as a runbook.

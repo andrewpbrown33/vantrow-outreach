@@ -87,12 +87,36 @@ reference, never reproduced.
   monograms; date bands stay (R-4D-1); the borrow is the generic social-feed
   grammar only — no Threads/X iconography or trade dress.
 
+## The pick (2026-08-08)
+
+- **R-4D-13 · Andrew's answer to the plates: "9" — the Pulse.** Read per the
+  plate's own terms: the Pulse is a **row grammar**, not a ground, so the ground
+  resolves to **the Lantern** — R-4D-10 stands ("the feed itself should be darker
+  background") and Plate 9's verdict names "Lantern × Pulse" the natural hybrid.
+  **Built as 9B.** If the light 9A cut was the intent, one word re-cuts it.
+- **Deck v2 built in the language:** `docs/design/mockups/deck-v2.html` —
+  Activity home (Pulse rows inside the Lantern pane; the centered picker IS the
+  reports per R-4D-2), Sequences overview (R-4D-5), sequence detail (schedule
+  drawer per R-4D-4, per-step numbers per F-003's aspect, enrollments as
+  person-first rows — no tables anywhere). v1 stays archived under a superseded
+  banner; the deck artifact republished at the same URL.
+- **Design law amended** (decision-log row, same date): radius cap rises to the
+  Lantern pane's 16px (`rounded-2xl` legal; 3xl+ and arbitrary radii still
+  banned) · U+2713 ✓ carved out of the emoji ban (the finished-badge glyph —
+  typographic, not emoji). **Grounds and state palette unchanged** — the pane is
+  the validated night ground `#16151A`, so the pinned set needs no re-stamp; v1's
+  open "night question" is answered: dark is a *place* (the feed pane), not a
+  preference.
+- **Open on the deck:** the "failed" vocabulary question — does step-level
+  failure need its own state, or do Bounced + retry policy cover it? (Overview
+  rail; one decision row either way.)
+
 ## Sequence from here
 
-1. Andrew picks a direction plate (or hybrid) — **two axes now**: ground
-   (plates 5–8) and row grammar (default event rows, or Plate 9's Pulse).
-2. Deck v2 rebuilt in that language (feed home, sequences overview → detail,
-   collapsible schedule filter, linked entities) → checkpoint re-review.
-3. Design law amended by decision-log row if the direction demands it; state
-   palette re-validated on the new grounds.
-4. Only then: workstream C (app UI build).
+1. ~~Andrew picks a direction plate (or hybrid)~~ **Done 2026-08-08: "9" →
+   Lantern × Pulse (R-4D-13 above).**
+2. Deck v2 rebuilt in that language — **built; the checkpoint re-review is the
+   live step.**
+3. Design law amended by decision-log row — **done (radius + ✓ carve-out)**;
+   palette re-validation **not needed** (grounds unchanged).
+4. Only then: workstream C (app UI build) — unlocks on deck v2 approval.
