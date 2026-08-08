@@ -158,7 +158,13 @@ the producer emits from MVP regardless so the contract is proven.
 
 1. A1 deck + A2/A3 law-and-palette CI  → **Checkpoint 4-D** (Andrew: deck + logo pick
    + case confirm — one review sitting)
-2. B1–B2 (schema, scheduler; invariant tests I1/I8/I9)
+2. B1–B2 (schema, scheduler; invariant tests I1/I8/I9) — **substrate landed
+   2026-08-08**: migration `0002_engine_substrate.sql` + `packages/engine`
+   (planner I4 · sweep with one-transaction execute+advance · dispatcher seam
+   with checkSent crash-recovery). Invariants I1/I2/I3/I5/I8 + RLS isolation
+   green against real Postgres (locally via the machine cluster; in CI via a
+   postgres:16 service). Still riding: the Vercel cron endpoint + staleness
+   alarm (needs the platform app scaffold), I6/I7 reply/bounce/OOO logic (B4).
 3. B3–B5 (provider, reply loop, schedules; I2–I7 complete) + D (Connect producer)
 4. A4–A7 + C (brand assets, site elevation, app surfaces on the approved deck)
 5. Adversarial functional review on the edge-case mock dataset (the standing list:
