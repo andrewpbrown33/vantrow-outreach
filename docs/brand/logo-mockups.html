@@ -216,6 +216,19 @@
       <path d="M29 24 L71 50 L29 76" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
       <circle cx="34" cy="50" r="11" fill="#B8956A"/>
     </symbol>
+    <!-- DECIDED — the Signal (G flipped: ball left, arcs forward) -->
+    <symbol id="sig-hero" viewBox="0 0 100 100">
+      <path d="M48.1 33.1 A22 22 0 0 1 48.1 66.9" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+      <path d="M60.2 31.6 A32 32 0 0 1 60.2 68.4" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+      <path d="M72.1 32.2 A42 42 0 0 1 72.1 67.8" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="34" cy="50" r="13" fill="#B8956A"/>
+    </symbol>
+    <symbol id="sig-small" viewBox="0 0 100 100">
+      <path d="M46.5 33.9 A21 21 0 0 1 46.5 66.1" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+      <path d="M58.4 32.2 A31 31 0 0 1 58.4 67.8" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+      <path d="M70.2 32.7 A41 41 0 0 1 70.2 67.3" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="33" cy="50" r="14" fill="#B8956A"/>
+    </symbol>
     <!-- Sharpening A: variants -->
     <symbol id="a-mid" viewBox="0 0 100 100">
       <path d="M20 30 H40 V50 H56 V70 H78" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="square" stroke-linejoin="round"/>
@@ -250,6 +263,40 @@
   <b style="color:var(--fg)">Round 2 (E–I) added at your request, with A the front-runner to beat —
   plus a "sharpening A" strip.</b></p>
 </header>
+
+<section style="padding-top:22px">
+  <div style="border:2px solid var(--camel);border-radius:14px;background:var(--card);padding:24px 26px">
+    <div class="cand-head"><span class="cand-letter" style="background:var(--camel);color:#fff">DECIDED</span>
+      <h3>The Signal — G, direction flipped</h3>
+      <span class="muted" style="font-size:14px">chosen by Andrew · 2026-08-07 · cut to packages/brand/assets/</span></div>
+    <p class="cand-story">Your call: <b>"dot is left and arcs are being 'signaled' forward"</b> — the family
+    ball receives one nudge and broadcasts until something answers. Palette applied per the decided system:
+    arcs in brand ink on light; on dark the arcs go <b>clarity yellow #F3DD6D</b> — palette F's own dark
+    primary (12.4:1) — so every ground keeps exactly two colors: that ground's primary + the constant camel ball.</p>
+    <div class="spec-row">
+      <div class="spec spec-light"><svg class="hero-svg" style="color:#4A4952"><use href="#sig-hero"/></svg><div class="cap">Hero · light</div></div>
+      <div class="spec spec-dark"><svg class="hero-svg" style="color:#F3DD6D"><use href="#sig-small"/></svg><div class="cap">Dark cut · clarity arcs</div></div>
+      <div class="spec spec-fav">
+        <svg class="hero-svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#FDFBF2" stroke="#E6E1D2"/><g style="color:#4A4952"><use href="#sig-small"/></g></svg>
+        <div class="cap">Favicon tile</div>
+      </div>
+      <div class="spec spec-sizes">
+        <div class="sizes-in" style="color:#4A4952">
+          <div class="s"><svg width="48" height="48"><use href="#sig-hero"/></svg><span>48</span></div>
+          <div class="s"><svg width="32" height="32"><use href="#sig-small"/></svg><span>32</span></div>
+          <div class="s"><svg width="24" height="24"><use href="#sig-small"/></svg><span>24</span></div>
+          <div class="s"><svg width="16" height="16"><use href="#sig-small"/></svg><span>16</span></div>
+        </div>
+        <div class="cap" style="color:#7E7D81">Size ladder</div>
+      </div>
+    </div>
+    <div class="lockup"><svg style="color:#4A4952"><use href="#sig-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <div class="lockup on-dark"><svg style="color:#F3DD6D"><use href="#sig-small"/></svg><span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span><span class="by">a Vantrow company</span></div>
+    <p class="weak" style="border-top:none;padding-top:6px"><b>Applied:</b> assets cut with construction-law
+    comments (`packages/brand/assets/` + README with the WCAG arithmetic) · site header lockup + favicon swapped ·
+    lowercase-lockup / capitalized-prose case split in effect. Everything below is the archived exploration.</p>
+  </div>
+</section>
 
 <section>
   <h2>The family, as built</h2>

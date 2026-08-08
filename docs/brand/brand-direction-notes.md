@@ -169,7 +169,12 @@ Momentum** (the ball pushed by three arcs — strongest challenger), **H The Bur
 **"sharpening A" strip**: A2 mid-carry and **A3 two-step** (best 16px survivor in the
 set). Standing: **A · G · F · E · B · C · H · I · D**; recommendation A as-is or A3.
 
-**Pending Andrew:** final pick (a letter, "A as-is", or "A3"), confirm the case split.
-Then the winner is cut to `packages/brand/assets/` as mark/mark-small/mark-dark/icon
-SVGs with construction-law comments, the site header + favicon swap to it, and the
-decision log gets the row.
+## DECIDED 2026-08-07: **G flipped → "the Signal"** (see decision log)
+
+Andrew: *"Let's go with G, but change the direction so dot is left and arcs are being
+'signaled' forward. You should also make this in the brand color palette we previously
+decided on."* Applied: ball left (camel, never moves), arcs radiating right — ink
+`#4A4952` on light, **clarity yellow `#F3DD6D` on dark** (the palette-F dark primary;
+arithmetic in `packages/brand/assets/README.md`). Assets cut, header + favicon
+swapped, lowercase-lockup case split applied per the unobjected recommendation.
+A and the other candidates archived on the exploration page with a DECIDED banner.

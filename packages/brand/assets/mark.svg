@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Nudgerow mark">
+  <!-- Nudgerow mark: the Signal (hero cut, >=28px).
+       The family ball, nudged once, broadcasting forward — three arcs
+       radiating right until something answers. Chosen by Andrew 2026-08-07
+       (round-2 candidate G, direction flipped: ball LEFT, arcs signal forward).
+       Construction law: 100-unit grid, 80-unit live area; ball cx34 cy50 r13
+       NEVER moves and is ALWAYS family camel #B8956A (fills only, never
+       strokes); arcs are brand ink #4A4952, stroke 7, round caps, radii
+       22/32/42 centered on the ball, spans ±50°/±35°/±25°.
+       Keep in sync with mark-small.svg / mark-dark.svg / icon.svg. -->
+  <path d="M48.1 33.1 A22 22 0 0 1 48.1 66.9" fill="none" stroke="#4A4952" stroke-width="7" stroke-linecap="round"/>
+  <path d="M60.2 31.6 A32 32 0 0 1 60.2 68.4" fill="none" stroke="#4A4952" stroke-width="7" stroke-linecap="round"/>
+  <path d="M72.1 32.2 A42 42 0 0 1 72.1 67.8" fill="none" stroke="#4A4952" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="34" cy="50" r="13" fill="#B8956A"/>
+</svg>
