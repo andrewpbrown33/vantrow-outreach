@@ -87,12 +87,71 @@ reference, never reproduced.
   monograms; date bands stay (R-4D-1); the borrow is the generic social-feed
   grammar only — no Threads/X iconography or trade dress.
 
+## The pick (2026-08-08)
+
+- **R-4D-13 · Andrew's answer to the plates: "9" — the Pulse.** Read per the
+  plate's own terms: the Pulse is a **row grammar**, not a ground, so the ground
+  resolves to **the Lantern** — R-4D-10 stands ("the feed itself should be darker
+  background") and Plate 9's verdict names "Lantern × Pulse" the natural hybrid.
+  **Built as 9B.** If the light 9A cut was the intent, one word re-cuts it.
+- **Deck v2 built in the language:** `docs/design/mockups/deck-v2.html` —
+  Activity home (Pulse rows inside the Lantern pane; the centered picker IS the
+  reports per R-4D-2), Sequences overview (R-4D-5), sequence detail (schedule
+  drawer per R-4D-4, per-step numbers per F-003's aspect, enrollments as
+  person-first rows — no tables anywhere). v1 stays archived under a superseded
+  banner; the deck artifact republished at the same URL.
+- **Design law amended** (decision-log row, same date): radius cap rises to the
+  Lantern pane's 16px (`rounded-2xl` legal; 3xl+ and arbitrary radii still
+  banned) · U+2713 ✓ carved out of the emoji ban (the finished-badge glyph —
+  typographic, not emoji). **Grounds and state palette unchanged** — the pane is
+  the validated night ground `#16151A`, so the pinned set needs no re-stamp; v1's
+  open "night question" is answered: dark is a *place* (the feed pane), not a
+  preference.
+- **Open on the deck:** the "failed" vocabulary question — does step-level
+  failure need its own state, or do Bounced + retry policy cover it? (Overview
+  rail; one decision row either way.)
+
+## Round 4 — deck v2 redlines (2026-08-08, same day)
+
+Andrew's reply to deck v2, applied as **v2.1** on the same PR:
+
+- **R-4D-14 · The home is BOTH.** A home page combining the activity feed with a
+  sequences overview as a right window panel — the feed stays the primary view.
+  (The Sequences nav still opens the full overview per R-4D-5; the panel is its
+  always-visible summary.)
+- **R-4D-15 · The stacked bar fails; another visualization.** The per-sequence
+  proportion bar "doesn't make sense to what we're tracking." Replaced with **dot
+  strips**: one dot = one person currently in the sequence, colored by pinned
+  state, grouped in fixed state order; counts written beside every strip (states
+  never color-alone); finished is history — a number, never dots. Validator
+  evidence recorded: two pinned pairs sit close (paused↔bounced for CVD;
+  replied↔active at the normal-vision floor) — covered now by grouping + words;
+  any future palette round should re-step them deliberately.
+- **R-4D-16 · No outreach scores.** "I don't need to know what you're tracking
+  here" — per-step sent/opened/replied numbers and all engagement-score texture
+  are off the surfaces. The ledger (I10) still records everything for the three
+  reports and the data export.
+- **R-4D-17 · "Brand's palette feels weak."** Addressed first as application:
+  deeper ink `#1A1920`, firmer hairlines `#DCD6C2`, heavier weights, camel
+  eyebrows — tokens, validated grounds, and the pinned state set untouched. If
+  Clarity Ink still reads weak in v2.1, the palette gate reopens (one decision
+  row, new candidates round — which would also re-step the CVD-close pairs).
+- **R-4D-18 · No self-describing screens; onboarding is a phase.** Product-
+  descriptive copy removed from every surface ("it's gonna be intuitive
+  interface"); provenance survives only at the value it qualifies ("classified
+  from headers"). First-time use becomes a dedicated onboarding flow — designed
+  under workstream A6 once this deck approves. The first-run panel left the
+  overview page accordingly.
+- One clause — *"update rounds to match the points"* — read as: keep this doc's
+  round records in sync with the feedback as delivered (this section). Flagged
+  in case a different meaning was intended.
+
 ## Sequence from here
 
-1. Andrew picks a direction plate (or hybrid) — **two axes now**: ground
-   (plates 5–8) and row grammar (default event rows, or Plate 9's Pulse).
-2. Deck v2 rebuilt in that language (feed home, sequences overview → detail,
-   collapsible schedule filter, linked entities) → checkpoint re-review.
-3. Design law amended by decision-log row if the direction demands it; state
-   palette re-validated on the new grounds.
-4. Only then: workstream C (app UI build).
+1. ~~Andrew picks a direction plate (or hybrid)~~ **Done 2026-08-08: "9" →
+   Lantern × Pulse (R-4D-13 above).**
+2. Deck v2 rebuilt in that language — **v2.1 cut from round 4 (above); the
+   re-review is the live step.**
+3. Design law amended by decision-log row — **done (radius + ✓ carve-out)**;
+   palette re-validation **not needed** (grounds unchanged).
+4. Only then: workstream C (app UI build) — unlocks on deck v2 approval.

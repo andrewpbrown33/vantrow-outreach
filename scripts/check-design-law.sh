@@ -42,11 +42,14 @@ check "banned typeface" -E '\b(Inter|Roboto|Poppins|Montserrat|Playfair)\b|Open 
 # 2 · No gradients. Flat grounds only.
 check "gradient" -E 'linear-gradient|radial-gradient|conic-gradient|bg-gradient-'
 
-# 3 · No emoji on product surfaces.
-check "emoji" -P '[\x{1F300}-\x{1FAFF}\x{2600}-\x{27BF}\x{FE0F}]'
+# 3 · No emoji on product surfaces. U+2713 ✓ is carved out — the Pulse
+#     finished-badge glyph, a typographic check mark, not emoji (decision log
+#     2026-08-08). Emoji proper (incl. U+2705/U+2714+FE0F) stay banned.
+check "emoji" -P '[\x{1F300}-\x{1FAFF}\x{2600}-\x{2712}\x{2714}-\x{27BF}\x{FE0F}]'
 
-# 4 · Radius cap: nothing above rounded-xl, no arbitrary radii.
-check "radius over cap" -E '\brounded-(2xl|3xl|\[)'
+# 4 · Radius cap: nothing above rounded-2xl — raised from xl for the Lantern
+#     feed pane's 16px (decision log 2026-08-08). No arbitrary radii.
+check "radius over cap" -E '\brounded-(3xl|\[)'
 
 # 5 · No shadows: raw box-shadow or Tailwind shadow utilities (shadow-none ok).
 check "shadow" -E 'box-shadow:|\bshadow-(2xs|xs|sm|md|lg|xl|2xl|inner)\b'
