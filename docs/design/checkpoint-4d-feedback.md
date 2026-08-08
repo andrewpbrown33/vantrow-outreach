@@ -66,9 +66,31 @@ reference, never reproduced.
   band), **The Crown** (inversion control: dark dashboard crown, light feed —
   tests whether "dark" wants to live in the chrome instead of the feed).
 
+## Round 3 — the social-grammar question (2026-08-08)
+
+- **R-4D-12 · "What if we made the feed look like X (Twitter), or Threads?"**
+  Asked with four Threads-web-home screenshots (third-party reference — curated
+  captures of Meta's Threads UI, not incumbent material, so no Tier-F concern;
+  kept out of the repo, described here). What the reference shows: one centered
+  column; person-first rows (avatar left, bold name + relative time, content,
+  action row with counts); faint hairline dividers, no cards; a centered
+  "For you ▾" view picker; a small corner badge on each avatar.
+- **Read as a row-grammar question, orthogonal to the round-2 ground question.**
+  Plates 5–8 decide *where dark lives*; the social grammar decides *the shape of
+  each row*. They compose — Threads-shaped rows can sit inside the Lantern pane.
+- **Answered as Plate 9 · The Pulse** on `direction-plates.html`: **9A** the
+  literal borrow (Threads' white ground — flagged as contradicting R-4D-10 "the
+  feed itself darker"), **9B** the synthesis (identical rows inside the Lantern
+  pane). Translation rules recorded on the plate: monogram-as-chip with corner
+  state badge; the reply's words become the post body; no engagement-count
+  theater (per-row actions instead); thin events aggregate under stacked
+  monograms; date bands stay (R-4D-1); the borrow is the generic social-feed
+  grammar only — no Threads/X iconography or trade dress.
+
 ## Sequence from here
 
-1. Andrew picks a direction plate (or hybrid).
+1. Andrew picks a direction plate (or hybrid) — **two axes now**: ground
+   (plates 5–8) and row grammar (default event rows, or Plate 9's Pulse).
 2. Deck v2 rebuilt in that language (feed home, sequences overview → detail,
    collapsible schedule filter, linked entities) → checkpoint re-review.
 3. Design law amended by decision-log row if the direction demands it; state
