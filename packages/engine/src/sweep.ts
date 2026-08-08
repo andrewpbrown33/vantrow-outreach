@@ -39,6 +39,7 @@ export async function sweepOnce(
   opts: SweepOptions = {},
 ): Promise<SweepStats> {
   const stats: SweepStats = { claimed: 0, sent: 0, deferred: 0, skipped: 0, failed: 0 };
+  await resumeDueOoo(pool, opts);
   const claimed = await pool.query<ClaimedRow>(
     "select id, claim_token, attempt_epoch from public.claim_due_enrollments($1, make_interval(mins => $2))",
     [opts.batchSize ?? 50, opts.claimTtlMinutes ?? 5],
@@ -52,6 +53,58 @@ export async function sweepOnce(
 }
 
 export type Outcome = "sent" | "deferred" | "skipped" | "failed";
+
+/** I6's second half: OOO pauses auto-resume when their return date passes —
+ *  through the planner, so the re-armed touch lands inside the send window,
+ *  never at whatever hour the sweep happened to run. Sequences that disable
+ *  auto-resume keep their pauses until a human acts. */
+async function resumeDueOoo(pool: Pool, opts: SweepOptions): Promise<void> {
+  const due = await pool.query<{
+    id: string; workspace_id: string; sequence_id: string; mailbox_id: string;
+    prospect_tz: string | null; timezone_source: string;
+    fallback_timezone: string; window_days: number[];
+    window_start_minute: number; window_end_minute: number;
+    skip_us_holidays: boolean;
+  }>(
+    `select e.id, e.workspace_id, e.sequence_id, e.mailbox_id,
+            p.timezone as prospect_tz, s.timezone_source, s.fallback_timezone,
+            s.window_days, s.window_start_minute, s.window_end_minute,
+            s.skip_us_holidays
+       from public.enrollments e
+       join public.prospects p on p.id = e.prospect_id
+       join public.sequences s on s.id = e.sequence_id
+      where e.state = 'paused' and e.pause_reason = 'out of office'
+        and e.resume_at is not null and e.resume_at <= now()
+        and s.ooo_auto_resume`,
+  );
+  for (const r of due.rows) {
+    const schedule: SendSchedule = {
+      windowDays: r.window_days,
+      windowStartMinute: r.window_start_minute,
+      windowEndMinute: r.window_end_minute,
+      timeZone: r.timezone_source === "prospect"
+        ? (r.prospect_tz ?? r.fallback_timezone)
+        : r.fallback_timezone,
+      skipUsHolidays: r.skip_us_holidays,
+    };
+    const nta = snapToWindow(new Date(), schedule,
+      (opts.jitterFraction ?? Math.random)());
+    await pool.query(
+      `update public.enrollments
+          set state = 'active', pause_reason = null, resume_at = null,
+              next_touch_at = $2, updated_at = now()
+        where id = $1 and state = 'paused'`,
+      [r.id, nta],
+    );
+    await pool.query(
+      `insert into public.events
+         (workspace_id, type, enrollment_id, sequence_id, mailbox_id, payload)
+       values ($1, 'enrollment.resumed', $2, $3, $4, $5)`,
+      [r.workspace_id, r.id, r.sequence_id, r.mailbox_id,
+       { reason: "ooo_auto_resume", next_touch_at: nta.toISOString() }],
+    );
+  }
+}
 
 interface WorkRow {
   workspace_id: string;
