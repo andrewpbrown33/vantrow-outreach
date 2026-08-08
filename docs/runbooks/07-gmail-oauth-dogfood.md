@@ -31,7 +31,10 @@ verification at all**.
    account makes the console auto-create your domain's Organization
    ("Created getvantrow.com organization…") and then REQUIRE a parent — click
    **Browse** and select the **getvantrow.com organization**. No folder needed.
-   Create, then select the project.
+   Picker quirks: its search box filters FOLDERS only — **leave it empty** and
+   the org shows as the root row; and a just-created org can lag a minute or
+   two ("No resources to display") — reload the New Project page and Browse
+   again. Create, then select the project.
 3. The org is only the project's resource-hierarchy home; it does not limit
    which mailboxes can connect. But it changes §3: the console will now offer
    **User type: Internal** — see the warning there.
