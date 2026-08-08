@@ -27,7 +27,14 @@ verification at all**.
 ## §1 · Project
 
 1. https://console.cloud.google.com → project picker → **New project**.
-2. Name: `nudgerow-dogfood` (any org/no org is fine). Create, then select it.
+2. Name: `nudgerow-dogfood`. **Parent resource:** signing in with a Workspace
+   account makes the console auto-create your domain's Organization
+   ("Created getvantrow.com organization…") and then REQUIRE a parent — click
+   **Browse** and select the **getvantrow.com organization**. No folder needed.
+   Create, then select the project.
+3. The org is only the project's resource-hierarchy home; it does not limit
+   which mailboxes can connect. But it changes §3: the console will now offer
+   **User type: Internal** — see the warning there.
 
 ## §2 · Enable the Gmail API
 
@@ -37,7 +44,11 @@ verification at all**.
 
 1. **APIs & Services → OAuth consent screen** (Google Auth Platform → Branding
    on newer consoles).
-2. User type: **External** → Create.
+2. User type: **External** → Create. **Do NOT pick Internal**, even though it
+   advertises "no verification": Internal restricts sign-in to getvantrow.com
+   Workspace users only, which would lock out `andrew@eaverow.com` and
+   `andrew@parcelrow.com` (different Workspace domains). External + Testing is
+   the required combination.
 3. App name `Nudgerow` · support email + developer email: your address.
    No logo (a logo can trigger early review), no scopes on this page yet.
 4. **Audience / Publishing status: leave in `Testing`. Do NOT publish.**
