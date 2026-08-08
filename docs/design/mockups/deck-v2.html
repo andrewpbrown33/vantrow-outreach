@@ -2,13 +2,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nudgerow — Design Deck v2 · Lantern × Pulse</title>
 <style>
-  /* Deck v2 sits on the two VALIDATED grounds so the pinned state palette holds
+  /* Deck v2.1 sits on the two VALIDATED grounds so the pinned state palette holds
      without a re-stamp: the room is the light product paper (#FDFBF2), the feed
-     pane is the night ground (#16151A). Dark stopped being an open question at
-     the direction pick — it is a PLACE (the pane), not a page theme. */
+     pane is the night ground (#16151A). Dark is a PLACE (the pane), not a theme.
+     Round-4 strengthening: deeper ink, firmer hairlines, camel eyebrows — the
+     grounds and the pinned state colors are untouched. */
   :root{
-    --bg:#FDFBF2; --panel:#FFFFFF; --ink:#201F24; --sub:#4A4952; --mut:#7E7D81;
-    --line:#E6E1D2; --accent:#F3DD6D; --camel:#B8956A;
+    --bg:#FDFBF2; --panel:#FFFFFF; --ink:#1A1920; --sub:#403F49; --mut:#7E7D81;
+    --line:#DCD6C2; --accent:#F3DD6D; --camel:#B8956A;
 
     /* State palette — pinned set 2026-08-07 (check-state-palette.mjs).
        Light values read on --bg, dark values on --night. Washes are chip
@@ -62,15 +63,14 @@
   .appbar .awm{font-weight:800;font-size:15px;letter-spacing:-.02em}
   .appbar nav{display:flex;gap:8px;margin-left:18px;font-size:13px;color:var(--mut);flex-wrap:wrap}
   .appbar nav span,.appbar nav b{padding:4px 12px;border-radius:99px}
-  .appbar nav b{color:var(--ink);background:var(--accent);font-weight:600}
+  .appbar nav b{color:var(--ink);background:var(--accent);font-weight:700}
   .appbar .mb{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mut)}
   .plateno{display:block;text-align:right;font-family:ui-monospace,Menlo,monospace;font-size:10px;
     letter-spacing:.18em;color:var(--mut);padding:8px 16px 0}
   .body{padding:14px 16px 20px}
-  h1.scr{font-size:21px;font-weight:700;letter-spacing:-.01em;margin:2px 0 2px}
-  .sub{font-size:13px;color:var(--mut);margin:0 0 14px}
+  h1.scr{font-size:21px;font-weight:800;letter-spacing:-.01em;margin:2px 0 2px}
   .eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;letter-spacing:.18em;
-    text-transform:uppercase;color:var(--sub);font-weight:700}
+    text-transform:uppercase;color:var(--camel);font-weight:700}
   .prov{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--mut)}
 
   /* link grammar — two destinations, two underline colors (chrome, not state):
@@ -79,12 +79,41 @@
   .lk-s{color:var(--sub);font-weight:600;text-decoration:none;border-bottom:2px solid var(--camel);cursor:pointer}
   .seqcard .top .lk-s{color:var(--ink);font-weight:700}
 
+  /* ---------- home: feed primary + overview side panel (R-4D-14) ---------- */
+  .home{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start}
+  @media (max-width:900px){.home{grid-template-columns:1fr}}
+  .srbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .srhead{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;font-weight:800}
+  .srhead .all{font-size:11.5px;font-weight:600;color:var(--sub);border-bottom:2px solid var(--camel);cursor:pointer}
+  .srseq{padding:9px 0 8px;border-top:1px solid var(--line);margin-top:8px}
+  .srseq:first-of-type{border-top:0;margin-top:2px}
+  .srseq .snm{font-size:13px}
+  .srnums{font-size:11px;color:var(--mut);margin-top:3px}
+  .srnums b{color:var(--sub);font-variant-numeric:tabular-nums}
+  .srstats{border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
+  .srstat{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--sub);padding:2px 0}
+  .srstat b{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700}
+  .srstat i{width:8px;height:8px;border-radius:99px;flex:none}
+
+  /* the dot strip — one dot = one person currently in the sequence, grouped in
+     fixed state order (active · scheduled · paused · replied · cracks · bounced)
+     so runs stay contiguous; the words beside always carry the counts (states
+     are never color-alone). Finished is history: a number, never dots. */
+  .dots{display:flex;flex-wrap:wrap;gap:2px;margin:6px 0 2px}
+  .dots i{width:8px;height:8px;border-radius:99px}
+  .d-act{background:var(--st-active)} .d-sch{background:var(--st-sched)}
+  .d-pau{background:var(--st-paused)} .d-rep{background:var(--st-replied)}
+  .d-fnr{background:var(--st-fnr)} .d-bnc{background:var(--st-bounced)}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:10.5px;color:var(--mut);margin-top:10px}
+  .legend span{display:flex;align-items:center;gap:4px}
+  .legend i{width:8px;height:8px;border-radius:99px;flex:none}
+
   /* ---------- the feed pane: the Pulse inside the Lantern ---------- */
-  .pane{background:var(--night);border-radius:16px;padding:6px 0 10px;color:var(--night-fg);margin-top:2px}
-  .panehead{display:flex;align-items:center;font-size:12px;color:var(--night-sub);padding:10px 18px 0}
-  .live{margin-left:auto;color:var(--dk-replied);font-size:11.5px;font-weight:600}
+  .pane{background:var(--night);border-radius:16px;padding:6px 0 10px;color:var(--night-fg)}
+  .panehead{display:flex;align-items:center;justify-content:flex-end;font-size:12px;color:var(--night-sub);padding:10px 18px 0}
+  .live{color:var(--dk-replied);font-size:11.5px;font-weight:600}
   .live::before{content:"●";margin-right:6px;font-size:9px;vertical-align:1px}
-  .picker{position:relative;display:flex;justify-content:center;padding:8px 0 6px}
+  .picker{position:relative;display:flex;justify-content:center;padding:2px 0 6px}
   .pickbtn{font-weight:700;font-size:14.5px;color:var(--night-fg);padding:4px 12px;border-radius:8px}
   .pickbtn span{font-weight:400;color:var(--night-sub);font-size:11px;margin-left:5px}
   .pickmenu{position:absolute;top:100%;left:50%;transform:translateX(-50%);z-index:5;
@@ -130,10 +159,11 @@
   .pillstat{background:var(--panel);border:1px solid var(--line);border-radius:12px;
     padding:9px 15px;font-size:12px;color:var(--mut)}
   .pillstat b{display:block;font-size:19px;color:var(--ink);font-weight:800;font-variant-numeric:tabular-nums}
-  .pillstat.n-act b{color:var(--st-active)} .pillstat.n-pau b{color:var(--st-paused)}
+  .pillstat.n-act b{color:var(--st-active)} .pillstat.n-sch b{color:var(--st-sched)}
+  .pillstat.n-pau b{color:var(--st-paused)} .pillstat.n-rep b{color:var(--st-replied)}
   .pillstat.n-bnc b{color:var(--st-bounced)} .pillstat.n-fnr b{color:var(--st-fnr)}
 
-  .chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+  .chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
   .c-draft{color:var(--st-draft);background:var(--w-draft)} .c-sched{color:var(--st-sched);background:var(--w-sched)}
   .c-active{color:var(--st-active);background:var(--w-active)} .c-paused{color:var(--st-paused);background:var(--w-paused)}
   .c-replied{color:var(--st-replied);background:var(--w-replied)} .c-fnr{color:var(--st-fnr);background:var(--w-fnr)}
@@ -143,20 +173,8 @@
     padding:12px 16px;margin-top:10px;font-size:14px}
   .seqcard .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
   .seqcard .from{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mut)}
-  .minibar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--w-draft);margin:9px 0 6px}
-  .minibar i{display:block;height:100%}
-  .seqcard .nums{display:flex;gap:12px;font-size:11.5px;color:var(--mut)}
+  .seqcard .nums{display:flex;gap:12px;font-size:11.5px;color:var(--mut);margin-top:4px}
   .seqcard .nums b{color:var(--ink);font-variant-numeric:tabular-nums}
-
-  .firstrun{border:1px dashed var(--line);border-radius:8px;padding:16px;margin-top:16px;background:var(--bg)}
-  .frsteps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
-  @media (max-width:700px){.frsteps{grid-template-columns:1fr}}
-  .fr{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:12px}
-  .fr .k{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--camel);font-weight:700}
-  .fr b{display:block;font-size:13.5px;margin:4px 0 2px}
-  .fr span{font-size:12px;color:var(--mut)}
-  .demo{display:flex;gap:8px;align-items:center;font-size:12px;background:var(--w-sched);
-    color:var(--st-sched);border-radius:6px;padding:8px 12px;margin-top:14px;font-weight:600}
 
   /* sequence detail */
   .seqhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
@@ -179,9 +197,6 @@
   .when span{display:block;color:var(--mut);font-weight:400}
   .step .subj b{font-weight:600}
   .step .subj span{display:block;font-size:12px;color:var(--mut)}
-  .step .stat{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;color:var(--mut);
-    margin-top:4px;font-variant-numeric:tabular-nums}
-  .step .stat b{color:var(--sub);font-weight:700}
   .modewrap{display:flex;align-items:center;gap:8px}
   .mode{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;letter-spacing:.08em;
     border:1px solid var(--line);border-radius:99px;padding:4px 11px;cursor:pointer;user-select:none}
@@ -226,108 +241,135 @@
   <span class="lockup"><svg style="color:var(--sub)"><use href="#sig"/></svg>
     <span class="wm"><span class="stem">nudge</span><span class="rowc">row</span></span></span>
   <span class="by">a Vantrow company</span>
-  <span class="tag">DECK V2 · LANTERN × PULSE · ILLUSTRATIVE DATA</span>
+  <span class="tag">DECK V2.1 · LANTERN × PULSE · ILLUSTRATIVE DATA</span>
 </header>
 
 <p class="deckmeta" style="border:2px solid #B8956A;border-radius:8px;padding:12px 14px;background:#FFFEF9">
-<b>DIRECTION LOCKED · 2026-08-08.</b> Andrew's pick on the plates: <b>"9" — the Pulse</b>. Plate 9 is a
-<b>row grammar</b>, not a ground; the ground resolves to <b>the Lantern</b> per his own standing redline
-R-4D-10 (<i>"the feed itself should be darker background"</i>) and Plate 9's verdict ("Lantern × Pulse is
-the natural hybrid") — i.e. <b>9B as drawn</b>. If the light 9A feed was the intent, one word re-cuts this
-deck light. v1 stays archived as the checkpoint artifact
-(<span class="mono">checkpoint-4d-mockups.html</span>); the two design-law amendments the direction
-requires (radius cap → the 16px pane; ✓ carved out of the emoji ban) are recorded in the decision log.</p>
-<p class="deckmeta">Phase 4 · workstream A1 deck v2 (<span class="mono">docs/plan/phase-4-plan.md</span> §2)
+<b>DIRECTION LOCKED · 2026-08-08.</b> Andrew's pick on the plates: <b>"9" — the Pulse</b>, ground resolved
+to <b>the Lantern (9B)</b> per R-4D-10 and the plate's verdict; the light 9A cut stays one word away.
+<b>Round-4 redlines applied same day (v2.1):</b> the home combines feed (primary) + a sequences overview
+side panel · the stacked bars are gone — <b>dot strips</b>, one dot = one person in play · engagement
+scores removed from every surface · palette <i>application</i> strengthened (deeper ink, firmer lines,
+camel eyebrows — tokens and validated grounds untouched; say the word and a bolder palette round opens) ·
+screens carry no self-description — a dedicated <b>onboarding phase</b> (workstream A6) owns first use.
+v1 archived (<span class="mono">checkpoint-4d-mockups.html</span>); law amendments in the decision log.</p>
+<p class="deckmeta">Phase 4 · workstream A1 deck v2.1 (<span class="mono">docs/plan/phase-4-plan.md</span> §2)
 · 2026-08-08 · single-file, zero dependencies — every name and number invented. Direction source:
-<span class="mono">direction-plates.html</span> (Plate 9 × Plate 5) · redlines:
+<span class="mono">direction-plates.html</span> (Plate 9 × Plate 5) · redline rounds:
 <span class="mono">docs/design/checkpoint-4d-feedback.md</span>.</p>
 
 <div class="tabs" role="tablist">
-  <button class="tab on" data-v="v1">01 · ACTIVITY (HOME)</button>
+  <button class="tab on" data-v="v1">01 · HOME</button>
   <button class="tab" data-v="v2">02 · SEQUENCES (OVERVIEW)</button>
   <button class="tab" data-v="v3">03 · SEQUENCE DETAIL</button>
 </div>
 
-<!-- ============ VIEW 1 · ACTIVITY HOME — the Pulse inside the Lantern ============ -->
+<!-- ============ VIEW 1 · HOME — feed primary + overview side panel ============ -->
 <section class="view on" id="v1">
 <div class="stage">
   <div class="screen">
-    <span class="plateno">DECK V2 · 01 ACTIVITY · ILLUSTRATIVE DATA</span>
+    <span class="plateno">DECK V2.1 · 01 HOME · ILLUSTRATIVE DATA</span>
     <div class="appbar"><svg style="color:var(--sub)"><use href="#sig"/></svg>
       <span class="awm"><span style="color:var(--sub)">nudge</span><span style="color:var(--camel)">row</span></span>
-      <nav><b>Activity</b><span>Sequences</span><span>Prospects</span><span>Settings</span></nav>
+      <nav><b>Home</b><span>Sequences</span><span>Prospects</span><span>Settings</span></nav>
       <span class="mb">andrew@getvantrow.com ▾</span>
     </div>
     <div class="body">
-      <h1 class="scr">Activity</h1>
-      <p class="sub">Everything your sequences did, newest first.
-        <span class="prov">AS OF 9:41 AM · REPLIES INFERRED FROM MAILBOX THREADS</span></p>
-
-      <div class="pane">
-        <div class="panehead"><span>Your outreach, as it happens</span><span class="live">Live · 22 queued today</span></div>
-        <div class="picker">
-          <button class="pickbtn" id="pickbtn" aria-haspopup="true" aria-expanded="false">Everything <span>▾</span></button>
-          <div class="pickmenu" id="pickmenu" role="menu">
-            <button data-f="all" class="cur">Everything <span class="n">6</span></button>
-            <button data-f="rep">Replies <span class="n">2</span></button>
-            <button data-f="adv">Advanced <span class="n">1</span></button>
-            <button data-f="fin">Finished <span class="n">1</span></button>
-            <button data-f="pau">Paused <span class="n">1</span></button>
-            <button data-f="bnc">Bounced <span class="n">1</span></button>
+      <div class="home">
+        <div class="pane">
+          <div class="panehead"><span class="live">Live · 22 queued today</span></div>
+          <div class="picker">
+            <button class="pickbtn" id="pickbtn" aria-haspopup="true" aria-expanded="false">Everything <span>▾</span></button>
+            <div class="pickmenu" id="pickmenu" role="menu">
+              <button data-f="all" class="cur">Everything <span class="n">6</span></button>
+              <button data-f="rep">Replies <span class="n">2</span></button>
+              <button data-f="adv">Advanced <span class="n">1</span></button>
+              <button data-f="fin">Finished <span class="n">1</span></button>
+              <button data-f="pau">Paused <span class="n">1</span></button>
+              <button data-f="bnc">Bounced <span class="n">1</span></button>
+            </div>
           </div>
+
+          <div class="dateslug">Today</div>
+          <div class="row" data-k="rep"><span class="mg m-rep">DS<i>↩</i></span><span>
+            <span class="nm"><span class="pl">Derek Smith</span> <span class="vb">replied</span><span class="tm">2h</span></span>
+            <span class="q">"Happy to take a look — send the one-pager and let's find 20 minutes next week."</span>
+            <span class="rsub">Step 3 (Auto Email) of <span class="sl">Vantrow Intro — Industrials</span> · sequence stopped itself</span>
+            <span class="acts"><b>Reply</b><b>View thread</b><b>Open prospect</b></span></span></div>
+          <div class="row" data-k="rep"><span class="mg m-rep">HL<i>↩</i></span><span>
+            <span class="nm"><span class="pl">Hugo Lachance</span> <span class="vb">replied</span><span class="tm">3h</span></span>
+            <span class="q">"Who else in the group has seen this?"</span>
+            <span class="rsub">Step 6 (Auto Email) of <span class="sl">Investor Referral</span></span>
+            <span class="acts"><b>Reply</b><b>View thread</b><b>Open prospect</b></span></span></div>
+          <div class="row agg" data-k="adv"><span class="stack"><span class="mg m-adv">NR</span><span class="mg m-adv">TK</span><span class="mg m-adv">+1</span></span><span>
+            <span class="nm"><span class="pl">Nathan Roseman</span> <span class="vb">and 2 others advanced</span><span class="tm">4h</span></span>
+            <span class="rsub">→ Steps 5–8 of <span class="sl">General Outreach</span></span>
+            <span class="acts"><b>View sequence</b></span></span></div>
+
+          <div class="dateslug">Yesterday</div>
+          <div class="row" data-k="fin"><span class="mg m-fin">BR<i>✓</i></span><span>
+            <span class="nm"><span class="pl">Bob Rose</span> <span class="vb">finished</span><span class="tm">1d</span></span>
+            <span class="rsub">5 steps of <span class="sl">Investor Referral</span>, no reply — waiting in Cracks</span>
+            <span class="acts"><b>Re-enroll</b><b>Open prospect</b></span></span></div>
+          <div class="row" data-k="pau"><span class="mg m-pau">MR<i>∥</i></span><span>
+            <span class="nm"><span class="pl">M. Reyes</span> <span class="vb">paused — out of office</span><span class="tm">1d</span></span>
+            <span class="rsub">Resumes Mon · return date parsed from auto-reply · <span class="sl">Vantrow Intro — Industrials</span></span>
+            <span class="acts"><b>Resume now</b><b>Open prospect</b></span></span></div>
+          <div class="row" data-k="bnc"><span class="mg m-bnc">AD<i>!</i></span><span>
+            <span class="nm"><span class="pl">A. Duval</span> <span class="vb">hard-bounced</span><span class="tm">1d</span></span>
+            <span class="rsub">Address suppressed, enrollment halted · classified from headers</span>
+            <span class="acts"><b>Review address</b></span></span></div>
         </div>
 
-        <div class="dateslug">Today</div>
-        <div class="row" data-k="rep"><span class="mg m-rep">DS<i>↩</i></span><span>
-          <span class="nm"><span class="pl">Derek Smith</span> <span class="vb">replied</span><span class="tm">2h</span></span>
-          <span class="q">"Happy to take a look — send the one-pager and let's find 20 minutes next week."</span>
-          <span class="rsub">Step 3 (Auto Email) of <span class="sl">Vantrow Intro — Industrials</span> · sequence stopped itself</span>
-          <span class="acts"><b>Reply</b><b>View thread</b><b>Open prospect</b></span></span></div>
-        <div class="row" data-k="rep"><span class="mg m-rep">HL<i>↩</i></span><span>
-          <span class="nm"><span class="pl">Hugo Lachance</span> <span class="vb">replied</span><span class="tm">3h</span></span>
-          <span class="q">"Who else in the group has seen this?"</span>
-          <span class="rsub">Step 6 (Auto Email) of <span class="sl">Investor Referral</span></span>
-          <span class="acts"><b>Reply</b><b>View thread</b><b>Open prospect</b></span></span></div>
-        <div class="row agg" data-k="adv"><span class="stack"><span class="mg m-adv">NR</span><span class="mg m-adv">TK</span><span class="mg m-adv">+1</span></span><span>
-          <span class="nm"><span class="pl">Nathan Roseman</span> <span class="vb">and 2 others advanced</span><span class="tm">4h</span></span>
-          <span class="rsub">→ Steps 5–8 of <span class="sl">General Outreach</span></span>
-          <span class="acts"><b>View sequence</b></span></span></div>
-
-        <div class="dateslug">Yesterday</div>
-        <div class="row" data-k="fin"><span class="mg m-fin">BR<i>✓</i></span><span>
-          <span class="nm"><span class="pl">Bob Rose</span> <span class="vb">finished</span><span class="tm">1d</span></span>
-          <span class="rsub">5 steps of <span class="sl">Investor Referral</span>, no reply — waiting in Cracks</span>
-          <span class="acts"><b>Re-enroll</b><b>Open prospect</b></span></span></div>
-        <div class="row" data-k="pau"><span class="mg m-pau">MR<i>∥</i></span><span>
-          <span class="nm"><span class="pl">M. Reyes</span> <span class="vb">paused — out of office</span><span class="tm">1d</span></span>
-          <span class="rsub">Resumes Mon · return date parsed from auto-reply · <span class="sl">Vantrow Intro — Industrials</span></span>
-          <span class="acts"><b>Resume now</b><b>Open prospect</b></span></span></div>
-        <div class="row" data-k="bnc"><span class="mg m-bnc">AD<i>!</i></span><span>
-          <span class="nm"><span class="pl">A. Duval</span> <span class="vb">hard-bounced</span><span class="tm">1d</span></span>
-          <span class="rsub">Address suppressed, enrollment halted · classified from headers</span>
-          <span class="acts"><b>Review address</b></span></span></div>
+        <aside class="srbox">
+          <div class="srhead">Sequences <span class="all">All →</span></div>
+          <div class="srseq">
+            <span class="lk-s snm">Vantrow intro — industrials</span>
+            <div class="dots"><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-sch"></i><i class="d-sch"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-bnc"></i></div>
+            <div class="srnums"><b>41</b> in play · <b>9</b> replied · <b>6</b> cracks</div>
+          </div>
+          <div class="srseq">
+            <span class="lk-s snm">Investor Referral</span>
+            <div class="dots"><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-sch"></i><i class="d-pau"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-bnc"></i><i class="d-bnc"></i><i class="d-bnc"></i></div>
+            <div class="srnums"><b>28</b> in play · <b>3</b> replied · <b>6</b> cracks</div>
+          </div>
+          <div class="srseq">
+            <span class="lk-s snm">Parcelrow county openers</span>
+            <div class="dots"><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-sch"></i><i class="d-sch"></i><i class="d-sch"></i><i class="d-rep"></i><i class="d-fnr"></i></div>
+            <div class="srnums"><b>17</b> in play · <b>1</b> replied · <b>1</b> crack</div>
+          </div>
+          <div class="srstats">
+            <div class="srstat"><i style="background:var(--st-active)"></i>Active<b>35</b></div>
+            <div class="srstat"><i style="background:var(--st-sched)"></i>Scheduled<b>6</b></div>
+            <div class="srstat"><i style="background:var(--st-paused)"></i>Paused<b>15</b></div>
+            <div class="srstat"><i style="background:var(--st-replied)"></i>Replied<b>13</b></div>
+            <div class="srstat"><i style="background:var(--st-fnr)"></i>In the cracks<b>13</b></div>
+            <div class="srstat"><i style="background:var(--st-bounced)"></i>Bounced<b>4</b></div>
+            <div class="srstat"><i style="background:var(--mut)"></i>Finished, all-time<b>208</b></div>
+          </div>
+        </aside>
       </div>
     </div>
   </div>
 
   <aside class="rail">
-    <div class="note"><b>The pick, recorded.</b> Andrew answered the plates with "9" — the Pulse row
-      grammar. Ground resolved to the Lantern (9B) by his own R-4D-10 and the plate's verdict; the light
-      9A cut stays one decision row away. <span class="src">DECISION LOG 2026-08-08 · R-4D-13</span></div>
-    <div class="note"><b>What the grammar buys.</b> Person-first rows: the monogram is the state chip
-      wearing the prospect's initials (corner badge carries the event); a reply's <i>actual words</i> are
-      the post body — the one thing no event-log feed can show; a quiet action row replaces engagement-count
-      theater; thin events aggregate under stacked monograms. <span class="src">PLATE 9 · R-4D-12</span></div>
-    <div class="note"><b>The picker IS the reports.</b> "Everything ▾" opens the report menu — each option
-      is a filtered feed with its count. Replies, finished, bounces: the three Gate-3 reports are three
-      menu rows, not three pages. <span class="src">R-4D-2 · GATE 3 10-SUBSET</span></div>
-    <div class="note"><b>Dark became a place.</b> v1's open night question is answered by the pick: the
-      pane is the validated night ground <span class="mono">#16151A</span> inside the light room — the
-      state palette's dark values now serve in the product, and both grounds stay exactly as pinned, so
-      the palette needs no re-stamp. <span class="src">AUDIT PORT #10 · CHECK-STATE-PALETTE.MJS</span></div>
-    <div class="note"><b>Two link colors, two destinations.</b> Yellow underlines open people; camel
-      underlines open sequences (R-4D-3: everything links). That's navigation chrome, not state — camel
-      still never encodes data. <span class="src">R-4D-3 · TWO-PALETTE LAW</span></div>
+    <div class="note"><b>The home is both.</b> Round-4: feed stays the primary view; the sequences
+      overview rides beside it as a side panel. The Sequences nav item still opens the full overview
+      (R-4D-5) — the panel is its always-visible summary. <span class="src">R-4D-14 · R-4D-5</span></div>
+    <div class="note"><b>One dot = one person in play.</b> The stacked bar is gone — each dot is a
+      prospect currently enrolled, colored by state, grouped in fixed state order. Finished is history:
+      a number, never dots. The words beside every strip carry the counts, so color never works alone.
+      <span class="src">R-4D-15 · TWO-PALETTE LAW</span></div>
+    <div class="note"><b>The picker IS the reports.</b> "Everything ▾" opens the report menu — each
+      option is a filtered feed with its count. Replies, finished, bounces: the three Gate-3 reports
+      are three menu rows, not three pages. <span class="src">R-4D-2 · GATE 3 10-SUBSET</span></div>
+    <div class="note"><b>No narration.</b> Round-4: screens describe nothing — no taglines, no "here's
+      what this page does." Provenance survives only at the value it qualifies ("classified from
+      headers", "parsed from auto-reply"). First use is an onboarding phase (A6), not copy.
+      <span class="src">R-4D-18 · A7 SCOPED</span></div>
+    <div class="note"><b>The pick, recorded.</b> "9" → the Pulse row grammar; ground resolved to the
+      Lantern (9B) by R-4D-10 and the plate's verdict; the light 9A cut stays one decision row away.
+      <span class="src">DECISION LOG 2026-08-08 · R-4D-13</span></div>
   </aside>
 </div>
 </section>
@@ -336,21 +378,22 @@ requires (radius cap → the 16px pane; ✓ carved out of the emoji ban) are rec
 <section class="view" id="v2">
 <div class="stage">
   <div class="screen">
-    <span class="plateno">DECK V2 · 02 SEQUENCES OVERVIEW · ILLUSTRATIVE DATA</span>
+    <span class="plateno">DECK V2.1 · 02 SEQUENCES OVERVIEW · ILLUSTRATIVE DATA</span>
     <div class="appbar"><svg style="color:var(--sub)"><use href="#sig"/></svg>
       <span class="awm"><span style="color:var(--sub)">nudge</span><span style="color:var(--camel)">row</span></span>
-      <nav><span>Activity</span><b>Sequences</b><span>Prospects</span><span>Settings</span></nav>
+      <nav><span>Home</span><b>Sequences</b><span>Prospects</span><span>Settings</span></nav>
       <span class="mb">3 mailboxes ▾</span>
     </div>
     <div class="body">
       <h1 class="scr">Sequences</h1>
-      <p class="sub">Every play across your mailboxes — the overview lands first; a card opens its detail.</p>
 
       <div class="pillrow">
-        <span class="pillstat n-act"><b>86</b>Active enrollments</span>
-        <span class="pillstat n-pau"><b>3</b>Paused</span>
-        <span class="pillstat n-bnc"><b>12</b>Bounced</span>
+        <span class="pillstat n-act"><b>35</b>Active</span>
+        <span class="pillstat n-sch"><b>6</b>Scheduled</span>
+        <span class="pillstat n-pau"><b>15</b>Paused</span>
+        <span class="pillstat n-rep"><b>13</b>Replied</span>
         <span class="pillstat n-fnr"><b>13</b>In the cracks</span>
+        <span class="pillstat n-bnc"><b>4</b>Bounced</span>
         <span class="pillstat"><b>208</b>Finished</span>
       </div>
 
@@ -358,65 +401,60 @@ requires (radius cap → the 16px pane; ✓ carved out of the emoji ban) are rec
         <div class="top"><span class="lk-s">Vantrow intro — industrials</span>
           <span class="chip c-active">Active</span></div>
         <span class="from">andrew@getvantrow.com</span>
-        <div class="minibar"><i style="width:22%;background:var(--st-replied)"></i><i style="width:14%;background:var(--st-fnr)"></i><i style="width:48%;background:var(--st-active)"></i></div>
-        <div class="nums"><span><b>41</b> enrolled</span><span><b>9</b> replied</span><span><b>6</b> cracks</span></div>
+        <div class="dots"><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-sch"></i><i class="d-sch"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-bnc"></i></div>
+        <div class="nums"><span><b>41</b> in play</span><span><b>9</b> replied</span><span><b>6</b> cracks</span></div>
       </div>
       <div class="seqcard">
-        <div class="top"><span class="lk-s">Eaverow founders — logistics</span>
+        <div class="top"><span class="lk-s">Investor Referral</span>
           <span class="chip c-active">Active</span></div>
         <span class="from">andrew@eaverow.com</span>
-        <div class="minibar"><i style="width:12%;background:var(--st-replied)"></i><i style="width:22%;background:var(--st-fnr)"></i><i style="width:38%;background:var(--st-active)"></i></div>
-        <div class="nums"><span><b>28</b> enrolled</span><span><b>3</b> replied</span><span><b>6</b> cracks</span></div>
+        <div class="dots"><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-act"></i><i class="d-sch"></i><i class="d-pau"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-rep"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-fnr"></i><i class="d-bnc"></i><i class="d-bnc"></i><i class="d-bnc"></i></div>
+        <div class="nums"><span><b>28</b> in play</span><span><b>3</b> replied</span><span><b>6</b> cracks</span></div>
       </div>
       <div class="seqcard">
         <div class="top"><span class="lk-s">Parcelrow county openers</span>
           <span class="chip c-paused">Paused</span></div>
         <span class="from">andrew@parcelrow.com</span>
-        <div class="minibar"><i style="width:8%;background:var(--st-replied)"></i><i style="width:6%;background:var(--st-fnr)"></i><i style="width:20%;background:var(--st-paused)"></i></div>
-        <div class="nums"><span><b>17</b> enrolled</span><span><b>1</b> replied</span><span><b>1</b> crack</span></div>
+        <div class="dots"><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-pau"></i><i class="d-sch"></i><i class="d-sch"></i><i class="d-sch"></i><i class="d-rep"></i><i class="d-fnr"></i></div>
+        <div class="nums"><span><b>17</b> in play</span><span><b>1</b> replied</span><span><b>1</b> crack</span></div>
       </div>
       <div class="seqcard">
         <div class="top"><span class="lk-s">Dormant re-warm — Q3</span>
           <span class="chip c-draft">Draft</span></div>
         <span class="from">andrew@getvantrow.com</span>
-        <div class="minibar"></div>
-        <div class="nums"><span><b>0</b> enrolled</span><span>starts when you say so</span></div>
+        <div class="nums"><span><b>0</b> in play</span><span>starts when you say so</span></div>
       </div>
 
-      <div class="firstrun">
-        <p class="eyebrow">First run · what an empty org shows</p>
-        <div class="frsteps">
-          <div class="fr"><span class="k">STEP 1</span><b>Connect a mailbox</b>
-            <span>Any Google Workspace or Gmail address — this product is standalone; your brands,
-            your senders. Microsoft next.</span></div>
-          <div class="fr"><span class="k">STEP 2</span><b>Bring prospects</b>
-            <span>CSV or Affinity import — deduped, suppression-screened on entry, bodies never required.</span></div>
-          <div class="fr"><span class="k">STEP 3</span><b>Start a sequence</b>
-            <span>Steps, windows, stop-on-reply — then it runs itself and you watch the feed.</span></div>
-        </div>
-        <div class="demo">◇ DEMO MODE — no keys configured, so this org is seeded with illustrative data.
-          Everything is walkable; nothing sends.</div>
+      <div class="legend">
+        <span><i style="background:var(--st-active)"></i>Active</span>
+        <span><i style="background:var(--st-sched)"></i>Scheduled</span>
+        <span><i style="background:var(--st-paused)"></i>Paused</span>
+        <span><i style="background:var(--st-replied)"></i>Replied</span>
+        <span><i style="background:var(--st-fnr)"></i>In the cracks</span>
+        <span><i style="background:var(--st-bounced)"></i>Bounced</span>
       </div>
     </div>
   </div>
 
   <aside class="rail">
-    <div class="note"><b>The overview lands first.</b> R-4D-5 verbatim: Sequences opens to the
-      all-sequences view with per-state statistics; v1's "Board" name is retired. A card click opens the
-      detail (tab 03). <span class="src">R-4D-5 · F-001 TIER-F</span></div>
+    <div class="note"><b>The overview lands first.</b> R-4D-5: Sequences opens to the all-sequences
+      view with per-state statistics; a card opens its detail (tab 03). The home's side panel is this
+      page's summary. <span class="src">R-4D-5 · F-001 TIER-F</span></div>
+    <div class="note"><b>Dots replaced the bars.</b> Round-4: the stacked bar read as proportion-of-
+      nothing. One dot = one person currently in the sequence, in fixed state order; the counts are
+      written beside every strip. One pinned pair (paused/bounced) sits close for color-blind readers —
+      grouping + words cover it now; a palette-strengthening round would re-step it deliberately.
+      <span class="src">R-4D-15 · VALIDATOR EVIDENCE 2026-08-08</span></div>
     <div class="note"><b>Your "failed" column — flagged, not invented.</b> Hard failures fold into
-      Bounced; soft bounces retry within policy before classifying (I7). If step-level failures (bad
-      variable, provider error) deserve their own state, that's a palette amendment — one decision row +
-      a re-stamp. Asked here rather than assumed. <span class="src">R-4D-5 · A3 TWO-PALETTE LAW</span></div>
-    <div class="note"><b>The bar is the sequence's whole story.</b> Replied (green) · cracks (violet) ·
-      in motion (teal) against the neutral remainder — state palette only, read left to right.
-      <span class="src">TWO-PALETTE LAW</span></div>
+      Bounced; soft bounces retry within policy (I7). If step-level failures deserve their own state,
+      that's a palette amendment — one decision row + a re-stamp. <span class="src">R-4D-5 · A3 TWO-PALETTE LAW</span></div>
     <div class="note"><b>Standalone, brand-level, multi-mailbox.</b> Three cards send as three brands
       from one org — R10 made visible. Mailbox badges stay mono micro-labels, never logos.
       <span class="src">R10 · GATE 4 RECORD</span></div>
-    <div class="note"><b>Empty states are product copy.</b> The first-run panel is what a new org sees —
-      three steps, one sentence each; demo mode is a feature (and our screenshot + Playwright fixture
-      source). <span class="src">PARCELROW PORT #7 · PHASE 4 §2·A6</span></div>
+    <div class="note"><b>First use became a phase.</b> Round-4: the first-run explainer left this page —
+      screens don't narrate themselves. A dedicated onboarding flow (connect mailbox → import → first
+      sequence) is designed under A6; demo mode stays the engineering fixture behind it.
+      <span class="src">R-4D-18 · PHASE 4 §2·A6</span></div>
   </aside>
 </div>
 </section>
@@ -425,10 +463,10 @@ requires (radius cap → the 16px pane; ✓ carved out of the emoji ban) are rec
 <section class="view" id="v3">
 <div class="stage">
   <div class="screen">
-    <span class="plateno">DECK V2 · 03 SEQUENCE DETAIL · ILLUSTRATIVE DATA</span>
+    <span class="plateno">DECK V2.1 · 03 SEQUENCE DETAIL · ILLUSTRATIVE DATA</span>
     <div class="appbar"><svg style="color:var(--sub)"><use href="#sig"/></svg>
       <span class="awm"><span style="color:var(--sub)">nudge</span><span style="color:var(--camel)">row</span></span>
-      <nav><span>Activity</span><b>Sequences</b><span>Prospects</span><span>Settings</span></nav>
+      <nav><span>Home</span><b>Sequences</b><span>Prospects</span><span>Settings</span></nav>
       <span class="mb">andrew@getvantrow.com ▾</span>
     </div>
     <div class="body">
@@ -450,27 +488,23 @@ requires (radius cap → the 16px pane; ✓ carved out of the emoji ban) are rec
         </div>
       </div>
 
-      <p class="eyebrow">Steps · per-step control &amp; per-step numbers</p>
+      <p class="eyebrow">Steps · per-step control</p>
       <div class="steps">
         <div class="step"><span class="when">DAY 0<span>on enroll</span></span>
           <span class="subj"><b>"{{firstName}}, a quiet question on {{company}}"</b>
-            <span>Template: intro-industrials-1 · variables resolve at send</span>
-            <span class="stat"><b>41</b> sent · <b>26</b> opened · <b>6</b> replied</span></span>
+            <span>Template: intro-industrials-1 · variables resolve at send</span></span>
           <span class="modewrap"><button class="mode auto">AUTO-SEND</button></span></div>
         <div class="step"><span class="when">+3 DAYS<span>2h jitter</span></span>
           <span class="subj"><b>"Re: a quiet question"</b>
-            <span>Threads under step 1 · skipped if bounced</span>
-            <span class="stat"><b>33</b> sent · <b>19</b> opened · <b>2</b> replied</span></span>
+            <span>Threads under step 1 · skipped if bounced</span></span>
           <span class="modewrap"><button class="mode auto">AUTO-SEND</button></span></div>
         <div class="step"><span class="when">+5 DAYS<span>+4 hours</span></span>
           <span class="subj"><b>"The {{industry}} angle, in one paragraph"</b>
-            <span>Intervals in days + hours — founder requirement</span>
-            <span class="stat"><b>24</b> sent · <b>11</b> opened · <b>1</b> replied</span></span>
+            <span>Intervals in days + hours</span></span>
           <span class="modewrap"><button class="mode draft">DRAFT FIRST</button></span></div>
         <div class="step"><span class="when">+9 DAYS<span>final</span></span>
           <span class="subj"><b>"Closing the loop"</b>
-            <span>No reply after this → the prospect lands in Cracks</span>
-            <span class="stat"><b>18</b> sent · <b>7</b> opened · <b>0</b> replied</span></span>
+            <span>No reply after this → the prospect lands in Cracks</span></span>
           <span class="modewrap"><button class="mode auto">AUTO-SEND</button></span></div>
       </div>
 
@@ -495,13 +529,12 @@ requires (radius cap → the 16px pane; ✓ carved out of the emoji ban) are rec
   <aside class="rail">
     <div class="note"><b>The schedule went into the drawer.</b> R-4D-4: window, holidays, and caps are a
       collapsible menu, not inline furniture — and the "stops itself" commentary is demoted to two quiet
-      rule lines inside it. Furniture off the surface; promises kept on it. <span class="src">R-4D-4 · I2 · I6</span></div>
-    <div class="note"><b>Per-step numbers, quietly.</b> F-003's aspect — a step timeline that carries its
-      own analytics — replicated in our grammar: sent · opened · replied per step, mono and small. Replied
-      stays the loud signal; opens never get a chip. <span class="src">R-4D-6 · F-003 TIER-F · POSITIONING 12</span></div>
+      rule lines inside it. <span class="src">R-4D-4 · I2 · I6</span></div>
+    <div class="note"><b>No scores on the surface.</b> Round-4: the per-step sent/opened/replied numbers
+      are gone — the page shows what runs and who's in it, nothing it's tracking. The engine's ledger
+      (I10) still records everything for the reports and the data export. <span class="src">R-4D-16 · I10 · R-REQ EXPORT</span></div>
     <div class="note"><b>No tables anywhere.</b> The Pulse row generalizes: enrollments are person-first
-      rows — monogram, name, state chip, one line of what happens next. R-4D-1's "no tables" applied
-      beyond the home. <span class="src">R-4D-1 EXTENDED</span></div>
+      rows — monogram, name, state chip, one line of what happens next. <span class="src">R-4D-1 EXTENDED</span></div>
     <div class="note"><b>Days + hours, verbatim.</b> "+5 days +4 hours" is a first-class interval, not a
       workaround. <span class="src">R-REQ: INTERVALS IN DAYS+HOURS</span></div>
     <div class="note"><b>Deferrals are visible.</b> The drawer's cap line says what deferral means; a
@@ -511,16 +544,19 @@ requires (radius cap → the 16px pane; ✓ carved out of the emoji ban) are rec
 </section>
 
 <footer class="deck">
-  <h2>What deck v2 asks (checkpoint re-review)</h2>
+  <h2>What deck v2.1 asks (checkpoint re-review)</h2>
   <ul>
-    <li><b>Approve or redline the Lantern × Pulse execution</b> — this deck is the contract for
-      workstream C; app UI is built only from an approved deck.</li>
-    <li><b>Confirm the ground resolution</b> — "9" was read as 9B (Pulse rows inside the Lantern pane)
-      per R-4D-10; if the light 9A feed was the intent, one word re-cuts it.</li>
+    <li><b>Approve or redline the round-4 cut</b> — this deck is the contract for workstream C; app UI
+      is built only from an approved deck. On approval, the onboarding flow (A6) gets designed as its
+      own small deck.</li>
+    <li><b>The palette</b> — this cut strengthens the <i>application</i> (deeper ink, firmer hairlines,
+      heavier weights, camel eyebrows) with tokens and validated grounds untouched. If Clarity Ink still
+      feels weak, say the word: a bolder palette round opens (one decision row), and it would re-step the
+      two color-blind-close state pairs the validator flagged while it's at it.</li>
     <li><b>The "failed" vocabulary question</b> — does step-level failure need its own state, or do
       Bounced + retry policy cover it? (One decision row either way.)</li>
   </ul>
-  <p class="mono" style="font-size:10.5px;color:var(--mut)">NUDGEROW · DECK V2 · ILLUSTRATIVE DATA THROUGHOUT ·
+  <p class="mono" style="font-size:10.5px;color:var(--mut)">NUDGEROW · DECK V2.1 · ILLUSTRATIVE DATA THROUGHOUT ·
   GROUNDS &amp; STATE COLORS = VALIDATED SET 2026-08-07 (NO RE-STAMP NEEDED) · LAW AMENDMENTS 2026-08-08:
   RADIUS CAP → 16PX PANE · ✓ CARVED FROM THE EMOJI BAN · TYPE IS A PREVIEW STAND-IN</p>
 </footer>

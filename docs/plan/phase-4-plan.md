@@ -172,7 +172,9 @@ the producer emits from MVP regardless so the contract is proven.
 1. ~~Logo pick + wordmark case confirm~~ **done 2026-08-07** — "the Signal" (G
    flipped), case split applied (decision log).
 2. ~~Checkpoint 4-D deck review~~ → redlined 2026-08-07; direction picked
-   2026-08-08 ("9" → Lantern × Pulse). **Live item: deck v2 re-review**
-   (`deck-v2.html`) + the "failed" vocabulary question in its overview rail.
+   2026-08-08 ("9" → Lantern × Pulse); round-4 redlines applied same day
+   (v2.1). **Live item: deck v2.1 re-review** (`deck-v2.html`) + the "failed"
+   vocabulary question + the palette question (stronger application shipped;
+   gate reopens on his word).
 3. Google Cloud project access for the Gmail OAuth app (dogfood test mode) when B3
    starts — agent will prepare exact console steps as a runbook.
