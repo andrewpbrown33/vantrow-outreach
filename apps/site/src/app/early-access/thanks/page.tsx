@@ -17,10 +17,7 @@ export const metadata: Metadata = {
 export default function EarlyAccessThanksPage() {
   return (
     <section className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6">
-      <p className="text-sm font-semibold uppercase tracking-widest text-brand-accent">
-        Early access
-      </p>
-      <h1 className="mt-2 text-4xl font-bold tracking-tight text-brand-dark">
+      <h1 className="text-4xl font-bold tracking-tight text-brand-dark">
         You&rsquo;re on the list.
       </h1>
       <p className="mx-auto mt-4 max-w-lg text-lg text-muted">

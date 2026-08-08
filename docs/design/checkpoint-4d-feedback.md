@@ -146,12 +146,36 @@ Andrew's reply to deck v2, applied as **v2.1** on the same PR:
   round records in sync with the feedback as delivered (this section). Flagged
   in case a different meaning was intended.
 
+## Round 5 — v2.1 verdict (2026-08-08, post-merge)
+
+- **R-4D-19 · Eyebrow text: gone, everywhere.** *"Remove eyebrow text on any
+  page, it looks low quality."* Applied across the deck (section labels are now
+  plain bold sentence case) and the live site (five instances: home hero
+  tagline, cracks-section lead-in, pricing "Founding teams", thanks-page "Early
+  access" — removed; the About endorsement line kept its words and lost the
+  costume). Now **design-law rule 6**: uppercase+tracked micro-labels, anything
+  classed `eyebrow`, and raw uppercase transforms are banned on product
+  surfaces. The Parcelrow port of that texture is revoked for this product;
+  A5's site-elevation spec updated.
+- **R-4D-20 · Verdict: serviceable framework — proceed.** *"Overall, the site
+  feels low quality UI, but it is a serviceable first pass at the
+  setup/framework. We can proceed, and then do a phased approach at improving
+  UI components on a per-page view once everything is setup."* Consequences:
+  this deck stands as the IA/structure contract (workstream C builds on it);
+  the program **proceeds to the engine (B1–B2 per phase-4 §6)**; a **phased
+  per-page UI elevation** is registered as a standing post-setup workstream —
+  the open palette question (R-4D-17), the CVD re-step, and per-component
+  quality passes ride it.
+- PR #8 merged by Andrew alongside this message.
+
 ## Sequence from here
 
 1. ~~Andrew picks a direction plate (or hybrid)~~ **Done 2026-08-08: "9" →
    Lantern × Pulse (R-4D-13 above).**
-2. Deck v2 rebuilt in that language — **v2.1 cut from round 4 (above); the
-   re-review is the live step.**
-3. Design law amended by decision-log row — **done (radius + ✓ carve-out)**;
-   palette re-validation **not needed** (grounds unchanged).
-4. Only then: workstream C (app UI build) — unlocks on deck v2 approval.
+2. ~~Deck v2 rebuilt in that language → re-review~~ **Done: v2.1 accepted as
+   the serviceable framework (R-4D-20).**
+3. ~~Design law amended by decision-log row~~ **Done** (radius + ✓ carve-out ·
+   rule 6 eyebrow ban); palette re-validation not needed (grounds unchanged).
+4. **Live: the build proceeds per phase-4 §6** — engine B1–B2 next, then
+   workstream C on this deck's structure; **phased per-page UI elevation after
+   setup** (palette question + CVD re-step + component passes carried there).

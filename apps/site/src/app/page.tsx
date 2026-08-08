@@ -39,10 +39,7 @@ export default function HomePage() {
       <section className="bg-background">
         <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-wider text-brand">
-              {brand.tagline}
-            </p>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-brand-dark sm:text-5xl">
+            <h1 className="text-4xl font-bold tracking-tight text-brand-dark sm:text-5xl">
               Follow-ups your whole team can run &mdash; built so no prospect
               slips through the cracks
             </h1>
@@ -112,12 +109,9 @@ export default function HomePage() {
         className="scroll-mt-20 bg-brand-dark text-white"
       >
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
-          <p className="text-sm font-semibold uppercase tracking-wider text-white/70">
-            The part we care most about
-          </p>
           <h2
             id="cracks-view-heading"
-            className="mt-3 max-w-3xl text-3xl font-bold tracking-tight"
+            className="max-w-3xl text-3xl font-bold tracking-tight"
           >
             Never let a prospect slip through the cracks
           </h2>

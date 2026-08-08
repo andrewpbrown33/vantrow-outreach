@@ -91,10 +91,7 @@ export default function PricingPage() {
       </div>
 
       <div className="mt-12 rounded-lg border-2 border-brand-accent bg-white p-6 sm:p-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-brand-accent">
-          Founding teams
-        </p>
-        <h2 className="mt-2 text-2xl font-bold text-brand-dark">
+        <h2 className="text-2xl font-bold text-brand-dark">
           Early access comes with founding terms
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">

@@ -93,9 +93,11 @@ Tailwind — the laws port; the no-framework architecture does not).
   `packages/brand/assets/{mark,mark-small,mark-dark,icon}.svg` with
   Parcelrow-style construction-law comments; header + favicon swap; wordmark case
   split applied (lowercase lockup / capitalized prose, pending confirm); decision row.
-- **A5 · Site elevation.** Rebuild the Phase 2 site's surface to the bar: eyebrow +
-  mono micro-label texture, statstrip, the annotated product-showcase pattern (real
-  screenshots with hotspot pins + static legend fallback once app screens exist),
+- **A5 · Site elevation.** Rebuild the Phase 2 site's surface to the bar
+  (eyebrow/caps micro-label texture is BANNED — R-4D-19, law rule 6; the
+  elevation leans on hierarchy, spacing, and the statstrip instead): the
+  annotated product-showcase pattern (real screenshots with hotspot pins +
+  static legend fallback once app screens exist),
   designed not-available paths, the final-CTA/footer ground shift, family manifest
   markers (footer family bar + Organization JSON-LD with
   `parentOrganization` → Vantrow), voice block + banned-word list
@@ -156,7 +158,13 @@ the producer emits from MVP regardless so the contract is proven.
 
 1. A1 deck + A2/A3 law-and-palette CI  → **Checkpoint 4-D** (Andrew: deck + logo pick
    + case confirm — one review sitting)
-2. B1–B2 (schema, scheduler; invariant tests I1/I8/I9)
+2. B1–B2 (schema, scheduler; invariant tests I1/I8/I9) — **substrate landed
+   2026-08-08**: migration `0002_engine_substrate.sql` + `packages/engine`
+   (planner I4 · sweep with one-transaction execute+advance · dispatcher seam
+   with checkSent crash-recovery). Invariants I1/I2/I3/I5/I8 + RLS isolation
+   green against real Postgres (locally via the machine cluster; in CI via a
+   postgres:16 service). Still riding: the Vercel cron endpoint + staleness
+   alarm (needs the platform app scaffold), I6/I7 reply/bounce/OOO logic (B4).
 3. B3–B5 (provider, reply loop, schedules; I2–I7 complete) + D (Connect producer)
 4. A4–A7 + C (brand assets, site elevation, app surfaces on the approved deck)
 5. Adversarial functional review on the edge-case mock dataset (the standing list:
@@ -171,10 +179,10 @@ the producer emits from MVP regardless so the contract is proven.
 
 1. ~~Logo pick + wordmark case confirm~~ **done 2026-08-07** — "the Signal" (G
    flipped), case split applied (decision log).
-2. ~~Checkpoint 4-D deck review~~ → redlined 2026-08-07; direction picked
-   2026-08-08 ("9" → Lantern × Pulse); round-4 redlines applied same day
-   (v2.1). **Live item: deck v2.1 re-review** (`deck-v2.html`) + the "failed"
-   vocabulary question + the palette question (stronger application shipped;
-   gate reopens on his word).
+2. ~~Checkpoint 4-D deck review~~ **closed 2026-08-08**: direction "9" →
+   Lantern × Pulse; rounds 4–5 applied; **v2.1 accepted as the serviceable
+   framework — proceed** (R-4D-20). Still riding: the "failed" vocabulary
+   question; the palette question + CVD re-step (carried by the **phased
+   per-page UI elevation** workstream registered for after setup).
 3. Google Cloud project access for the Gmail OAuth app (dogfood test mode) when B3
    starts — agent will prepare exact console steps as a runbook.
