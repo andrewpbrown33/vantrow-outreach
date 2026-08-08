@@ -166,6 +166,15 @@ the producer emits from MVP regardless so the contract is proven.
    postgres:16 service). Still riding: the Vercel cron endpoint + staleness
    alarm (needs the platform app scaffold), I6/I7 reply/bounce/OOO logic (B4).
 3. B3–B5 (provider, reply loop, schedules; I2–I7 complete) + D (Connect producer)
+   — **B3 landed 2026-08-08** (`packages/engine/src/gmail/`): GmailProvider on
+   the seam (deterministic touch Message-ID ⇒ idempotent send + exact
+   checkSent via `rfc822msgid:`), OAuth refresh client + `scripts/
+   gmail-connect.mjs` + runbook 07 (Andrew's console steps), inbound sync
+   (history cursor w/ full-sync fallback) and **B4's core behaviors with it**:
+   reply→I2, OOO→I6 incl. planner-routed auto-resume, DSN hard bounce→I7
+   suppress+halt, soft bounce recorded. B5's schedule mechanics were already
+   in the substrate. Still riding: soft-bounce retry orchestration, D
+   (Connect producer), the cron endpoint (platform scaffold).
 4. A4–A7 + C (brand assets, site elevation, app surfaces on the approved deck)
 5. Adversarial functional review on the edge-case mock dataset (the standing list:
    DST straddles, reply-vs-send races, OOO chains, hard-bounce storms, cap

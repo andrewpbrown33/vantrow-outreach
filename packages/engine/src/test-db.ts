@@ -1,10 +1,14 @@
 /** Real-Postgres test harness (phase-4 §1: the invariant suite runs against
  *  real Postgres, never mocks — the claims are about transactional behavior).
  *
- *  Resolution order:
+ *  Vitest runs test files in separate worker processes, so provisioning must
+ *  be concurrency-safe: each worker gets its OWN database (named by pid),
+ *  created under an advisory lock on the admin connection; the cluster start
+ *  tolerates "already running" races.
+ *
+ *  Resolution order for the admin connection:
  *   1. DATABASE_URL (CI's postgres service, or a dev's own database)
- *   2. The machine's Debian-style cluster (pg_ctlcluster 16 main) — present in
- *      the dev containers this repo builds in
+ *   2. The machine's Debian-style cluster (pg_ctlcluster 16 main)
  *  Anything else: the suite SKIPS locally but hard-fails under CI=true, so the
  *  invariants can never silently stop being checked where it matters. */
 
@@ -15,7 +19,8 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
-const TEST_DB = "nudgerow_engine_test";
+const WORKER_DB = `nudgerow_engine_test_${process.pid}`;
+const PROVISION_LOCK = 424_242;
 
 function sh(cmd: string, args: string[]): string {
   return execFileSync(cmd, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
@@ -52,31 +57,61 @@ async function applyMigrations(url: string): Promise<void> {
   }
 }
 
+/** Start the Debian cluster; a concurrent worker winning the race is success. */
+function ensureClusterUp(): void {
+  const online = (): boolean => {
+    try { return sh("pg_lsclusters", ["--no-header"]).includes(" online"); }
+    catch { return false; }
+  };
+  if (online()) return;
+  try {
+    sh("pg_ctlcluster", ["16", "main", "start"]);
+  } catch (err) {
+    // Another worker may be starting it right now; poll briefly before
+    // declaring failure.
+    const deadline = Date.now() + 10_000;
+    while (Date.now() < deadline) {
+      if (online()) return;
+      execFileSync("sleep", ["0.5"]);
+    }
+    throw err;
+  }
+}
+
+/** Mint this worker's database from the admin connection, serialized by an
+ *  advisory lock so concurrent workers can't trip CREATE DATABASE races. */
+async function mintWorkerDb(adminUrl: string): Promise<string> {
+  const admin = new pg.Client({ connectionString: adminUrl });
+  await admin.connect();
+  try {
+    await admin.query("select pg_advisory_lock($1)", [PROVISION_LOCK]);
+    await admin.query(`drop database if exists ${WORKER_DB} with (force)`);
+    await admin.query(`create database ${WORKER_DB}`);
+    await admin.query("select pg_advisory_unlock($1)", [PROVISION_LOCK]);
+  } finally {
+    await admin.end();
+  }
+  const url = new URL(adminUrl);
+  url.pathname = `/${WORKER_DB}`;
+  return url.toString();
+}
+
 let provisioned: string | null | undefined;
 
-/** Returns a connection URL to a migrated test database, or null when no
- *  Postgres is reachable (suite skips — loudly, and never under CI). */
+/** Returns a connection URL to this worker's own migrated test database, or
+ *  null when no Postgres is reachable (suite skips — loudly, never in CI). */
 export async function provisionTestDb(): Promise<string | null> {
   if (provisioned !== undefined) return provisioned;
-
-  if (process.env.DATABASE_URL) {
-    await applyMigrations(process.env.DATABASE_URL);
-    provisioned = process.env.DATABASE_URL;
-    return provisioned;
-  }
-
   try {
-    // Debian cluster tooling: start the machine's cluster and mint a clean DB.
-    const clusters = sh("pg_lsclusters", ["--no-header"]);
-    if (!clusters.trim()) throw new Error("no postgres cluster");
-    const started = clusters.includes(" online");
-    if (!started) sh("pg_ctlcluster", ["16", "main", "start"]);
-    const su = (sql: string) =>
-      sh("su", ["postgres", "-c", `psql -v ON_ERROR_STOP=1 -c "${sql}"`]);
-    su("alter user postgres password 'postgres'");
-    su(`drop database if exists ${TEST_DB} with (force)`);
-    su(`create database ${TEST_DB}`);
-    const url = `postgres://postgres:postgres@127.0.0.1:5432/${TEST_DB}`;
+    let adminUrl = process.env.DATABASE_URL;
+    if (!adminUrl) {
+      ensureClusterUp();
+      const su = (sql: string) =>
+        sh("su", ["postgres", "-c", `psql -v ON_ERROR_STOP=1 -c "${sql}"`]);
+      su("alter user postgres password 'postgres'");
+      adminUrl = "postgres://postgres:postgres@127.0.0.1:5432/postgres";
+    }
+    const url = await mintWorkerDb(adminUrl);
     await applyMigrations(url);
     provisioned = url;
     return provisioned;
