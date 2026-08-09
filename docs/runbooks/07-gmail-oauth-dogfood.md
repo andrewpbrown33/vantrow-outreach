@@ -34,11 +34,20 @@ verification at all**.
    Picker quirks: its search box filters FOLDERS only — **leave it empty** and
    the org shows as the root row; and a just-created org can lag ("No
    resources to display") — reload the New Project page and Browse again.
-   **If only a "No organization" row appears (warning triangle): select it and
-   Create** — everything in this runbook works identically without an org, and
-   the project can be moved under the org later in one step (IAM & Admin →
-   Settings → Migrate). A sign-out/sign-in (or incognito window) materializes
-   a lagging org faster than waiting, if you want it parented from the start.
+   If only a "No organization" row appears (warning triangle) and **Select
+   stays grayed** — Workspace accounts must parent under their real org, and
+   the picker hasn't caught up. **Bypass the picker with Cloud Shell** (the
+   `>_` icon in the console's top bar):
+
+   ```bash
+   gcloud organizations list                     # shows the org + its ID
+   gcloud projects create nudgerow-dogfood --organization=ORG_ID
+   gcloud config set project nudgerow-dogfood
+   gcloud services enable gmail.googleapis.com   # this IS §2 — skip to §3
+   ```
+
+   If `organizations list` prints nothing, the new org hasn't propagated:
+   retry in a fresh incognito session first, else wait ~15 minutes and rerun.
 3. The org is only the project's resource-hierarchy home; it does not limit
    which mailboxes can connect. But it changes §3: the console will now offer
    **User type: Internal** — see the warning there.
