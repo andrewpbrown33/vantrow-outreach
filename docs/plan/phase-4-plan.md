@@ -175,6 +175,10 @@ the producer emits from MVP regardless so the contract is proven.
    suppress+halt, soft bounce recorded. B5's schedule mechanics were already
    in the substrate. Still riding: soft-bounce retry orchestration, D
    (Connect producer), the cron endpoint (platform scaffold).
+   **Dogfood LIVE 2026-08-09:** runbook 07 executed — OAuth app in test
+   mode, prod Supabase carries 0002/0003 + the dogfood bootstrap, and
+   `andrew@getvantrow.com` is connected and verified against the live
+   Gmail API (eaverow/parcelrow pending, 30-second repeats).
 4. A4–A7 + C (brand assets, site elevation, app surfaces on the approved deck)
 5. Adversarial functional review on the edge-case mock dataset (the standing list:
    DST straddles, reply-vs-send races, OOO chains, hard-bounce storms, cap
