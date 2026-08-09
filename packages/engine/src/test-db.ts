@@ -78,6 +78,18 @@ function ensureClusterUp(): void {
   }
 }
 
+async function canConnect(url: string): Promise<boolean> {
+  const c = new pg.Client({ connectionString: url, connectionTimeoutMillis: 2000 });
+  try {
+    await c.connect();
+    await c.end();
+    return true;
+  } catch {
+    try { await c.end(); } catch { /* already closed */ }
+    return false;
+  }
+}
+
 /** Mint this worker's database from the admin connection, serialized by an
  *  advisory lock so concurrent workers can't trip CREATE DATABASE races. */
 async function mintWorkerDb(adminUrl: string): Promise<string> {
@@ -105,11 +117,22 @@ export async function provisionTestDb(): Promise<string | null> {
   try {
     let adminUrl = process.env.DATABASE_URL;
     if (!adminUrl) {
-      ensureClusterUp();
-      const su = (sql: string) =>
-        sh("su", ["postgres", "-c", `psql -v ON_ERROR_STOP=1 -c "${sql}"`]);
-      su("alter user postgres password 'postgres'");
       adminUrl = "postgres://postgres:postgres@127.0.0.1:5432/postgres";
+      // Vitest runs each test file in its own worker, so several processes hit
+      // this bootstrap at once. Probe first and only shell out if we must —
+      // concurrent `su postgres` calls fail transiently, and a silent skip
+      // would quietly stop checking the invariants.
+      for (let attempt = 0; !(await canConnect(adminUrl)); attempt++) {
+        if (attempt >= 5) throw new Error("postgres unreachable after bootstrap attempts");
+        try {
+          ensureClusterUp();
+          sh("su", ["postgres", "-c",
+            `psql -v ON_ERROR_STOP=1 -c "alter user postgres password 'postgres'"`]);
+        } catch {
+          // Another worker is mid-bootstrap; wait and re-probe.
+        }
+        execFileSync("sleep", ["1"]);
+      }
     }
     const url = await mintWorkerDb(adminUrl);
     await applyMigrations(url);

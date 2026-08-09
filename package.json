@@ -10,12 +10,14 @@
     "spec:lint": "npx -y @redocly/cli@latest lint docs/specs/vantrow-connect/openapi.yaml",
     "spec:fixtures": "node scripts/validate-connect-fixtures.mjs",
     "design:law": "bash scripts/check-design-law.sh",
-    "design:palette": "node scripts/check-state-palette.mjs"
+    "design:palette": "node scripts/check-state-palette.mjs",
+    "connect:adoption": "tsx scripts/render-connect-adoption.mjs"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "tsx": "^4.23.11"
   }
 }

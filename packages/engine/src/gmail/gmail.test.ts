@@ -154,76 +154,127 @@ const req: SendRequest = {
   threadAsReply: false,
 };
 
-describe("GmailProvider wire protocol", () => {
-  it("checkSent searches rfc822msgid and reports the wire message", async () => {
-    const { fetchImpl, calls } = scripted([
-      (url) => url.includes("/messages?q=")
-        ? json(200, { messages: [{ id: "m1" }] }) : undefined,
-    ]);
-    const p = new GmailProvider({
-      tokenSource: stubTokens(), senderDomain: "getvantrow.com", fetchImpl,
-    });
-    expect(await p.checkSent("abc:1"))
-      .toEqual({ sent: true, providerMessageId: "m1" });
-    expect(decodeURIComponent(calls[0]!))
-      .toContain("rfc822msgid:touch-abc-1@getvantrow.com");
-  });
+/** Provider wire protocol, rewritten against LIVE-GMAIL REALITY (2026-08-09):
+ *  Gmail replaces the Message-ID we supply, so identity rides the surviving
+ *  X-Nudgerow-Key header and recovery scans the SENT label index (immediately
+ *  consistent) rather than the lagging search index. These tests encode the
+ *  behavior the old suite got wrong — it passed while production duplicated. */
+describe("GmailProvider wire protocol (post-rewrite reality)", () => {
+  /** A Gmail that rewrites Message-ID, exactly as the live API does. */
+  function fakeGmail() {
+    const sent: {
+      id: string; threadId: string; key: string; rfcId: string;
+    }[] = [];
+    let n = 0;
+    const routes: Route[] = [
+      (url) => {
+        if (!url.includes("labelIds=SENT")) return undefined;
+        return json(200, { messages: [...sent].reverse().map((m) => ({ id: m.id })) });
+      },
+      (url, init) => {
+        if (!url.endsWith("/messages/send")) return undefined;
+        const raw = fromB64url((JSON.parse(String(init?.body)) as { raw: string }).raw);
+        n += 1;
+        const rec = {
+          id: `m${n}`,
+          threadId: `t${n}`,
+          key: /X-Nudgerow-Key: (.+)/.exec(raw)![1]!.trim(),
+          // Gmail's rewrite: our supplied Message-ID is discarded.
+          rfcId: `<CAK${n}@mail.gmail.com>`,
+        };
+        sent.push(rec);
+        return json(200, { id: rec.id, threadId: rec.threadId });
+      },
+      (url) => {
+        const m = /\/messages\/(m\d+)\?format=metadata/.exec(url);
+        if (!m) return undefined;
+        const rec = sent.find((s) => s.id === m[1]);
+        if (!rec) return json(404, {});
+        return json(200, {
+          id: rec.id, threadId: rec.threadId,
+          payload: { headers: [
+            { name: "X-Nudgerow-Key", value: rec.key },
+            { name: "Message-ID", value: rec.rfcId },
+          ] },
+        });
+      },
+    ];
+    return { routes, sent };
+  }
 
-  it("send is idempotent by touch: a prior wire message short-circuits", async () => {
-    const { fetchImpl, calls } = scripted([
-      (url) => url.includes("/messages?q=")
-        ? json(200, { messages: [{ id: "m1" }] }) : undefined,
-    ]);
+  it("returns the provider's OWN ids for persistence (not the one we supplied)", async () => {
+    const g = fakeGmail();
+    const { fetchImpl } = scripted(g.routes);
     const p = new GmailProvider({
       tokenSource: stubTokens(), senderDomain: "getvantrow.com", fetchImpl,
     });
     const res = await p.send(req);
-    expect(res).toEqual({ ok: true, providerMessageId: "m1" });
-    expect(calls.some((c) => c.startsWith("POST"))).toBe(false);
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.providerMessageId).toBe("m1");
+      expect(res.threadId).toBe("t1");
+      // The id a prospect's reply will quote — Gmail's, never ours.
+      expect(res.rfc822MessageId).toBe("<CAK1@mail.gmail.com>");
+    }
   });
 
-  it("send composes raw with the touch Message-ID and the idempotency key", async () => {
-    let sentRaw = "";
-    const { fetchImpl } = scripted([
-      (url) => url.includes("/messages?q=") ? json(200, {}) : undefined,
-      (url, init) => {
-        if (!url.endsWith("/messages/send")) return undefined;
-        sentRaw = (JSON.parse(String(init?.body)) as { raw: string }).raw;
-        return json(200, { id: "m2" });
-      },
-    ]);
+  it("checkSent finds a sent touch by X-Nudgerow-Key via the SENT label index", async () => {
+    const g = fakeGmail();
+    const { fetchImpl, calls } = scripted(g.routes);
     const p = new GmailProvider({
       tokenSource: stubTokens(), senderDomain: "getvantrow.com", fetchImpl,
     });
-    expect(await p.send(req)).toEqual({ ok: true, providerMessageId: "m2" });
-    const text = fromB64url(sentRaw);
-    expect(text).toContain("Message-ID: <touch-abc-1@getvantrow.com>");
-    expect(text).toContain("X-Nudgerow-Key: abc:1:0");
+    expect(await p.checkSent("abc:1")).toEqual({ sent: false });
+    await p.send(req);
+    expect(await p.checkSent("abc:1"))
+      .toEqual({ sent: true, providerMessageId: "m1" });
+    // Never consults the lagging search index.
+    expect(calls.some((c) => c.includes("rfc822msgid") || c.includes("q="))).toBe(false);
   });
 
-  it("threads a reply-step under the previous touch and reuses its threadId", async () => {
+  it("REGRESSION: a retry after a crash does not duplicate (the live-Gmail bug)", async () => {
+    const g = fakeGmail();
+    const { fetchImpl } = scripted(g.routes);
+    const p = new GmailProvider({
+      tokenSource: stubTokens(), senderDomain: "getvantrow.com", fetchImpl,
+    });
+    await p.send(req);                                    // epoch 0 reaches the wire
+    const retry = await p.send({ ...req, idempotencyKey: "abc:1:1" }); // crash retry
+    expect(retry.ok).toBe(true);
+    if (retry.ok) expect(retry.providerMessageId).toBe("m1"); // recovered, not resent
+    expect(g.sent).toHaveLength(1);
+  });
+
+  it("a first attempt (epoch 0) skips the scan — steady state stays cheap", async () => {
+    const g = fakeGmail();
+    const { fetchImpl, calls } = scripted(g.routes);
+    const p = new GmailProvider({
+      tokenSource: stubTokens(), senderDomain: "getvantrow.com", fetchImpl,
+    });
+    await p.send(req);
+    expect(calls.filter((c) => c.includes("labelIds=SENT"))).toHaveLength(0);
+  });
+
+  it("threads using the provider ids the caller persisted", async () => {
+    const g = fakeGmail();
     let body: { raw: string; threadId?: string } | undefined;
     const { fetchImpl } = scripted([
-      (url) => {
-        if (!url.includes("/messages?q=")) return undefined;
-        return decodeURIComponent(url).includes("touch-abc-1@")
-          ? json(200, { messages: [{ id: "p1", threadId: "th9" }] })
-          : json(200, {});
-      },
       (url, init) => {
         if (!url.endsWith("/messages/send")) return undefined;
         body = JSON.parse(String(init?.body));
-        return json(200, { id: "m3" });
+        return json(200, { id: "m9", threadId: "t9" });
       },
+      ...g.routes,
     ]);
     const p = new GmailProvider({
       tokenSource: stubTokens(), senderDomain: "getvantrow.com", fetchImpl,
     });
-    const res = await p.send({ ...req, touchRef: "abc:2",
-      idempotencyKey: "abc:2:0", threadAsReply: true });
-    expect(res.ok).toBe(true);
-    expect(body?.threadId).toBe("th9");
-    expect(fromB64url(body!.raw)).toContain("In-Reply-To: <touch-abc-1@getvantrow.com>");
+    await p.send({
+      ...req, touchRef: "abc:2", idempotencyKey: "abc:2:0", threadAsReply: true,
+      inReplyToMessageId: "<CAK1@mail.gmail.com>", threadId: "t1",
+    });
+    expect(body?.threadId).toBe("t1");
+    expect(fromB64url(body!.raw)).toContain("In-Reply-To: <CAK1@mail.gmail.com>");
   });
 
   it("refreshes the token once on 401 and retries", async () => {
@@ -231,7 +282,7 @@ describe("GmailProvider wire protocol", () => {
     let attempts = 0;
     const { fetchImpl } = scripted([
       (url) => {
-        if (!url.includes("/messages?q=")) return undefined;
+        if (!url.includes("labelIds=SENT")) return undefined;
         attempts += 1;
         return attempts === 1
           ? new Response("unauthorized", { status: 401 })
@@ -248,7 +299,6 @@ describe("GmailProvider wire protocol", () => {
 
   it("maps provider outages to a retryable failure, not an exception", async () => {
     const { fetchImpl } = scripted([
-      (url) => url.includes("/messages?q=") ? json(200, {}) : undefined,
       (url) => url.endsWith("/messages/send")
         ? new Response("backend error", { status: 500 }) : undefined,
     ]);

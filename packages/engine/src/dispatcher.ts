@@ -12,7 +12,9 @@
  */
 
 export interface SendRequest {
-  /** `${enrollmentId}:${stepOrder}:${attemptEpoch}` — also goes on the wire. */
+  /** `${enrollmentId}:${stepOrder}:${attemptEpoch}` — also goes on the wire
+   *  as `X-Nudgerow-Key`, the header that survives provider rewriting and so
+   *  carries touch identity (Gmail replaces Message-ID; see gmail/provider). */
   idempotencyKey: string;
   /** `${enrollmentId}:${stepOrder}` — epoch-agnostic touch identity. */
   touchRef: string;
@@ -22,10 +24,25 @@ export interface SendRequest {
   subject: string;
   bodyHtml: string;
   threadAsReply: boolean;
+  /** The PROVIDER-assigned RFC822 Message-ID of the previous touch, persisted
+   *  when that touch sent. Threading must quote the provider's id, not one we
+   *  invented, or replies thread nowhere. */
+  inReplyToMessageId?: string;
+  /** Provider conversation id of the previous touch, likewise persisted. */
+  threadId?: string;
 }
 
 export type SendResult =
-  | { ok: true; providerMessageId: string }
+  | {
+      ok: true;
+      providerMessageId: string;
+      /** Provider conversation id — persist for the next step's threading. */
+      threadId?: string;
+      /** The RFC822 Message-ID the PROVIDER assigned. Persist it: a prospect's
+       *  reply quotes this in In-Reply-To, and that's how replies match back
+       *  to their touch. */
+      rfc822MessageId?: string;
+    }
   | { ok: false; error: string };
 
 export interface Provider {
@@ -61,9 +78,12 @@ export class FakeProvider implements Provider {
       this.failKeys.delete(req.idempotencyKey);
       return { ok: false, error: "simulated transport failure" };
     }
+    const n = this.delivered.size + 1;
     const result: SendResult = {
       ok: true,
-      providerMessageId: `fake-${this.delivered.size + 1}`,
+      providerMessageId: `fake-${n}`,
+      threadId: `fake-thread-${n}`,
+      rfc822MessageId: `<fake-${n}@provider.test>`,
     };
     this.delivered.set(req.idempotencyKey, { req, result });
     if (this.crashAfterAckKeys.has(req.idempotencyKey)) {
