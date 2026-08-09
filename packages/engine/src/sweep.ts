@@ -36,7 +36,7 @@ interface ClaimedRow {
 
 export async function sweepOnce(
   pool: Pool,
-  provider: Provider,
+  provider: ProviderSource,
   opts: SweepOptions = {},
 ): Promise<SweepStats> {
   const stats: SweepStats = { claimed: 0, sent: 0, deferred: 0, skipped: 0, failed: 0 };
@@ -54,6 +54,19 @@ export async function sweepOnce(
 }
 
 export type Outcome = "sent" | "deferred" | "skipped" | "failed";
+
+/** One provider, or one per mailbox — R10 means an org sends as several
+ *  identities at once, and each needs its own credentials. */
+export type ProviderSource =
+  | Provider
+  | ((mailboxId: string) => Provider | undefined);
+
+function resolveProvider(
+  source: ProviderSource,
+  mailboxId: string,
+): Provider | undefined {
+  return typeof source === "function" ? source(mailboxId) : source;
+}
 
 /** I6's second half: OOO pauses auto-resume when their return date passes —
  *  through the planner, so the re-armed touch lands inside the send window,
@@ -142,7 +155,7 @@ interface WorkRow {
  *  and the execution (the I2 reply race). */
 export async function executeOne(
   pool: Pool,
-  provider: Provider,
+  providerSource: ProviderSource,
   claim: { id: string; claim_token: string; attempt_epoch: number },
   opts: SweepOptions = {},
 ): Promise<Outcome> {
@@ -178,6 +191,25 @@ export async function executeOne(
         (w.state !== "scheduled" && w.state !== "active")) {
       await client.query("rollback");
       return "skipped";
+    }
+
+    const provider = resolveProvider(providerSource, w.mailbox_id);
+    if (!provider) {
+      // No credentials for this mailbox (never connected, or revoked). Defer
+      // rather than fail: the work is still due once it is reconnected.
+      await client.query(
+        `update public.enrollments
+            set next_touch_at = now() + interval '1 hour',
+                claimed_at = null, claim_token = null, updated_at = now()
+          where id = $1`, [claim.id]);
+      await client.query(
+        `insert into public.events
+           (workspace_id, type, enrollment_id, sequence_id, mailbox_id, payload)
+         values ($1, 'touch.deferred', $2, $3, $4, $5)`,
+        [w.workspace_id, claim.id, w.sequence_id, w.mailbox_id,
+         { reason: "mailbox_not_connected" }]);
+      await client.query("commit");
+      return "deferred";
     }
 
     const events = (type: string, payload: Record<string, unknown> = {}) =>

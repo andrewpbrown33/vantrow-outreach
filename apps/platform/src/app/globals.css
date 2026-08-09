@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+ * Brand tokens.
+ *
+ * The values for the --brand-* custom properties are injected by the root
+ * layout via brandCssVars(brand) from @vantrow/brand: the light palette (plus
+ * typography/radius/spacing tokens) on :root, and the dark palette on
+ * :root[data-theme="dark"]. The Tailwind theme below resolves to those
+ * variables, so a brand or palette swap requires zero Tailwind or CSS
+ * changes — only the brand package.
+ *
+ * Note on dark mode: the dark palette is injected and ready, but the site
+ * does not set data-theme yet — the interim identity renders light-only, and
+ * wiring a theme switch belongs to the Phase-2 design pass (brand.config.ts
+ * carries dark as a first-class palette so it is never bolted on later).
+ */
+@theme inline {
+  --color-brand: var(--brand-primary);
+  --color-brand-dark: var(--brand-primary-dark);
+  --color-brand-accent: var(--brand-accent);
+  --color-background: var(--brand-background);
+  --color-foreground: var(--brand-foreground);
+  --color-muted: var(--brand-muted);
+  --color-alert: var(--brand-alert);
+  --color-success: var(--brand-success);
+  --color-info: var(--brand-info);
+  --color-highlight: var(--brand-highlight);
+  --color-row-thread: var(--brand-row-thread);
+  --font-sans: var(--brand-font-sans);
+  --font-display: var(--brand-font-display);
+  --font-mono: var(--brand-font-mono);
+  --radius-sm: var(--brand-radius-sm);
+  --radius-md: var(--brand-radius-md);
+  --radius-lg: var(--brand-radius-lg);
+}
+
+body {
+  background-color: var(--brand-background);
+  color: var(--brand-foreground);
+  font-family: var(--brand-font-sans);
+}
+
+/*
+ * Honeypot field: visually removed without display:none so naive bots still
+ * see and fill it. Paired with tabIndex={-1}, aria-hidden and autocomplete
+ * off on the input itself.
+ */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

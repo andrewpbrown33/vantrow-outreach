@@ -5,7 +5,7 @@ export { usFederalHolidays } from "./holidays";
 export { FakeProvider } from "./dispatcher";
 export type { Provider, SendRequest, SendResult } from "./dispatcher";
 export { sweepOnce, executeOne } from "./sweep";
-export type { SweepOptions, SweepStats } from "./sweep";
+export type { SweepOptions, SweepStats, ProviderSource } from "./sweep";
 export {
   GMAIL_SCOPES, buildAuthUrl, exchangeCode, RefreshTokenSource,
 } from "./gmail/oauth";

@@ -1,6 +1,12 @@
-/** Pure Gmail-adapter tests: the RFC822 layer (the Message-ID-as-touch-identity
- *  trick), the inbound classifier on realistic fixtures, and GmailProvider's
- *  wire protocol against a scripted fetch — no Google anywhere. */
+/** Pure Gmail-adapter tests: the RFC822 composition layer, the inbound
+ *  classifier on realistic fixtures, and GmailProvider's wire protocol against
+ *  a scripted fetch — no Google anywhere.
+ *
+ *  Note on the rfc822 block below: the synthetic `touch-…@domain` Message-ID
+ *  is NO LONGER how identity travels (Gmail rewrites that header — see
+ *  provider.ts). It remains the fallback for providers that honor a supplied
+ *  Message-ID, so it stays tested; the load-bearing identity is
+ *  `X-Nudgerow-Key`, exercised in the provider block. */
 
 import { describe, expect, it } from "vitest";
 import type { SendRequest } from "../dispatcher";

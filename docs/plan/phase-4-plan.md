@@ -135,6 +135,14 @@ Build order follows the dependency chain; §1 invariants are the acceptance bar.
 
 ## §4 — Workstream C: app surfaces
 
+> **Scaffold + heartbeat LANDED 2026-08-09.** `apps/platform` (second Vercel
+> project) with `/api/cron/tick` — the Gate-5 dispatcher made real: inbound
+> sync → engine sweep → Connect drain, every minute, CRON_SECRET-gated, jobs
+> isolated so one outage can't silence the others, and the response body is
+> the tick's own operator report (207 + named errors on partial failure).
+> Deploy steps in runbook 08. **Next: the deck v2.1 surfaces themselves**
+> (Activity home, Sequences overview, sequence detail) on real data.
+
 Built only after Checkpoint 4-D approves the deck; every view exists in the deck
 first. Cracks home · sequences board · sequence builder (auto-email steps primary,
 per-step draft-vs-auto control) · sequence detail with enrollment states · prospects
