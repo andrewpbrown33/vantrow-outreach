@@ -83,8 +83,9 @@ export function classifyInbound(msg: NormalizedInbound): ClassifiedInbound {
     return { classification: "ooo", oooReturnDate, touch };
   }
 
-  // A human wrote back: a touch reference makes it a reply outright; without
-  // one, the caller may still match by sender address.
+  // A human wrote back. A synthetic touch reference proves it outright; with
+  // Gmail (which rewrites Message-ID) the caller resolves the quoted provider
+  // id against the ledger, or falls back to the sender address.
   return { classification: touch ? "reply" : "other", touch };
 }
 
@@ -112,11 +113,32 @@ export async function processInbound(
 
     const cls = classifyInbound(msg);
 
-    // Link an enrollment: exact touch linkage first, sender address second.
+    // Link an enrollment. Exact linkage comes from the ledger: a reply quotes
+    // the PROVIDER's Message-ID (Gmail rewrites ours), and that id was
+    // persisted when the touch sent. Legacy synthetic-id parsing is kept as a
+    // secondary path for non-rewriting providers on the same seam; sender
+    // address is the final fallback.
     let enrollment: {
       id: string; prospect_id: string; state: string; prospect_email: string;
     } | null = null;
-    if (cls.touch) {
+
+    const quoted = [
+      ...(msg.headers["in-reply-to"] ?? "").split(/\s+/),
+      ...(msg.headers["references"] ?? "").split(/\s+/),
+    ].filter((t) => t.startsWith("<") && t.endsWith(">"));
+    if (quoted.length > 0) {
+      enrollment = (await client.query(
+        `select e.id, e.prospect_id, e.state, p.email as prospect_email
+           from touch_ledger t
+           join enrollments e on e.id = t.enrollment_id
+           join prospects p on p.id = e.prospect_id
+          where t.workspace_id = $1
+            and t.provider_rfc822_message_id = any($2::text[])
+          order by t.created_at desc limit 1`,
+        [ws, quoted],
+      )).rows[0] ?? null;
+    }
+    if (!enrollment && cls.touch) {
       enrollment = (await client.query(
         `select e.id, e.prospect_id, e.state, p.email as prospect_email
            from enrollments e join prospects p on p.id = e.prospect_id

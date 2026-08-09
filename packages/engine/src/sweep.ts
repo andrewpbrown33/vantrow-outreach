@@ -337,6 +337,24 @@ export async function executeOne(
       return "skipped";
     }
 
+    // Threading quotes the PROVIDER's ids from the previous touch (Gmail
+    // rewrites Message-ID, so an id we invented threads nowhere).
+    let inReplyToMessageId: string | undefined;
+    let threadId: string | undefined;
+    if (step.thread_as_reply && w.current_step_order > 1) {
+      const prev = await client.query<{
+        provider_rfc822_message_id: string | null; provider_thread_id: string | null;
+      }>(
+        `select provider_rfc822_message_id, provider_thread_id
+           from public.touch_ledger
+          where enrollment_id = $1 and state = 'sent' and step_order < $2
+          order by step_order desc limit 1`,
+        [claim.id, w.current_step_order],
+      );
+      inReplyToMessageId = prev.rows[0]?.provider_rfc822_message_id ?? undefined;
+      threadId = prev.rows[0]?.provider_thread_id ?? undefined;
+    }
+
     const vars: Record<string, string> = {
       firstName: w.first_name ?? "",
       lastName: w.last_name ?? "",
@@ -361,6 +379,8 @@ export async function executeOne(
       subject: fill(template.subject),
       bodyHtml: fill(template.body_html),
       threadAsReply: step.thread_as_reply,
+      inReplyToMessageId,
+      threadId,
     });
     await client.query("select public.increment_cogs($1, 'provider_send_calls', 1)",
       [w.workspace_id]);
@@ -382,8 +402,12 @@ export async function executeOne(
     }
 
     await client.query(
-      "update public.touch_ledger set state = 'sent', provider_message_id = $2 where id = $1",
-      [ledgerId, result.providerMessageId]);
+      `update public.touch_ledger
+          set state = 'sent', provider_message_id = $2,
+              provider_thread_id = $3, provider_rfc822_message_id = $4
+        where id = $1`,
+      [ledgerId, result.providerMessageId, result.threadId ?? null,
+       result.rfc822MessageId ?? null]);
     await events("touch.sent", {
       step_order: w.current_step_order,
       provider_message_id: result.providerMessageId,
