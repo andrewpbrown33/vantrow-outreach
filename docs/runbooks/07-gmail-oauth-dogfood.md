@@ -153,6 +153,17 @@ GOOGLE_OAUTH_CLIENT_ID=... GOOGLE_OAUTH_CLIENT_SECRET=... \
    in `public.mailboxes` first.)
 3. Repeat per mailbox (getvantrow / eaverow / parcelrow).
 
+> **Status 2026-08-09: FIRST MAILBOX LIVE.** `andrew@getvantrow.com` connected
+> (verified against the live Gmail API; credential row in
+> `mailbox_credentials`, prod Supabase carries migrations 0002/0003 + the
+> dogfood bootstrap). eaverow / parcelrow pending — each is a 30-second
+> repeat. **Chat-assisted connect path (proven):** the agent builds the §6
+> auth URL, you approve in the browser, the redirect lands on a dead
+> 127.0.0.1 page, you paste that page's full URL back — the agent exchanges
+> the code and hands you the one-line SQL. No local node/repo needed.
+> Test-mode reminder: refresh tokens expire ~7 days; reconnect is the same
+> 30-second dance.
+
 ## §7 · What this unlocks / what still gates
 
 - Unlocked: the engine's `GmailProvider` can send as connected mailboxes and
