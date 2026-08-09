@@ -122,6 +122,20 @@ Give the agent (or put in the deploy env when the platform app exists):
 
 Secrets live in env/Vercel project settings — never in the repo.
 
+> **Status 2026-08-08: DONE.** Client created in project `nudgerow-dogfood`
+> (Desktop app). Client ID (public by design):
+> `517832856056-pamqalipsibcm05j5j32du018qmbe8dd.apps.googleusercontent.com`.
+> The secret lives only in Andrew's env — rotate anytime via Credentials →
+> the client → Reset secret; only the env value changes.
+
+## §6a · Database prep (once, before the first connect)
+
+In the Supabase SQL editor, three pastes in order (each idempotent):
+1. `supabase/migrations/0002_engine_substrate.sql`
+2. `supabase/migrations/0003_gmail_adapter.sql`
+3. `supabase/bootstrap-dogfood.sql` — creates the dogfood workspace + the
+   three mailbox rows the credential upsert attaches to.
+
 ## §6 · Connect a mailbox (per mailbox, repeatable)
 
 On any machine with node 22+ and this repo:
