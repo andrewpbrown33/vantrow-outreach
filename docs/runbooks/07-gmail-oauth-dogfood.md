@@ -24,6 +24,28 @@ blocked you creating it ("phone number used too many times"), stop — you don't
 need it here, and when you do want that address, §8b gets it with **no phone
 verification at all**.
 
+**Cost: zero.** No subscription, no billing account, no free trial. Ignore
+every "$300 credits / Try for free / Start free" banner — those sell compute
+products this runbook never touches. Gmail-API OAuth in test mode is free.
+
+**Fastest path (skips the org picker entirely):** open Cloud Shell (the `>_`
+icon in the console top bar) and paste:
+
+```bash
+ORG=$(gcloud organizations list --format='value(name)' 2>/dev/null | head -1 | tr -dc 0-9)
+if [ -n "$ORG" ]; then gcloud projects create nudgerow-dogfood --organization="$ORG"; else gcloud projects create nudgerow-dogfood; fi
+gcloud config set project nudgerow-dogfood
+gcloud services enable gmail.googleapis.com
+```
+
+That covers §1–§2. Then three direct links finish the UI part:
+consent screen → https://console.cloud.google.com/auth/overview?project=nudgerow-dogfood
+("Get started": name `Nudgerow`, External, stay in Testing) · test users →
+https://console.cloud.google.com/auth/audience?project=nudgerow-dogfood (add
+the three mailboxes) · client →
+https://console.cloud.google.com/auth/clients/create?project=nudgerow-dogfood
+(**Desktop app**) — then copy the Client ID + secret (§5).
+
 ## §1 · Project
 
 1. https://console.cloud.google.com → project picker → **New project**.
