@@ -6,6 +6,7 @@
  *  message id. */
 
 import type { Pool } from "pg";
+import { emitSequenceProgress } from "../connect-emit";
 import { parseTouchMessageId } from "./rfc822";
 
 export interface NormalizedInbound {
@@ -120,6 +121,7 @@ export async function processInbound(
     // address is the final fallback.
     let enrollment: {
       id: string; prospect_id: string; state: string; prospect_email: string;
+      sequence_id: string;
     } | null = null;
 
     const quoted = [
@@ -128,7 +130,7 @@ export async function processInbound(
     ].filter((t) => t.startsWith("<") && t.endsWith(">"));
     if (quoted.length > 0) {
       enrollment = (await client.query(
-        `select e.id, e.prospect_id, e.state, p.email as prospect_email
+        `select e.id, e.prospect_id, e.state, e.sequence_id, p.email as prospect_email
            from touch_ledger t
            join enrollments e on e.id = t.enrollment_id
            join prospects p on p.id = e.prospect_id
@@ -140,7 +142,7 @@ export async function processInbound(
     }
     if (!enrollment && cls.touch) {
       enrollment = (await client.query(
-        `select e.id, e.prospect_id, e.state, p.email as prospect_email
+        `select e.id, e.prospect_id, e.state, e.sequence_id, p.email as prospect_email
            from enrollments e join prospects p on p.id = e.prospect_id
           where e.id = $1 and e.workspace_id = $2`,
         [cls.touch.enrollmentId, ws],
@@ -148,7 +150,7 @@ export async function processInbound(
     }
     if (!enrollment && cls.classification !== "bounce_soft") {
       enrollment = (await client.query(
-        `select e.id, e.prospect_id, e.state, p.email as prospect_email
+        `select e.id, e.prospect_id, e.state, e.sequence_id, p.email as prospect_email
            from enrollments e join prospects p on p.id = e.prospect_id
           where e.workspace_id = $1 and e.mailbox_id = $2
             and lower(p.email) = lower($3)
@@ -160,6 +162,7 @@ export async function processInbound(
 
     const classification: Classification =
       cls.classification === "other" && enrollment ? "reply" : cls.classification;
+    const seqId = enrollment?.sequence_id;
 
     const inserted = await client.query(
       `insert into inbound_messages
@@ -201,6 +204,12 @@ export async function processInbound(
           [enrollment.id],
         );
         await events("inbound.reply", { gmail_message_id: msg.gmailMessageId });
+        if (seqId) {
+          await emitSequenceProgress(client, {
+            workspaceId: ws, sequenceId: seqId, reason: "inbound.reply",
+            occurredAt: msg.receivedAt,
+          });
+        }
       } else if (classification === "ooo") {
         // I6: pause with the return date; NEVER marks a reply. Default resume
         // is +3 days when the auto-reply names no date.
@@ -239,6 +248,12 @@ export async function processInbound(
         await events("inbound.bounce_hard", {
           address: addr, dsn_status: cls.dsnStatus ?? null,
         });
+        if (seqId) {
+          await emitSequenceProgress(client, {
+            workspaceId: ws, sequenceId: seqId, reason: "inbound.bounce_hard",
+            occurredAt: msg.receivedAt,
+          });
+        }
       } else if (classification === "bounce_soft") {
         // Soft bounces retry within provider policy before classifying (I7);
         // the ledger row + event are the record. Retry orchestration is B4/B5.

@@ -145,6 +145,16 @@ note type (R9) · data export (sequence states, metrics, prospect lists+states �
 
 ## §5 — Workstream D: Connect producer (Gate 6 applied)
 
+> **LANDED 2026-08-09.** `packages/connect` (mapping · envelope · HMAC
+> signing · transactional outbox + delivery worker · `outreach.*` metrics),
+> migration 0005, engine emission on every terminal enrollment transition,
+> and `docs/specs/vantrow-connect/ADOPTION.md` **generated from the
+> producer's own code** (`pnpm connect:adoption`). Producer output is
+> validated against the spec's normative JSON Schemas in the test suite —
+> the mechanical check Eaverow lacked when it shipped 0%. Remaining:
+> `project.created` fires from the sequence-create surface (workstream C),
+> and the outbox drain joins the minute cron with the platform scaffold.
+
 `project` = sequence, always populated; status mapping per the gate row
 (draft→lead, scheduled→quoted, active/paused→in_progress with detail, finished→
 completed, archived→closed, canceled→canceled); `outreach.*` metric/event catalog

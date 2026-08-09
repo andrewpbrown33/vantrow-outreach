@@ -10,6 +10,7 @@
 
 import type { Pool, PoolClient } from "pg";
 import type { Provider } from "./dispatcher";
+import { emitSequenceProgress } from "./connect-emit";
 import { nextFireTime, snapToWindow, type SendSchedule } from "./planner";
 
 export interface SweepOptions {
@@ -500,5 +501,11 @@ async function advance(
        values ($1, 'enrollment.finished_no_reply', $2, $3, $4, '{}')`,
       [w.workspace_id, enrollmentId, w.sequence_id, w.mailbox_id],
     );
+    // Workstream D: the cracks count just moved — tell the dashboard, in this
+    // same transaction.
+    await emitSequenceProgress(client, {
+      workspaceId: w.workspace_id, sequenceId: w.sequence_id,
+      reason: "enrollment.finished_no_reply",
+    });
   }
 }
