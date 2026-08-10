@@ -674,3 +674,59 @@ export async function upsertProspects(
     client.release();
   }
 }
+
+/** Approve a parked draft-first step so the engine may send it (protocol §10).
+ *
+ *  Two halves, both required. Recording WHICH step was approved is what stops
+ *  the sweep meeting the same draft_first step on its next tick and parking it
+ *  again; re-arming next_touch_at is what makes the enrollment visible to the
+ *  claim query at all, because that column IS the schedule. Before 0006 only
+ *  the parking half existed, so a draft-first step was a permanent dead end.
+ *
+ *  The UPDATE repeats the paused/pause_reason guard from the read, so two
+ *  approvals racing the same enrollment resolve to one: the loser matches no
+ *  row and reports false rather than double-arming it.
+ */
+export async function approveDraft(
+  ws: string, enrollmentId: string, now: Date = new Date(),
+): Promise<boolean> {
+  const pool = getPool();
+  const { rows } = await pool.query<{
+    sequence_id: string; current_step_order: number; prospect_tz: string | null;
+  }>(
+    `select e.sequence_id, e.current_step_order, p.timezone as prospect_tz
+       from public.enrollments e
+       join public.prospects p on p.id = e.prospect_id
+      where e.workspace_id = $1 and e.id = $2
+        and e.state = 'paused' and e.pause_reason = 'awaiting draft approval'`,
+    [ws, enrollmentId],
+  );
+  const row = rows[0];
+  if (!row) return false;
+
+  const seq = await getSequence(ws, row.sequence_id);
+  if (!seq) return false;
+
+  // Zero interval: approval means "it may go now", subject to the send window.
+  const fireAt = nextFireTime(
+    now, { days: 0, hours: 0 }, scheduleFor(seq, row.prospect_tz), Math.random());
+
+  const upd = await pool.query(
+    `update public.enrollments
+        set state = 'scheduled', pause_reason = null,
+            draft_approved_step = current_step_order,
+            next_touch_at = $3, updated_at = now()
+      where workspace_id = $1 and id = $2
+        and state = 'paused' and pause_reason = 'awaiting draft approval'`,
+    [ws, enrollmentId, fireAt],
+  );
+  if (upd.rowCount === 0) return false;
+
+  await pool.query(
+    `insert into public.events
+       (workspace_id, type, enrollment_id, sequence_id, payload)
+     values ($1, 'touch.draft_approved', $2, $3, $4)`,
+    [ws, enrollmentId, row.sequence_id, { step_order: row.current_step_order }],
+  );
+  return true;
+}

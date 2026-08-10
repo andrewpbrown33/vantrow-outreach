@@ -124,6 +124,7 @@ interface WorkRow {
   workspace_id: string;
   state: string;
   current_step_order: number;
+  draft_approved_step: number | null;
   attempt_epoch: number;
   replied_at: Date | null;
   claim_token: string | null;
@@ -166,7 +167,7 @@ export async function executeOne(
     await client.query("begin");
     const work = await client.query<WorkRow>(
       `select e.workspace_id, e.state, e.current_step_order, e.attempt_epoch,
-              e.replied_at, e.claim_token,
+              e.draft_approved_step, e.replied_at, e.claim_token,
               p.email as prospect_email, p.first_name, p.last_name, p.company,
               p.title, p.custom, p.timezone as prospect_tz, p.opted_out_at,
               s.id as sequence_id, s.state as seq_state, s.timezone_source,
@@ -347,8 +348,15 @@ export async function executeOne(
     }
 
     // Protocol §10: draft-first steps wait for a human; the engine never
-    // auto-sends them. Approval re-arms the enrollment (workstream C surface).
-    if (step.mode === "draft_first") {
+    // auto-sends them. Approval (approveDraft, on the sequence screen) records
+    // the approved step order and re-arms the timer — the comparison is against
+    // THIS step, so approving step 2 never carries forward to step 3.
+    //
+    // Parking clears next_touch_at, and next_touch_at is the schedule, so
+    // before 0006 recorded the approval this branch was a permanent dead end:
+    // re-arming alone would meet the same draft_first step on the next tick and
+    // park it again, forever, with nothing surfaced anywhere.
+    if (step.mode === "draft_first" && w.draft_approved_step !== w.current_step_order) {
       await resolve(
         "state = 'paused', next_touch_at = null, pause_reason = 'awaiting draft approval'",
         []);

@@ -293,6 +293,45 @@ describe.skipIf(!dbUrl)("engine invariants (real Postgres)", () => {
     expect((await enrollment(b.enrollmentId)).current_step_order).toBe(2);
   });
 
+  it("never auto-sends a draft-first step, and sends it once approved", async () => {
+    // The program plan's own Phase-4 verification row: no code path sends
+    // tenant email without an approved draft. Before 0006 the second half of
+    // this test was impossible — approval had nowhere to be recorded, so the
+    // enrollment parked here permanently.
+    const s = await seed();
+    await pool!.query(
+      `update sequence_steps set mode = 'draft_first'
+        where sequence_id = $1 and step_order = 1`, [s.sequenceId]);
+
+    const provider = new FakeProvider();
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+
+    let e = await enrollment(s.enrollmentId);
+    expect(e.state).toBe("paused");
+    expect(e.pause_reason).toBe("awaiting draft approval");
+    expect(e.next_touch_at).toBeNull();
+    // Nothing was attempted for THIS enrollment (other seeds share the sweep).
+    const before = await pool!.query<{ c: number }>(
+      "select count(*)::int as c from touch_ledger where enrollment_id = $1",
+      [s.enrollmentId]);
+    expect(before.rows[0].c).toBe(0);
+
+    // What approveDraft does: record the approved step, hand the timer back.
+    await pool!.query(
+      `update enrollments
+          set state = 'scheduled', pause_reason = null,
+              draft_approved_step = current_step_order, next_touch_at = now()
+        where id = $1`, [s.enrollmentId]);
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+
+    e = await enrollment(s.enrollmentId);
+    expect(e.current_step_order).toBe(2); // it sent and advanced
+    const after = await pool!.query<{ c: number }>(
+      `select count(*)::int as c from touch_ledger
+        where enrollment_id = $1 and state = 'sent'`, [s.enrollmentId]);
+    expect(after.rows[0].c).toBe(1);
+  });
+
   it("sends step 1, plans step 2 at +3 days, and finishes into the cracks", async () => {
     const s = await seed({ steps: 1 });
     const provider = new FakeProvider();

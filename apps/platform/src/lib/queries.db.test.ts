@@ -266,3 +266,76 @@ run()("workspace scoping", () => {
     expect(await q.listSteps(WS_B, f.sequenceId)).toEqual([]);
   });
 });
+
+/** What the sweep does to a draft-first step: parks it and clears the timer.
+ *  Mirrors the branch in packages/engine/src/sweep.ts exactly — including the
+ *  null next_touch_at, which is what made this a dead end before 0006. */
+async function sweepParksDraft(enrollmentId: string): Promise<void> {
+  await admin.query(
+    `update public.enrollments
+        set state = 'paused', next_touch_at = null,
+            pause_reason = 'awaiting draft approval', claimed_at = null
+      where id = $1`, [enrollmentId]);
+}
+
+run()("approveDraft", () => {
+  it("re-arms a parked draft-first step and records the step it approved", async () => {
+    const f = await seed(WS_A, ["d1@x.com"], "draft-approve");
+    await admin.query(
+      `update public.sequence_steps set mode = 'draft_first'
+        where sequence_id = $1 and step_order = 1`, [f.sequenceId]);
+    await q.enrollProspects(WS_A, f.sequenceId, f.prospectIds);
+    const [e] = await q.listEnrollments(WS_A, f.sequenceId);
+    await sweepParksDraft(e.id);
+
+    expect(await q.approveDraft(WS_A, e.id)).toBe(true);
+
+    const { rows } = await admin.query(
+      `select state, pause_reason, next_touch_at, draft_approved_step,
+              current_step_order
+         from public.enrollments where id = $1`, [e.id]);
+    expect(rows[0].state).toBe("scheduled");
+    expect(rows[0].pause_reason).toBeNull();
+    expect(rows[0].next_touch_at).not.toBeNull(); // the timer is back
+    // Recorded per step: this is what stops the sweep re-parking it forever.
+    expect(rows[0].draft_approved_step).toBe(rows[0].current_step_order);
+  });
+
+  it("does not pre-approve a later step", async () => {
+    const f = await seed(WS_A, ["d2@x.com"], "draft-per-step");
+    await admin.query(
+      `update public.sequence_steps set mode = 'draft_first'
+        where sequence_id = $1 and step_order = 1`, [f.sequenceId]);
+    await q.enrollProspects(WS_A, f.sequenceId, f.prospectIds);
+    const [e] = await q.listEnrollments(WS_A, f.sequenceId);
+    await sweepParksDraft(e.id);
+    await q.approveDraft(WS_A, e.id);
+
+    // The engine advances to step 2; the step-1 approval must not carry.
+    await admin.query(
+      `update public.enrollments set current_step_order = 2 where id = $1`, [e.id]);
+    const { rows } = await admin.query(
+      `select draft_approved_step, current_step_order
+         from public.enrollments where id = $1`, [e.id]);
+    expect(rows[0].draft_approved_step).not.toBe(rows[0].current_step_order);
+  });
+
+  it("refuses an enrollment that is not awaiting approval", async () => {
+    const f = await seed(WS_A, ["d3@x.com"], "draft-noop");
+    await q.enrollProspects(WS_A, f.sequenceId, f.prospectIds);
+    const [e] = await q.listEnrollments(WS_A, f.sequenceId);
+    expect(await q.approveDraft(WS_A, e.id)).toBe(false);
+  });
+
+  it("will not approve across a workspace boundary", async () => {
+    const f = await seed(WS_A, ["d4@x.com"], "draft-tenancy");
+    await q.enrollProspects(WS_A, f.sequenceId, f.prospectIds);
+    const [e] = await q.listEnrollments(WS_A, f.sequenceId);
+    await sweepParksDraft(e.id);
+
+    expect(await q.approveDraft(WS_B, e.id)).toBe(false);
+    const { rows } = await admin.query(
+      "select state from public.enrollments where id = $1", [e.id]);
+    expect(rows[0].state).toBe("paused"); // untouched by the wrong tenant
+  });
+});
