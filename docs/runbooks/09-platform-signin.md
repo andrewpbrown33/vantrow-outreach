@@ -78,15 +78,27 @@ deployment.
 
 ## §4 · Tell Supabase where the link may land (the step people miss)
 
+**Do not skip this one.** A new Supabase project ships with **Site URL =
+`http://localhost:3000`**, so until you change it the magic link points at a
+machine that isn't there. The symptom is not an error page — it is a browser
+that cannot connect at all, which reads like a broken deploy rather than a
+missing setting. (Hit live 2026-08-10.)
+
 Supabase dashboard → **Authentication → URL Configuration**.
 
 1. **Site URL:** your platform domain, e.g. `https://nudgerow-platform.vercel.app`
    (or `https://app.nudgerow.com` once that domain points here).
 2. **Redirect URLs → Add URL:** `https://<your-platform-domain>/auth/callback`
 
-If the callback URL is not on that list, Supabase silently sends you to the
-Site URL instead and the link appears to "do nothing". That is the single most
-common failure here.
+Both fields matter, and they fail differently:
+
+| Wrong | What you get |
+|---|---|
+| Site URL still `localhost:3000` | the link goes nowhere — browser can't connect |
+| Callback missing from Redirect URLs | Supabase silently falls back to Site URL; you land on the app root, not signed in |
+
+After fixing either, **request a fresh link** — the one already in your inbox
+is spent.
 
 Preview deploys get a different hostname each time; add
 `https://nudgerow-platform-*.vercel.app/auth/callback` as a wildcard entry if
@@ -130,8 +142,14 @@ with the wrong domain.
   request URL."** — `SUPABASE_URL` points at a path (almost always
   `/rest/v1`), so the call reached the database API instead of the auth
   server. Set it to the bare project URL and redeploy. See §1's trap note.
+- **The link goes to a page that will not load** (address bar shows
+  `localhost:3000`). — §4. Supabase's **Site URL** is still the factory
+  default. Set it to the platform domain, then request a new link.
 - **The link opens the sign-in page again, with no error.** — §4. The callback
   URL is not in Supabase's redirect allow-list.
+- **"That link is missing its code. Ask for a new one."** — the redirect came
+  back without `?code=`, which again points at §4: the allow-list rejected our
+  callback and Supabase fell back to the Site URL.
 - **"Open the link in the same browser you asked for it from."** — the PKCE
   verifier cookie lives in the browser that requested the link. Request a new
   one where you will open it.
