@@ -314,7 +314,7 @@ describe.skipIf(!dbUrl)("engine invariants (real Postgres)", () => {
     const before = await pool!.query<{ c: number }>(
       "select count(*)::int as c from touch_ledger where enrollment_id = $1",
       [s.enrollmentId]);
-    expect(before.rows[0].c).toBe(0);
+    expect(before.rows[0]?.c).toBe(0);
 
     // What approveDraft does: record the approved step, hand the timer back.
     await pool!.query(
@@ -329,7 +329,7 @@ describe.skipIf(!dbUrl)("engine invariants (real Postgres)", () => {
     const after = await pool!.query<{ c: number }>(
       `select count(*)::int as c from touch_ledger
         where enrollment_id = $1 and state = 'sent'`, [s.enrollmentId]);
-    expect(after.rows[0].c).toBe(1);
+    expect(after.rows[0]?.c).toBe(1);
   });
 
   it("sends step 1, plans step 2 at +3 days, and finishes into the cracks", async () => {
