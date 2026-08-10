@@ -121,8 +121,14 @@ export async function GET(req: Request): Promise<NextResponse> {
     errors.push(`connect: ${String(err).slice(0, 300)}`);
   }
 
+  // Log the report as well as returning it: an operator reading Vercel's log
+  // list should see what the heartbeat DID without expanding a row or curling
+  // the endpoint. Errors go to console.error so Vercel's Error filter counts
+  // them.
   if (errors.length > 0) {
+    console.error("[tick] partial failure", JSON.stringify({ ...report, errors }));
     return NextResponse.json({ ...report, errors }, { status: 207 });
   }
+  console.log("[tick]", JSON.stringify(report));
   return NextResponse.json(report);
 }

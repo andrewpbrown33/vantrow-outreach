@@ -18,17 +18,84 @@ next.
 
 ## §2 · Environment variables
 
-Add under Settings → Environment Variables (Production + Preview):
+Four values. Three you can copy straight from here; only the database string
+needs looking up.
 
-| Name | Value | Notes |
-|---|---|---|
-| `SUPABASE_DB_URL` | the **service-role** Postgres connection string | Supabase → Project Settings → Database → Connection string (URI). Use the **pooler** (port 6543) — serverless opens many short connections. |
-| `CRON_SECRET` | a long random string | `openssl rand -hex 32`. Vercel sends it to the cron route as a bearer token. |
-| `GOOGLE_OAUTH_CLIENT_ID` | from runbook 07 §4 | Without it, Gmail jobs skip (visible in the tick report). |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | from runbook 07 §4 | Server-only; never a `NEXT_PUBLIC_` name. |
+### Where the database string lives (this trips people up)
 
-**None of these may be prefixed `NEXT_PUBLIC_`** — that prefix ships a value
-to the browser, and every one of these is a server secret.
+**NOT** in Settings → Database (that page is pooler *configuration* and
+logging). It's behind the green **Connect** button at the **top of the
+dashboard**, beside the project/branch name.
+
+1. Click **Connect**.
+2. The modal opens on the **Framework** tab — that is a client-library code
+   generator, NOT what we need. Click the third tab: **Direct — "Connection
+   string"** (database icon).
+3. That tab lists **Direct connection**, **Transaction pooler**, and **Session
+   pooler**. **Copy the Transaction pooler one** — its host contains
+   `pooler.supabase.com` and it ends `:6543/postgres`. Serverless opens many
+   short-lived connections, which is exactly what that pooler exists for.
+   (The direct `db.<ref>.supabase.co:5432` string also works if you can't find
+   the pooler; switching later is a one-variable edit.)
+4. Replace `[YOUR-PASSWORD]` with the database password. Don't know it?
+   Settings → Database → **Reset database password** (it is NOT your Supabase
+   login password).
+
+The result looks like:
+
+```
+postgresql://postgres.abcdefghijklm:REAL-PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+```
+
+**You do NOT need the $4/mo IPv4 add-on.** If the modal shows a *Dedicated*
+pooler string (`db.<ref>.supabase.co:6543`) and warns "Transaction pooler uses
+IPv6 by default / Enable IPv4 add-on", flip the **"Use IPv4 connection"**
+toggle just above the Type selector instead — it switches to the **shared**
+pooler, which is free and reaches Vercel over IPv4. The host then becomes
+`aws-0-<region>.pooler.supabase.com` and the username gains the project ref
+(`postgres.<ref>`). Vercel functions need IPv4, so the shared pooler is the
+right choice on the merits, not just the cheap one.
+
+If the database password contains special characters, percent-encode them in
+the URI (`@` → `%40`, `#` → `%23`, `/` → `%2F`) — or reset it to something
+alphanumeric and avoid the problem.
+
+### The four variables
+
+In Vercel → the `nudgerow-platform` project → Settings → Environment
+Variables. Add each with **Production and Preview** both ticked.
+
+| Name | Where it comes from |
+|---|---|
+| `SUPABASE_DB_URL` | the Transaction-pooler string above |
+| `CRON_SECRET` | any long random string — `openssl rand -hex 32`, or use the one the agent generated for you |
+| `GOOGLE_OAUTH_CLIENT_ID` | `517832856056-pamqalipsibcm05j5j32du018qmbe8dd.apps.googleusercontent.com` (public by design; also in runbook 07 §5) |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | **not in the repo** — Andrew's password manager. Lost it? Console → APIs & Services → Credentials → `nudgerow-connect` → **Reset secret**, then update this one variable. Nothing else breaks; connected mailboxes keep working. |
+
+Both live at
+https://console.cloud.google.com/apis/credentials?project=nudgerow-dogfood
+→ **OAuth 2.0 Client IDs** → `nudgerow-connect`. Google shows a client secret
+only once at creation, so if it was never saved, resetting is the path — not
+a lookup.
+
+**None may be prefixed `NEXT_PUBLIC_`** — that prefix ships a value to the
+browser, and all four are server secrets.
+
+### Faster: the Vercel CLI
+
+If you'd rather not click through the console four times:
+
+```bash
+npx vercel link            # pick the nudgerow-platform project, once
+npx vercel env add SUPABASE_DB_URL production
+npx vercel env add CRON_SECRET production
+npx vercel env add GOOGLE_OAUTH_CLIENT_ID production
+npx vercel env add GOOGLE_OAUTH_CLIENT_SECRET production
+```
+
+Each prompts for the value and reads it without echoing to screen — better
+for secrets than pasting into a browser field. Repeat with `preview` in place
+of `production` if you want preview deploys working too.
 
 ## §3 · The cron
 
@@ -46,11 +113,23 @@ costs nothing but freshness.)
 
 ## §4 · Verify it works
 
-After the deploy is green:
+**You do not need a terminal.** The cron fires itself every minute — read the
+result in **Vercel → the `nudgerow-platform` project → Logs**, filtered to
+`/api/cron/tick`. Each invocation shows its status code and the JSON report.
+(The **Cron Jobs** tab shows the schedule and last-run status.)
+
+To trigger it on demand instead:
 
 ```bash
+# macOS / Linux
 curl -sS -H "Authorization: Bearer $CRON_SECRET" \
   https://<your-platform-domain>/api/cron/tick | jq
+```
+
+```powershell
+# Windows PowerShell — use curl.exe; bare `curl` is an alias for
+# Invoke-WebRequest and handles the header differently
+curl.exe -H "Authorization: Bearer <CRON_SECRET>" https://<your-platform-domain>/api/cron/tick
 ```
 
 A healthy tick returns 200 and a report like:
