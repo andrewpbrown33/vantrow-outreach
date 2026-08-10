@@ -113,11 +113,23 @@ costs nothing but freshness.)
 
 ## §4 · Verify it works
 
-After the deploy is green:
+**You do not need a terminal.** The cron fires itself every minute — read the
+result in **Vercel → the `nudgerow-platform` project → Logs**, filtered to
+`/api/cron/tick`. Each invocation shows its status code and the JSON report.
+(The **Cron Jobs** tab shows the schedule and last-run status.)
+
+To trigger it on demand instead:
 
 ```bash
+# macOS / Linux
 curl -sS -H "Authorization: Bearer $CRON_SECRET" \
   https://<your-platform-domain>/api/cron/tick | jq
+```
+
+```powershell
+# Windows PowerShell — use curl.exe; bare `curl` is an alias for
+# Invoke-WebRequest and handles the header differently
+curl.exe -H "Authorization: Bearer <CRON_SECRET>" https://<your-platform-domain>/api/cron/tick
 ```
 
 A healthy tick returns 200 and a report like:
