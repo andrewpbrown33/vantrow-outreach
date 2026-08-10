@@ -153,16 +153,19 @@ GOOGLE_OAUTH_CLIENT_ID=... GOOGLE_OAUTH_CLIENT_SECRET=... \
    in `public.mailboxes` first.)
 3. Repeat per mailbox (getvantrow / eaverow / parcelrow).
 
-> **Status 2026-08-09: FIRST MAILBOX LIVE.** `andrew@getvantrow.com` connected
-> (verified against the live Gmail API; credential row in
-> `mailbox_credentials`, prod Supabase carries migrations 0002/0003 + the
-> dogfood bootstrap). eaverow / parcelrow pending — each is a 30-second
-> repeat. **Chat-assisted connect path (proven):** the agent builds the §6
-> auth URL, you approve in the browser, the redirect lands on a dead
-> 127.0.0.1 page, you paste that page's full URL back — the agent exchanges
-> the code and hands you the one-line SQL. No local node/repo needed.
-> Test-mode reminder: refresh tokens expire ~7 days; reconnect is the same
-> 30-second dance.
+> **Status 2026-08-10: ALL THREE MAILBOXES LIVE.** `andrew@getvantrow.com`,
+> `andrew@eaverow.com`, and `andrew@parcelrow.com` are connected and each
+> verified against the live Gmail API (the token authenticates as the expected
+> address before the credential is stored). R10 — standalone, brand-level,
+> multi-mailbox — is real, not just modeled. The platform deploy (runbook 08)
+> is live too, so the minute heartbeat syncs all three unattended.
+> **Chat-assisted connect path (proven ×3):** the agent builds the §6 auth URL,
+> you approve in the browser, the redirect lands on a dead 127.0.0.1 page, you
+> paste that page's full URL back — the agent exchanges the code, verifies the
+> identity, and hands you one SQL statement. No local node or repo clone.
+> Test-mode reminder: refresh tokens expire ~7 days; reconnecting is the same
+> 30-second dance, and an expired mailbox shows up as a 207 tick with
+> `last_refresh_error` set.
 
 ## §7 · What this unlocks / what still gates
 
