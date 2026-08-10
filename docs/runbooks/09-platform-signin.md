@@ -31,15 +31,20 @@ Two things worth knowing:
 
 ## §2 · The third value: `AUTH_SECRET`
 
-This one is ours, not Supabase's — it signs the session cookie. Any long random
-string works. Generated for you:
+This one is ours, not Supabase's — it signs the session cookie. Mint one:
 
-```
-84fa6e6e8fec4ddfde755b4e24225e9a12189b6ee10bdc58094ec0d711a461a4
+```bash
+openssl rand -hex 32
 ```
 
-(Or mint your own with `openssl rand -hex 32`.) Changing it later is harmless:
-it signs everyone out, nothing else.
+Paste the output straight into Vercel (§3) and keep a copy in your password
+manager. **It does not go in this file** — the same rule as every other secret
+here (runbook 08 §2). Changing it later is harmless: it signs everyone out,
+nothing else.
+
+> An earlier draft of this runbook printed a generated value inline. That was
+> wrong by our own rule and the value is not in use; if you already pasted it
+> into Vercel, replace it with a fresh `openssl rand -hex 32`.
 
 ## §3 · Add them in Vercel
 
