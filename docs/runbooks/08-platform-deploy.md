@@ -69,8 +69,14 @@ Variables. Add each with **Production and Preview** both ticked.
 |---|---|
 | `SUPABASE_DB_URL` | the Transaction-pooler string above |
 | `CRON_SECRET` | any long random string — `openssl rand -hex 32`, or use the one the agent generated for you |
-| `GOOGLE_OAUTH_CLIENT_ID` | runbook 07 §5 (recorded there) |
-| `GOOGLE_OAUTH_CLIENT_SECRET` | runbook 07 §4 — kept in Andrew's password manager, never in the repo |
+| `GOOGLE_OAUTH_CLIENT_ID` | `517832856056-pamqalipsibcm05j5j32du018qmbe8dd.apps.googleusercontent.com` (public by design; also in runbook 07 §5) |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | **not in the repo** — Andrew's password manager. Lost it? Console → APIs & Services → Credentials → `nudgerow-connect` → **Reset secret**, then update this one variable. Nothing else breaks; connected mailboxes keep working. |
+
+Both live at
+https://console.cloud.google.com/apis/credentials?project=nudgerow-dogfood
+→ **OAuth 2.0 Client IDs** → `nudgerow-connect`. Google shows a client secret
+only once at creation, so if it was never saved, resetting is the path — not
+a lookup.
 
 **None may be prefixed `NEXT_PUBLIC_`** — that prefix ships a value to the
 browser, and all four are server secrets.
