@@ -146,6 +146,8 @@ interface WorkRow {
   mailbox_id: string;
   mailbox_email: string;
   daily_cap: number;
+  min_send_gap_secs: number;
+  jitter_secs: number;
   send_disabled: boolean;
   suppressed: boolean;
 }
@@ -171,7 +173,7 @@ export async function executeOne(
               s.fallback_timezone, s.window_days, s.window_start_minute,
               s.window_end_minute, s.skip_us_holidays,
               m.id as mailbox_id, m.email as mailbox_email, m.daily_cap,
-              m.send_disabled,
+              m.min_send_gap_secs, m.jitter_secs, m.send_disabled,
               exists (
                 select 1 from public.suppression_entries sup
                 where sup.workspace_id = e.workspace_id
@@ -287,6 +289,44 @@ export async function executeOne(
       return "deferred";
     }
 
+    // I5 (second half): per-mailbox send spacing. sweepOnce awaits executeOne
+    // per claimed row with no spacing between them, so one tick could empty the
+    // entire daily cap onto the wire in seconds — the most deliverability-
+    // hostile behaviour in the engine, and 0002 already calls these columns law
+    // the sweep enforces. Defer rather than sleep: a cron tick must not block,
+    // and deferring keeps the "caps defer, never drop" rule intact.
+    //
+    // Spacing is per mailbox by construction (the gap is measured against this
+    // mailbox's own last send), so separate mailboxes still send concurrently.
+    if (w.min_send_gap_secs > 0) {
+      const lastRes = await client.query<{ last_sent: Date | null }>(
+        `select max(created_at) as last_sent from public.touch_ledger
+          where mailbox_id = $1 and state = 'sent'`,
+        [w.mailbox_id],
+      );
+      const lastSent = lastRes.rows[0]?.last_sent ?? null;
+      const gapMs = w.min_send_gap_secs * 1000;
+      if (lastSent && Date.now() - lastSent.getTime() < gapMs) {
+        // Jitter on top of the floor so a queue never emits on an audible beat.
+        const jitterMs =
+          Math.floor((opts.jitterFraction ?? Math.random)() * w.jitter_secs * 1000);
+        // snapToWindow returns its candidate untouched when already legal, so a
+        // gap landing inside the window costs nothing but still respects it.
+        const readyAt = snapToWindow(
+          new Date(lastSent.getTime() + gapMs + jitterMs),
+          schedule,
+          (opts.jitterFraction ?? Math.random)(),
+        );
+        await resolve("next_touch_at = $2", [readyAt]);
+        await events("touch.deferred", {
+          reason: "min_send_gap",
+          resumes_at: readyAt.toISOString(),
+        });
+        await client.query("commit");
+        return "deferred";
+      }
+    }
+
     const stepRes = await client.query<{
       step_order: number; template_id: string | null; mode: string;
       thread_as_reply: boolean;
@@ -398,8 +438,47 @@ export async function executeOne(
     for (const [k, v] of Object.entries(w.custom ?? {})) {
       if (typeof v === "string") vars[k] = v;
     }
+    // A merge field with nothing behind it used to render as "" and go out
+    // anyway — "Hi ," to a live prospect. The product promise is the opposite
+    // (site/product: "a send with an unfilled variable is blocked and flagged —
+    // never sent broken, never skipped silently"), so render first, collect the
+    // misses across BOTH subject and body, and refuse the send if there are any.
+    //
+    // "Unfilled" means absent OR blank after trim, whatever the source: a merge
+    // field is a claim that a value exists, and whitespace produces the same
+    // broken output as nothing. An operator who wants an optional value should
+    // not be using a merge field for it.
+    const missing = new Set<string>();
     const fill = (s: string) =>
-      s.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, name) => vars[name] ?? "");
+      s.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, name: string) => {
+        const v = vars[name];
+        if (typeof v !== "string" || v.trim() === "") {
+          missing.add(name);
+          return "";
+        }
+        return v;
+      });
+    const subject = fill(template.subject);
+    const bodyHtml = fill(template.body_html);
+
+    if (missing.size > 0) {
+      // Paused, not dropped: this is a data gap a human fixes on the prospect,
+      // after which the enrollment is re-armed like any other paused work.
+      const fields = [...missing].sort();
+      const reason = `unfilled merge fields: ${fields.join(", ")}`;
+      await client.query(
+        "update public.touch_ledger set state = 'skipped', error = $2 where id = $1",
+        [ledgerId, reason]);
+      await resolve(
+        "state = 'paused', next_touch_at = null, pause_reason = $2", [reason]);
+      await events("touch.blocked", {
+        reason: "unfilled_merge_fields",
+        fields,
+        step_order: w.current_step_order,
+      });
+      await client.query("commit");
+      return "skipped";
+    }
 
     // The provider call — the transaction's one side effect. COGS ticks on
     // every call (program overlay), success or failure.
@@ -409,8 +488,8 @@ export async function executeOne(
       workspaceId: w.workspace_id,
       fromEmail: w.mailbox_email,
       toEmail: w.prospect_email,
-      subject: fill(template.subject),
-      bodyHtml: fill(template.body_html),
+      subject,
+      bodyHtml,
       threadAsReply: step.thread_as_reply,
       inReplyToMessageId,
       threadId,
