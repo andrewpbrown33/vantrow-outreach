@@ -28,10 +28,16 @@ logging). It's behind the green **Connect** button at the **top of the
 dashboard**, beside the project/branch name.
 
 1. Click **Connect**.
-2. Three strings appear: Direct connection, **Transaction pooler**, Session
-   pooler. **Copy the Transaction pooler one** (port **6543**) — serverless
-   opens many short-lived connections, which is what that pooler exists for.
-3. Replace `[YOUR-PASSWORD]` with the database password. Don't know it?
+2. The modal opens on the **Framework** tab — that is a client-library code
+   generator, NOT what we need. Click the third tab: **Direct — "Connection
+   string"** (database icon).
+3. That tab lists **Direct connection**, **Transaction pooler**, and **Session
+   pooler**. **Copy the Transaction pooler one** — its host contains
+   `pooler.supabase.com` and it ends `:6543/postgres`. Serverless opens many
+   short-lived connections, which is exactly what that pooler exists for.
+   (The direct `db.<ref>.supabase.co:5432` string also works if you can't find
+   the pooler; switching later is a one-variable edit.)
+4. Replace `[YOUR-PASSWORD]` with the database password. Don't know it?
    Settings → Database → **Reset database password** (it is NOT your Supabase
    login password).
 
