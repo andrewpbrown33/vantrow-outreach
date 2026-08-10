@@ -204,7 +204,8 @@ function describe(row: EnrollmentRow): string {
       parts.push("address suppressed, enrollment halted");
       break;
     case "finished_no_reply":
-      parts.push(`ran ${row.currentStepOrder} steps without an answer`);
+      parts.push(`ran ${row.currentStepOrder} ${
+        row.currentStepOrder === 1 ? "step" : "steps"} without an answer`);
       break;
     case "canceled":
       parts.push("canceled");

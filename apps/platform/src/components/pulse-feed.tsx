@@ -110,8 +110,14 @@ function MenuRow({
 
 function Row({ item, now }: { item: FeedItem; now: Date }) {
   const { lead, rest } = peopleLabel(item.people);
+  // A collapsed row stacks up to three monograms, which needs a wider gutter
+  // than a single one — otherwise the stack runs under the name. Both class
+  // strings are written out because Tailwind only generates what it can see.
+  const gutter = item.people.length > 1
+    ? "grid-cols-[76px_1fr]"
+    : "grid-cols-[42px_1fr]";
   return (
-    <div className="grid grid-cols-[42px_1fr] gap-3 border-t border-night-line px-4.5 pt-2.5 pb-3 text-sm leading-snug">
+    <div className={`grid ${gutter} gap-3 border-t border-night-line px-4.5 pt-2.5 pb-3 text-sm leading-snug`}>
       <span className="flex items-center">
         {item.people.slice(0, 3).map((p, i) => (
           <span key={`${p.id ?? p.name}-${i}`} className={i > 0 ? "-ml-1.5" : ""}>
