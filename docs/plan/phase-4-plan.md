@@ -140,8 +140,22 @@ Build order follows the dependency chain; §1 invariants are the acceptance bar.
 > sync → engine sweep → Connect drain, every minute, CRON_SECRET-gated, jobs
 > isolated so one outage can't silence the others, and the response body is
 > the tick's own operator report (207 + named errors on partial failure).
-> Deploy steps in runbook 08. **Next: the deck v2.1 surfaces themselves**
-> (Activity home, Sequences overview, sequence detail) on real data.
+> Deploy steps in runbook 08.
+>
+> **SURFACES LANDED 2026-08-10.** The deck v2.1 contract, on real rows:
+> **Activity home** (night-ground Pulse feed primary + sequences side panel;
+> the picker is the reports, R-4D-2), **Sequences overview** (per-state pill
+> stats + dot strips), **Sequence detail** (collapsed schedule drawer, steps
+> with auto/draft-first, enrollments as person-first rows), plus the two
+> flows that retire the SQL editor: **create sequence** and **import
+> prospects** (delimiter-sniffing parser, suppression + opt-out screened
+> before enrollment, every unreadable row reported by line number).
+> Sign-in is server-driven Supabase magic link + our own signed cookie —
+> runbook 09 turns it on. Building the create→import→start path found and
+> fixed a stranding bug in the engine seam (decision log 2026-08-10).
+> **Still open in C:** the three reports as standalone pages (the picker
+> covers them today), prospect detail, mailbox settings beyond health,
+> external-interaction log note type (R9), and data export.
 
 Built only after Checkpoint 4-D approves the deck; every view exists in the deck
 first. Cracks home · sequences board · sequence builder (auto-email steps primary,

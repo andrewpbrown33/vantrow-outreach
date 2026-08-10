@@ -81,6 +81,11 @@ a lookup.
 **None may be prefixed `NEXT_PUBLIC_`** — that prefix ships a value to the
 browser, and all four are server secrets.
 
+> **Sign-in needs three more (runbook 09).** These four run the engine. The
+> product surfaces additionally need `SUPABASE_URL`, `SUPABASE_ANON_KEY` and
+> `AUTH_SECRET`; without them every surface redirects to a sign-in page that
+> names what is missing, while the cron below keeps running normally.
+
 ### Faster: the Vercel CLI
 
 If you'd rather not click through the console four times:

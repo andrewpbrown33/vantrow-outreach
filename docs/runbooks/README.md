@@ -23,7 +23,10 @@ settings, legal). Policy, learned the hard way in subsidiary #1:
 | 04 | `04-supabase-waitlist.md` — project, `0001_waitlist.sql`, keys → Vercel | **ACTIVE** |
 | 05 | `05-legal-counsel-checklist.md` — NUDGEROW clearance (Nudge.ai/Affinity flag), Outreach ToS review, comparative-ad + ToS/privacy sign-offs | **ACTIVE — item 1 opens now** |
 | 06 | `06-site-launch-checklist.md` — Gate 3 acceptance, site half | ACTIVE (runs at Gate 3) |
-| 07 | mailbox OAuth verification (Microsoft publisher verification; Google restricted-scope assessment if gated in) | Planned — Phase 3, per `docs/plan/long-lead-register.md` |
-| 08 | sending domains + warmup operations | Planned — Phase 3/4 |
-| 09 | Stripe billing activation (build-now-charge-at-GA switch) | Planned — Phase 5 |
-| 10 | dogfood go-live checklist (Gate 7 acceptance) | Planned — Phase 4 |
+| 07 | `07-gmail-oauth-dogfood.md` — Google Cloud project, consent screen in test mode, OAuth client, mailbox connect | ✅ Done 2026-08-10 (all three mailboxes live) |
+| 08 | `08-platform-deploy.md` — `nudgerow-platform` Vercel project, env vars, the minute cron | ✅ Done 2026-08-10 (heartbeat returning 200) |
+| 09 | `09-platform-signin.md` — Supabase Auth values, `AUTH_SECRET`, the redirect allow-list | **ACTIVE — the product surfaces are locked until this is done** |
+| 10 | mailbox OAuth verification (Microsoft publisher verification; Google restricted-scope assessment) | Planned — per `docs/plan/long-lead-register.md` |
+| 11 | sending domains + warmup operations | Planned — Phase 3/4 |
+| 12 | Stripe billing activation (build-now-charge-at-GA switch) | Planned — Phase 5 |
+| 13 | dogfood go-live checklist (Gate 7 acceptance) | Planned — Phase 4 |

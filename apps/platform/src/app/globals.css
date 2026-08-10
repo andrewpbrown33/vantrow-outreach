@@ -1,20 +1,16 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
 /*
- * Brand tokens.
+ * Brand tokens (chrome) are injected by the root layout via brandCssVars(brand);
+ * state tokens (data) are injected alongside them from the brand package's
+ * state palette. Two palettes, two jobs — brand colour never encodes state and
+ * the family camel never encodes data (two-palette law, R11).
  *
- * The values for the --brand-* custom properties are injected by the root
- * layout via brandCssVars(brand) from @vantrow/brand: the light palette (plus
- * typography/radius/spacing tokens) on :root, and the dark palette on
- * :root[data-theme="dark"]. The Tailwind theme below resolves to those
- * variables, so a brand or palette swap requires zero Tailwind or CSS
- * changes — only the brand package.
- *
- * Note on dark mode: the dark palette is injected and ready, but the site
- * does not set data-theme yet — the interim identity renders light-only, and
- * wiring a theme switch belongs to the Phase-2 design pass (brand.config.ts
- * carries dark as a first-class palette so it is never bolted on later).
+ * Dark is a PLACE, not a theme. The activity feed sits on the night ground
+ * (#16151A) inside an otherwise light room (#FDFBF2), exactly as deck v2.1
+ * draws it. `.on-night` re-points the same --state-* variables at their dark
+ * values, so one set of utilities renders correctly on both grounds and no
+ * component needs to know which ground it is standing on.
  */
 @theme inline {
   --color-brand: var(--brand-primary);
@@ -27,14 +23,73 @@
   --color-success: var(--brand-success);
   --color-info: var(--brand-info);
   --color-highlight: var(--brand-highlight);
-  --color-row-thread: var(--brand-row-thread);
   --font-sans: var(--brand-font-sans);
   --font-display: var(--brand-font-display);
   --font-mono: var(--brand-font-mono);
   --radius-sm: var(--brand-radius-sm);
   --radius-md: var(--brand-radius-md);
   --radius-lg: var(--brand-radius-lg);
+
+  /* The room */
+  --color-line: #DCD6C2;
+  --color-panel: #FFFFFF;
+  --color-sub: #403F49;
+  --color-camel: #B8956A;
+
+  /* The night pane */
+  --color-night: #16151A;
+  --color-night-fg: #EFEDE6;
+  --color-night-sub: #8B89A0;
+  --color-night-line: #2E2D35;
+  --color-night-quote: #B9B7C2;
+  --color-night-time: #6B6976;
+
+  /* State encodings — resolved per ground by the variables below */
+  --color-state-draft: var(--state-draft);
+  --color-state-scheduled: var(--state-scheduled);
+  --color-state-active: var(--state-active);
+  --color-state-paused: var(--state-paused);
+  --color-state-replied: var(--state-replied);
+  --color-state-fnr: var(--state-finished-no-reply);
+  --color-state-bounced: var(--state-bounced);
+
+  --color-wash-draft: var(--state-wash-draft);
+  --color-wash-scheduled: var(--state-wash-scheduled);
+  --color-wash-active: var(--state-wash-active);
+  --color-wash-paused: var(--state-wash-paused);
+  --color-wash-replied: var(--state-wash-replied);
+  --color-wash-fnr: var(--state-wash-finished-no-reply);
+  --color-wash-bounced: var(--state-wash-bounced);
 }
+
+/*
+ * Night washes: chip and monogram grounds for the feed pane. These are
+ * decorative backgrounds (their foreground is the pinned dark state colour),
+ * so they are not contrast-pinned by check-state-palette.mjs — the pinned
+ * pair is foreground-on-ground, and that pair is unchanged here.
+ *
+ * Written as `:root .on-night` rather than `.on-night` on purpose: a bare
+ * class ties with `:root` on specificity, which would make the winner depend
+ * on whether this file or the layout's injected <style> lands first in the
+ * head. Two selectors beat one, so the override holds either way.
+ */
+:root .on-night {
+  --state-wash-draft: #26252C;
+  --state-wash-scheduled: #1D2836;
+  --state-wash-active: #152B31;
+  --state-wash-paused: #2F2514;
+  --state-wash-replied: #1D2F23;
+  --state-wash-finished-no-reply: #272138;
+  --state-wash-bounced: #2F1F1E;
+}
+
+/*
+ * The monogram badge is a cutout: its ring is the GROUND it sits on, not its
+ * own colour, so the glyph reads as punched through the avatar. One variable,
+ * re-pointed on the night ground, saves threading a prop through every call.
+ */
+:root { --mono-ring: #FFFFFF; }
+:root .on-night { --mono-ring: #16151A; }
 
 body {
   background-color: var(--brand-background);
@@ -43,15 +98,10 @@ body {
 }
 
 /*
- * Honeypot field: visually removed without display:none so naive bots still
- * see and fill it. Paired with tabIndex={-1}, aria-hidden and autocomplete
- * off on the input itself.
+ * State changes in this product are instant — nothing animates, so there is
+ * no reduced-motion override to write. Focus stays loud on both grounds.
  */
-.hp-field {
-  position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
+:focus-visible {
+  outline: 2px solid var(--brand-highlight);
+  outline-offset: 2px;
 }
