@@ -47,9 +47,18 @@ The result looks like:
 postgresql://postgres.abcdefghijklm:REAL-PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres
 ```
 
-Ignore the "Dedicated pooler uses IPv6 / Enable IPv4 add-on" banner on the
-pooling settings page — that is a different, paid pooler. The shared one in
-the Connect modal reaches Vercel over IPv4 with no add-on.
+**You do NOT need the $4/mo IPv4 add-on.** If the modal shows a *Dedicated*
+pooler string (`db.<ref>.supabase.co:6543`) and warns "Transaction pooler uses
+IPv6 by default / Enable IPv4 add-on", flip the **"Use IPv4 connection"**
+toggle just above the Type selector instead — it switches to the **shared**
+pooler, which is free and reaches Vercel over IPv4. The host then becomes
+`aws-0-<region>.pooler.supabase.com` and the username gains the project ref
+(`postgres.<ref>`). Vercel functions need IPv4, so the shared pooler is the
+right choice on the merits, not just the cheap one.
+
+If the database password contains special characters, percent-encode them in
+the URI (`@` → `%40`, `#` → `%23`, `/` → `%2F`) — or reset it to something
+alphanumeric and avoid the problem.
 
 ### The four variables
 
