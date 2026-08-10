@@ -30,21 +30,57 @@ export interface SessionUser {
   email: string;
 }
 
+/** Reduce whatever was pasted into `SUPABASE_URL` to the project ORIGIN.
+ *
+ *  Supabase's gateway routes by path prefix — `/auth/v1/*` to the auth server,
+ *  `/rest/v1/*` to PostgREST — so the base we append `/auth/v1/otp` to must
+ *  carry no path of its own. The dashboard also publishes a "RESTful endpoint"
+ *  ending `/rest/v1`, and pasting THAT here sends every auth call to
+ *  PostgREST, which answers with an opaque `PGRST125 Invalid path specified in
+ *  request URL`. Nobody should have to decode that, so both values work.
+ *
+ *  Returns null for anything that is not a usable absolute URL, which the
+ *  caller reports as configuration rather than letting fetch fail later. */
+export function projectOrigin(raw: string | undefined): string | null {
+  const trimmed = raw?.trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    return parsed.origin;
+  } catch {
+    return null;
+  }
+}
+
 /** Missing configuration is reported, not guessed at: a sign-in page that
  *  silently does nothing is worse than one that says which value is unset. */
 export function authConfig():
   | { ok: true; url: string; anonKey: string; secret: string }
   | { ok: false; missing: string[] } {
-  const url = process.env.SUPABASE_URL?.replace(/\/+$/, "");
+  const raw = process.env.SUPABASE_URL;
+  const url = projectOrigin(raw);
   const anonKey = process.env.SUPABASE_ANON_KEY;
   const secret = process.env.AUTH_SECRET;
   const missing = [
-    !url && "SUPABASE_URL",
+    !url && (raw ? "SUPABASE_URL (not a valid https URL)" : "SUPABASE_URL"),
     !anonKey && "SUPABASE_ANON_KEY",
     !secret && "AUTH_SECRET",
   ].filter((v): v is string => typeof v === "string");
   if (missing.length > 0) return { ok: false, missing };
   return { ok: true, url: url!, anonKey: anonKey!, secret: secret! };
+}
+
+/** Turn a provider error into something an operator can act on. A PostgREST
+ *  code here means the request was routed to the database API instead of the
+ *  auth server — always a base-URL problem, never a credential one. */
+function explain(status: number, body: string): string {
+  if (body.includes("PGRST")) {
+    return `${status} — that request reached the database API instead of the ` +
+      `auth server, which means SUPABASE_URL points at a path (e.g. /rest/v1) ` +
+      `rather than the project root. Set it to https://<project-ref>.supabase.co.`;
+  }
+  return `${status} ${body.slice(0, 200)}`;
 }
 
 const b64url = (b: Buffer): string => b.toString("base64url");
@@ -147,7 +183,7 @@ export async function sendMagicLink(
   );
   if (res.ok) return { ok: true };
   const body = await res.text().catch(() => "");
-  return { ok: false, error: `${res.status} ${body.slice(0, 200)}` };
+  return { ok: false, error: explain(res.status, body) };
 }
 
 /** Exchange the callback's `?code=` for the proven identity. We keep the id

@@ -18,8 +18,16 @@ Supabase dashboard → your project → **Project Settings → API**.
 
 | Vercel variable | What to copy |
 |---|---|
-| `SUPABASE_URL` | **Project URL** — `https://tbphmlrapkgqmklhsnyi.supabase.co` |
+| `SUPABASE_URL` | **Project URL** — `https://tbphmlrapkgqmklhsnyi.supabase.co`, and **nothing after `.co`** |
 | `SUPABASE_ANON_KEY` | the **anon / public** key (the long one labelled `anon`) |
+
+> **The `/rest/v1` trap (hit live 2026-08-10).** The same page also shows a
+> **RESTful endpoint**, `https://<ref>.supabase.co/rest/v1`. Pasting that into
+> `SUPABASE_URL` sends every auth call to the database API instead of the auth
+> server, and sign-in fails with a cryptic
+> `PGRST125 · Invalid path specified in request URL`. The app now normalises
+> the value to the project origin, so either form works — but the URL with no
+> path is the one to paste.
 
 Two things worth knowing:
 
@@ -116,7 +124,12 @@ with the wrong domain.
 ## §7 · Troubleshooting
 
 - **"Sign-in is not configured yet: … unset."** — exactly what it says; §3 and
-  redeploy.
+  redeploy. If it says `SUPABASE_URL (not a valid https URL)`, the value is
+  missing its `https://` or is not a URL at all.
+- **"The auth server refused: 404 … PGRST125 … Invalid path specified in
+  request URL."** — `SUPABASE_URL` points at a path (almost always
+  `/rest/v1`), so the call reached the database API instead of the auth
+  server. Set it to the bare project URL and redeploy. See §1's trap note.
 - **The link opens the sign-in page again, with no error.** — §4. The callback
   URL is not in Supabase's redirect allow-list.
 - **"Open the link in the same browser you asked for it from."** — the PKCE
