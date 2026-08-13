@@ -76,6 +76,29 @@ npx vercel env add AUTH_SECRET production
 **Redeploy after adding them** — Vercel only picks up new variables on a new
 deployment.
 
+## §4a · Make the link work from any device (do this one)
+
+**Paste one line into the email template and §4's redirect list stops
+mattering.** By default Supabase's magic link bounces the browser through its
+own `/verify` endpoint and back to your app, which drags in two fragile things:
+the redirect allow-list, and a one-time secret stored in the browser that
+*requested* the link. Since people open magic links on their phone, from the
+mail app, that second one fails constantly — and it is not the user's fault.
+
+Supabase dashboard → **Authentication → Emails → Magic Link** → edit the
+template body so the link is:
+
+```html
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=magiclink">Sign in to Nudgerow</a>
+```
+
+That points straight at `/auth/confirm`, which verifies the token server-side
+with no cookie involved. It works from any device, in any browser, and never
+touches the redirect allow-list.
+
+You still need **Site URL** set correctly (§4 below) because `{{ .SiteURL }}`
+is where the link points.
+
 ## §4 · Tell Supabase where the link may land (the step people miss)
 
 **Do not skip this one.** A new Supabase project ships with **Site URL =
@@ -150,9 +173,10 @@ with the wrong domain.
 - **"That link is missing its code. Ask for a new one."** — the redirect came
   back without `?code=`, which again points at §4: the allow-list rejected our
   callback and Supabase fell back to the Site URL.
-- **"Open the link in the same browser you asked for it from."** — the PKCE
-  verifier cookie lives in the browser that requested the link. Request a new
-  one where you will open it.
+- **"Open the link in the same browser you asked for it from."** — you are on
+  the PKCE path (`/auth/callback`), which binds the link to the requesting
+  browser. Either request the link from the device you will open it on, or —
+  better — do **§4a** and the constraint disappears for good.
 - **"That address is signed in but is not a member of any workspace."** — the
   address passed §5's check but matched no workspace. Either use a mailbox
   address, or add it to `NUDGEROW_ALLOWED_EMAILS`.

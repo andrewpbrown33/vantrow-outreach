@@ -186,6 +186,44 @@ export async function sendMagicLink(
   return { ok: false, error: explain(res.status, body) };
 }
 
+/** Verify a `token_hash` from the email link — the CROSS-DEVICE path.
+ *
+ *  PKCE binds the link to the browser that asked for it, because the verifier
+ *  lives in a cookie there. That is fine on a laptop and wrong for a magic
+ *  link, which people open on their phone from the mail app. A token hash
+ *  carries its own proof: whoever holds it received the email, so it verifies
+ *  from any device with no cookie involved.
+ *
+ *  Both paths stay live — /auth/callback for `?code=`, /auth/confirm for
+ *  `?token_hash=` — because which one an email uses depends on the project's
+ *  template, and a half-migrated project should not lock anyone out. */
+export async function verifyTokenHash(
+  tokenHash: string, type: string, cfg: { url: string; anonKey: string },
+): Promise<{ ok: true; user: SessionUser } | { ok: false; error: string }> {
+  const res = await fetch(`${cfg.url}/auth/v1/verify`, {
+    method: "POST",
+    headers: { "content-type": "application/json", apikey: cfg.anonKey },
+    body: JSON.stringify({ type, token_hash: tokenHash }),
+  });
+  const body = await res.json().catch(() => null) as
+    | { user?: { id?: unknown; email?: unknown }; error_description?: string;
+        msg?: string; message?: string }
+    | null;
+  if (!res.ok || !body) {
+    return {
+      ok: false,
+      error: body?.error_description ?? body?.msg ?? body?.message
+        ?? `that link could not be verified (${res.status})`,
+    };
+  }
+  const id = body.user?.id;
+  const email = body.user?.email;
+  if (typeof id !== "string" || typeof email !== "string") {
+    return { ok: false, error: "that link verified but returned no user" };
+  }
+  return { ok: true, user: { userId: id, email: email.toLowerCase() } };
+}
+
 /** Exchange the callback's `?code=` for the proven identity. We keep the id
  *  and the address and discard the tokens — nothing downstream calls Supabase
  *  again on this user's behalf. */

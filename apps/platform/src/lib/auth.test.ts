@@ -4,8 +4,10 @@
  *  signed in" rather than as a partial trust. */
 
 import { createHmac } from "node:crypto";
-import { describe, expect, it } from "vitest";
-import { challengeFor, mintSession, newVerifier, projectOrigin, readSession } from "./auth";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  challengeFor, mintSession, newVerifier, projectOrigin, readSession, verifyTokenHash,
+} from "./auth";
 
 const SECRET = "test-secret-do-not-ship";
 const USER = { userId: "11111111-1111-4111-8111-111111111111", email: "a@x.com" };
@@ -93,6 +95,48 @@ describe("projectOrigin", () => {
                        "postgres://abc.supabase.co"]) {
       expect(projectOrigin(raw)).toBeNull();
     }
+  });
+});
+
+describe("verifyTokenHash", () => {
+  const CFG = { url: "https://abc.supabase.co", anonKey: "anon" };
+  const okBody = { user: { id: USER.userId, email: "A@X.com" } };
+
+  const stubFetch = (status: number, body: unknown) =>
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(body), {
+        status, headers: { "content-type": "application/json" },
+      }));
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("proves identity with no cookie, so the link works on any device", async () => {
+    const fetchMock = stubFetch(200, okBody);
+    const result = await verifyTokenHash("hash123", "magiclink", CFG);
+    expect(result).toEqual({ ok: true, user: { userId: USER.userId, email: "a@x.com" } });
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://abc.supabase.co/auth/v1/verify");
+    expect(JSON.parse(String(init.body))).toEqual({ type: "magiclink", token_hash: "hash123" });
+    expect((init.headers as Record<string, string>).apikey).toBe("anon");
+  });
+
+  it("surfaces the auth server's own words when it refuses", async () => {
+    stubFetch(401, { error_description: "Email link is invalid or has expired" });
+    const result = await verifyTokenHash("stale", "magiclink", CFG);
+    expect(result).toEqual({ ok: false, error: "Email link is invalid or has expired" });
+  });
+
+  it("refuses a success response that carries no user", async () => {
+    stubFetch(200, { access_token: "t" });
+    const result = await verifyTokenHash("hash", "magiclink", CFG);
+    expect(result.ok).toBe(false);
+  });
+
+  it("does not throw on a non-JSON body", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("<html>502</html>", { status: 502 }));
+    const result = await verifyTokenHash("hash", "magiclink", CFG);
+    expect(result).toMatchObject({ ok: false });
   });
 });
 
