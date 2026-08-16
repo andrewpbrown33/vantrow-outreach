@@ -9,8 +9,10 @@ which variable is missing — the app is **locked, not broken**.
 The cron endpoint is unaffected: it authenticates with `CRON_SECRET` and keeps
 running whether or not sign-in is configured.
 
-**Three variables and two clicks.** Ten minutes, no cost, no new services —
-Supabase Auth is already part of the project you are using for the database.
+**Three variables, one email provider, two clicks.** Supabase Auth is already
+part of the project you use for the database, but its built-in *email sender*
+cannot carry this app — see **§2b**, which is required, free, and about ten
+minutes. Everything here costs nothing.
 
 ## §1 · Get the two Supabase values
 
@@ -53,6 +55,101 @@ nothing else.
 > An earlier draft of this runbook printed a generated value inline. That was
 > wrong by our own rule and the value is not in use; if you already pasted it
 > into Vercel, replace it with a fresh `openssl rand -hex 32`.
+
+## §2b · Custom SMTP — do this, it is not optional
+
+**Supabase's built-in email sender cannot run this app.** Three separate
+limits, each of which blocks us (hit live 2026-08-13, symptom:
+`500 unexpected_failure · "Error sending magic link email"`):
+
+| Limit | What it does to us |
+|---|---|
+| Delivers **only to members of your Supabase organization** | your sign-in address is refused unless it happens to be your Supabase login |
+| Rate-limited to a handful per hour | fine for one operator, useless past that |
+| **Since 3 June 2026, new free-tier projects on the default sender cannot edit auth email templates** | §4a's template edit — the whole cross-device fix — silently will not stick |
+
+That third one is the trap: the project was created in August 2026, so it is
+on the wrong side of that date. §4a cannot work until custom SMTP is on.
+Configuring SMTP lifts all three at once.
+
+### Which domain sends it — read before touching DNS
+
+Use **nudgerow.com**, not getvantrow.com / eaverow.com / parcelrow.com.
+
+> **A domain may carry only ONE SPF TXT record.** The sending domains are
+> Google Workspace domains that already have `v=spf1 include:_spf.google.com`.
+> If a provider's setup adds a *second* SPF record rather than merging into the
+> existing one, **both become invalid** and the deliverability of the cold
+> outreach this product exists to send degrades. Never risk an outreach domain
+> for the sake of a login email.
+
+`nudgerow.com` is the product's own domain, its DNS lives in Vercel, and it
+carries no mail records yet — nothing to collide with. Auth mail arriving from
+the product's own domain is also simply correct.
+
+**No mailbox purchase is required.** A `From:` address on transactional mail
+does not have to be a real mailbox — verify the *domain*, then send as
+`noreply@nudgerow.com` even though nothing receives there. This is independent
+of the `andrew@nudgerow.com` question in §2c.
+
+### Steps (~10 minutes, free tier)
+
+1. **[resend.com](https://resend.com)** → sign up → **Domains → Add Domain** →
+   `nudgerow.com`.
+2. Resend shows DNS records (DKIM `resend._domainkey`, an SPF/MX pair, usually
+   scoped to a `send.` subdomain). Add them in **Vercel → Domains →
+   nudgerow.com → DNS**. Wait for Resend to show **Verified**.
+   - If Resend offers to put SPF on the **root** rather than a subdomain,
+     prefer the subdomain. Root SPF on nudgerow.com is harmless today but
+     becomes a merge problem the day §2c adds Workspace to that domain.
+3. **API Keys → Create API Key** (sending permission is enough). Copy it — it
+   is shown once.
+4. Supabase → **Authentication → Emails → SMTP Settings** → enable custom SMTP:
+
+   | Field | Value |
+   |---|---|
+   | Host | `smtp.resend.com` |
+   | Port | `465` |
+   | Username | `resend` |
+   | Password | the API key from step 3 |
+   | Sender email | `noreply@nudgerow.com` |
+   | Sender name | `Nudgerow` |
+
+5. **Now go back and do §4a.** The template edit is unlocked once SMTP is
+   custom, and it will not stick before that.
+
+The API key is a secret: Supabase's SMTP settings and your password manager,
+never this repo.
+
+## §2c · `andrew@nudgerow.com`, and the phone-verification wall
+
+**This does not block sign-in.** §2b needs DNS on nudgerow.com and a `From:`
+header — no Google account, no mailbox. Do §2b today regardless of where this
+lands.
+
+The wall: Google rate-limits phone verification across account creations, the
+limit decays over days, and it rejects most VoIP numbers. Fighting it is not
+the answer, because **the flow that needs a phone is the wrong flow.**
+
+**Do this instead — no phone verification exists anywhere in it:** add
+`nudgerow.com` as a **secondary domain** on the Google Workspace tenant you
+already administer (getvantrow.com), then create `andrew@nudgerow.com` there
+as a user (one paid seat) or as a free **alias** on your existing user.
+
+Admin console → **Account → Domains → Manage domains → Add a domain** → verify
+by TXT record (nudgerow.com DNS is in Vercel) → then Directory → Users.
+
+> **If you already started a separate Workspace tenant for nudgerow.com**, the
+> add will fail with *"domain already in use"* — a domain can belong to only
+> one Workspace account at a time. Remove it from the new tenant first (Admin
+> → Account → Domains → Remove), or cancel that subscription if it is inside
+> the refund window, then add it as a secondary domain on the existing tenant.
+
+Why it matters beyond convenience: the live site publishes
+`andrew@nudgerow.com` as the support contact (footer, pricing, privacy, terms,
+early-access form, llms.txt, JSON-LD), so until this exists, mail to the
+published support address bounces. Standing operational flag, also tracked in
+runbook 07 §8b.
 
 ## §3 · Add them in Vercel
 
@@ -180,10 +277,21 @@ with the wrong domain.
 - **"That address is signed in but is not a member of any workspace."** — the
   address passed §5's check but matched no workspace. Either use a mailbox
   address, or add it to `NUDGEROW_ALLOWED_EMAILS`.
-- **No email arrives.** Supabase's built-in SMTP is rate-limited (a handful of
-  messages per hour) and is for development volumes. For the dogfood operator
-  that is plenty; a real user base needs a custom SMTP provider configured under
-  Authentication → Emails.
+- **`500 unexpected_failure · "Error sending magic link email"`** — Supabase's
+  built-in sender refused. Do **§2b**; that error is what the three built-in
+  limits look like from the app's side. The `error_id` in the message resolves
+  to the real reason in
+  [Auth logs](https://supabase.com/dashboard/project/tbphmlrapkgqmklhsnyi/logs/auth-logs)
+  if you want to see which of the three it was.
+- **`"Email address not authorized"`** — the built-in sender only mails members
+  of your Supabase organization. Also §2b.
+- **The §4a template edit will not save, or saves and changes nothing.** Free
+  tier + default sender cannot customise templates for projects created after
+  3 June 2026. §2b first, then §4a.
+- **No email arrives at all, custom SMTP configured.** Check the provider's own
+  log (Resend → Emails) — the send left Supabase and failed downstream, which
+  is usually an unverified domain or a `From:` address on a domain you have not
+  verified there.
 - **Rotating anything.** `AUTH_SECRET` signs everyone out. The anon key and
   project URL come from §1 if they ever change. None of it touches the engine —
   the cron keeps sending throughout.
