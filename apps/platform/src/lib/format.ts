@@ -30,6 +30,17 @@ export function intervalOf(days: number, hours: number, isFirst: boolean): strin
   return parts.length > 0 ? parts.join(" ") : "immediately after";
 }
 
+/** The calendar day each step lands on, day 1 = the enroll day. Waits are
+ *  BETWEEN steps, so the day is cumulative — and hours accumulate too: three
+ *  steps 12 hours apart land on days 1, 1, 2. */
+export function dayNumbers(steps: { days: number; hours: number }[]): number[] {
+  let hoursIn = 0;
+  return steps.map((s, i) => {
+    if (i > 0) hoursIn += Math.max(0, s.days) * 24 + Math.max(0, s.hours);
+    return 1 + Math.floor(hoursIn / 24);
+  });
+}
+
 /** "08:30" → 510. Anything unparseable returns 0 rather than throwing; the
  *  caller's start-before-end check is what rejects a nonsense pair. */
 export function minutesFromTime(value: string): number {
