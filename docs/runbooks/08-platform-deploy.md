@@ -156,7 +156,12 @@ A healthy tick returns 200 and a report like:
 ## §5 · Preconditions (do these first)
 
 1. Migrations applied to prod Supabase, in order: `0002`, `0003`, `0004`,
-   `0005`, then `bootstrap-dogfood.sql` (runbook 07 §6a).
+   `0005`, then `bootstrap-dogfood.sql` (runbook 07 §6a). **Added 2026-08-16:
+   `0006_reply_subjects.sql`** — one `alter table`, applies in seconds, same
+   SQL-editor procedure as the others (runbook 04 §2 shows the clicks).
+   Without it every send fails with `column "sent_subject" does not exist`;
+   nothing is lost (failures re-arm with a 15-minute backoff), but nothing
+   sends until it runs.
 2. At least one mailbox connected (runbook 07 §6) — otherwise the sweep has
    no provider and defers everything with `mailbox_not_connected`.
 

@@ -84,7 +84,12 @@ export async function createSequenceAction(
 
   const steps = stepsFrom(formData);
   if (steps.length === 0) return { error: "A sequence needs at least one step." };
-  const blank = steps.findIndex((s) => s.subject.length === 0);
+  if (steps[0]?.threadAsReply) {
+    return { error: "The first step opens the conversation — it cannot be a reply." };
+  }
+  // Reply steps carry no subject of their own: the engine derives
+  // "Re: <thread opener>" at send time. Only thread-opening steps need one.
+  const blank = steps.findIndex((s) => !s.threadAsReply && s.subject.length === 0);
   if (blank !== -1) return { error: `Step ${blank + 1} has no subject line.` };
 
   const windowDays = formData.getAll("window_day").map((d) => Number(d))

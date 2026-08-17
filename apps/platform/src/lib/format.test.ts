@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clockOf, daysOf, intervalOf, minutesFromTime, whenOf } from "./format";
+import { clockOf, dayNumbers, daysOf, intervalOf, minutesFromTime, whenOf } from "./format";
 
 describe("clockOf", () => {
   it("renders minutes-from-midnight as a clock time", () => {
@@ -70,5 +70,29 @@ describe("whenOf", () => {
     const now = new Date(2026, 7, 10, 9, 0);
     expect(whenOf(new Date(2026, 7, 13, 9, 10), now)).toMatch(/Thu/);
     expect(whenOf(new Date(2026, 8, 14, 9, 10), now)).toMatch(/Sep 14/);
+  });
+});
+
+describe("dayNumbers", () => {
+  it("starts at day 1 and accumulates waits between steps", () => {
+    expect(dayNumbers([
+      { days: 0, hours: 0 }, { days: 3, hours: 0 }, { days: 4, hours: 0 },
+    ])).toEqual([1, 4, 8]);
+  });
+
+  it("rolls hours into days once they add up", () => {
+    expect(dayNumbers([
+      { days: 0, hours: 0 }, { days: 0, hours: 12 }, { days: 0, hours: 12 },
+    ])).toEqual([1, 1, 2]);
+  });
+
+  it("ignores the first step's own wait — it fires on enroll", () => {
+    expect(dayNumbers([{ days: 9, hours: 9 }])).toEqual([1]);
+  });
+
+  it("treats negative input as zero rather than walking backwards", () => {
+    expect(dayNumbers([
+      { days: 0, hours: 0 }, { days: -2, hours: -5 },
+    ])).toEqual([1, 1]);
   });
 });

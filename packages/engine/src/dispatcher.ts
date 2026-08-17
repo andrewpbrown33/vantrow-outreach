@@ -57,6 +57,9 @@ export class FakeProvider implements Provider {
   private readonly delivered = new Map<string, { req: SendRequest; result: SendResult }>();
   /** Every send() call's key, in order — including deduped and failed ones. */
   readonly attempts: string[] = [];
+  /** Each request that reached the wire (deduped and failed calls excluded),
+   *  in send order — what a test inspects to assert subjects and threading. */
+  readonly requests: SendRequest[] = [];
   private readonly failKeys = new Set<string>();
   private readonly crashAfterAckKeys = new Set<string>();
 
@@ -86,6 +89,7 @@ export class FakeProvider implements Provider {
       rfc822MessageId: `<fake-${n}@provider.test>`,
     };
     this.delivered.set(req.idempotencyKey, { req, result });
+    this.requests.push(req);
     if (this.crashAfterAckKeys.has(req.idempotencyKey)) {
       this.crashAfterAckKeys.delete(req.idempotencyKey);
       throw new Error("simulated crash after provider ack");
