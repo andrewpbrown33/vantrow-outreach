@@ -1,4 +1,4 @@
--- 0006_draft_approval.sql
+-- 0007_draft_approval.sql
 --
 -- Closes the draft-first dead end.
 --

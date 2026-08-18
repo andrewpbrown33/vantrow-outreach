@@ -624,6 +624,23 @@ export interface ImportCandidate {
   company?: string;
   title?: string;
   timezone?: string;
+  /** Extra columns the user mapped to custom variables; merged into the
+   *  prospect's custom jsonb, where the engine's renderer already reads. */
+  custom?: Record<string, string>;
+}
+
+/** Every custom-variable key any prospect in the workspace carries — the
+ *  composer marks these as known so a typo shows red instead of sending "". */
+export async function listCustomVariableKeys(ws: string): Promise<string[]> {
+  const { rows } = await getPool().query<{ k: string }>(
+    `select distinct jsonb_object_keys(custom) as k
+       from public.prospects
+      where workspace_id = $1
+      order by k
+      limit 50`,
+    [ws],
+  );
+  return rows.map((r) => r.k);
 }
 
 export interface ImportOutcome {
@@ -648,18 +665,20 @@ export async function upsertProspects(
     for (const r of rows) {
       const res = await client.query<{ id: string; inserted: boolean }>(
         `insert into public.prospects
-           (workspace_id, email, first_name, last_name, company, title, timezone)
-         values ($1, $2, $3, $4, $5, $6, $7)
+           (workspace_id, email, first_name, last_name, company, title, timezone, custom)
+         values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
          on conflict (workspace_id, lower(email)) do update
            set first_name = coalesce(nullif(excluded.first_name, ''), public.prospects.first_name),
                last_name  = coalesce(nullif(excluded.last_name, ''),  public.prospects.last_name),
                company    = coalesce(nullif(excluded.company, ''),    public.prospects.company),
                title      = coalesce(nullif(excluded.title, ''),      public.prospects.title),
                timezone   = coalesce(nullif(excluded.timezone, ''),   public.prospects.timezone),
+               custom     = public.prospects.custom || excluded.custom,
                updated_at = now()
          returning id, (xmax = 0) as inserted`,
         [ws, r.email, r.firstName ?? null, r.lastName ?? null,
-         r.company ?? null, r.title ?? null, r.timezone ?? null],
+         r.company ?? null, r.title ?? null, r.timezone ?? null,
+         JSON.stringify(r.custom ?? {})],
       );
       const row = res.rows[0];
       out.ids.push(row.id);
@@ -680,7 +699,7 @@ export async function upsertProspects(
  *  Two halves, both required. Recording WHICH step was approved is what stops
  *  the sweep meeting the same draft_first step on its next tick and parking it
  *  again; re-arming next_touch_at is what makes the enrollment visible to the
- *  claim query at all, because that column IS the schedule. Before 0006 only
+ *  claim query at all, because that column IS the schedule. Before 0007 only
  *  the parking half existed, so a draft-first step was a permanent dead end.
  *
  *  The UPDATE repeats the paused/pause_reason guard from the read, so two

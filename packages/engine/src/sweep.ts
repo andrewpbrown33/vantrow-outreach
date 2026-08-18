@@ -12,6 +12,31 @@ import type { Pool, PoolClient } from "pg";
 import type { Provider } from "./dispatcher";
 import { emitSequenceProgress } from "./connect-emit";
 import { nextFireTime, snapToWindow, type SendSchedule } from "./planner";
+import { replySubject } from "./subject";
+
+/** The subject a reply step threads under when the ledger has no record: the
+ *  nearest earlier step that opens its own thread, rendered with the same
+ *  variables. Null when no such subject exists — the caller parks the
+ *  enrollment rather than send an empty subject. */
+async function rootSubject(
+  client: PoolClient,
+  sequenceId: string,
+  beforeOrder: number,
+  fill: (s: string) => string,
+): Promise<string | null> {
+  const { rows } = await client.query<{ subject: string }>(
+    `select t.subject
+       from public.sequence_steps st
+       join public.email_templates t on t.id = st.template_id
+      where st.sequence_id = $1 and st.step_order < $2 and not st.thread_as_reply
+      order by st.step_order desc limit 1`,
+    [sequenceId, beforeOrder],
+  );
+  const raw = rows[0]?.subject;
+  if (raw === undefined) return null;
+  const rendered = fill(raw);
+  return rendered.trim().length > 0 ? rendered : null;
+}
 
 export interface SweepOptions {
   batchSize?: number;
@@ -353,7 +378,7 @@ export async function executeOne(
     // THIS step, so approving step 2 never carries forward to step 3.
     //
     // Parking clears next_touch_at, and next_touch_at is the schedule, so
-    // before 0006 recorded the approval this branch was a permanent dead end:
+    // before 0007 recorded the approval this branch was a permanent dead end:
     // re-arming alone would meet the same draft_first step on the next tick and
     // park it again, forever, with nothing surfaced anywhere.
     if (step.mode === "draft_first" && w.draft_approved_step !== w.current_step_order) {
@@ -418,24 +443,6 @@ export async function executeOne(
       return "skipped";
     }
 
-    // Threading quotes the PROVIDER's ids from the previous touch (Gmail
-    // rewrites Message-ID, so an id we invented threads nowhere).
-    let inReplyToMessageId: string | undefined;
-    let threadId: string | undefined;
-    if (step.thread_as_reply && w.current_step_order > 1) {
-      const prev = await client.query<{
-        provider_rfc822_message_id: string | null; provider_thread_id: string | null;
-      }>(
-        `select provider_rfc822_message_id, provider_thread_id
-           from public.touch_ledger
-          where enrollment_id = $1 and state = 'sent' and step_order < $2
-          order by step_order desc limit 1`,
-        [claim.id, w.current_step_order],
-      );
-      inReplyToMessageId = prev.rows[0]?.provider_rfc822_message_id ?? undefined;
-      threadId = prev.rows[0]?.provider_thread_id ?? undefined;
-    }
-
     const vars: Record<string, string> = {
       firstName: w.first_name ?? "",
       lastName: w.last_name ?? "",
@@ -466,12 +473,14 @@ export async function executeOne(
         }
         return v;
       });
-    const subject = fill(template.subject);
+    // `let`, because a reply step overwrites this below with the derived
+    // "Re: " subject once the thread it belongs to is known.
+    let subject = fill(template.subject);
     const bodyHtml = fill(template.body_html);
 
-    if (missing.size > 0) {
-      // Paused, not dropped: this is a data gap a human fixes on the prospect,
-      // after which the enrollment is re-armed like any other paused work.
+    // Paused, not dropped: this is a data gap a human fixes on the prospect,
+    // after which the enrollment is re-armed like any other paused work.
+    const blockUnfilled = async () => {
       const fields = [...missing].sort();
       const reason = `unfilled merge fields: ${fields.join(", ")}`;
       await client.query(
@@ -485,6 +494,67 @@ export async function executeOne(
         step_order: w.current_step_order,
       });
       await client.query("commit");
+    };
+
+    if (missing.size > 0) {
+      await blockUnfilled();
+      return "skipped";
+    }
+
+    // Threading quotes the PROVIDER's ids from the previous touch (Gmail
+    // rewrites Message-ID, so an id we invented threads nowhere). The subject
+    // must match the conversation too — Gmail refuses to thread a message
+    // whose subject differs — so a reply step ignores its own template subject
+    // and derives "Re: " + whatever its thread actually opened with.
+    let inReplyToMessageId: string | undefined;
+    let threadId: string | undefined;
+    if (step.thread_as_reply && w.current_step_order > 1) {
+      const prev = await client.query<{
+        provider_rfc822_message_id: string | null; provider_thread_id: string | null;
+        sent_subject: string | null;
+      }>(
+        `select provider_rfc822_message_id, provider_thread_id, sent_subject
+           from public.touch_ledger
+          where enrollment_id = $1 and state = 'sent' and step_order < $2
+          order by step_order desc limit 1`,
+        [claim.id, w.current_step_order],
+      );
+      inReplyToMessageId = prev.rows[0]?.provider_rfc822_message_id ?? undefined;
+      threadId = prev.rows[0]?.provider_thread_id ?? undefined;
+      // What the wire saw, in preference order: the previous touch's recorded
+      // subject; this step's own template subject (pre-0006 sequences carried
+      // one); the nearest earlier thread-opening step, re-rendered. Blank
+      // counts as absent at every rung — "Re:" over nothing is not a thread.
+      const nonBlank = (s: string | null | undefined): string | null =>
+        s !== null && s !== undefined && s.trim().length > 0 ? s : null;
+      const threadSubject = nonBlank(prev.rows[0]?.sent_subject)
+        ?? nonBlank(subject)
+        ?? await rootSubject(client, w.sequence_id, w.current_step_order, fill);
+      if (threadSubject === null) {
+        // Unreachable through the forms (step 1 can never be a reply; every
+        // thread-opening step requires a subject) — but an empty subject on
+        // the wire is not an acceptable fallback, so park it visibly.
+        await client.query(
+          "update public.touch_ledger set state = 'skipped', error = 'reply step has no thread subject' where id = $1",
+          [ledgerId]);
+        await resolve(
+          "state = 'paused', next_touch_at = null, pause_reason = 'reply step has no thread subject'",
+          []);
+        await events("enrollment.paused", { reason: "missing_thread_subject" });
+        await client.query("commit");
+        return "skipped";
+      }
+      subject = replySubject(threadSubject);
+    }
+
+    // Re-check: the threading branch renders further templates through the same
+    // `fill` — the previous touch's subject, or an earlier thread-opening step
+    // via rootSubject — so a miss can appear after the first check. rootSubject
+    // only rejects a subject that is blank *entirely*; a partial miss like
+    // "{{company}} update" survives as " update" and would reach the wire as
+    // "Re:  update", which is the exact output this step exists to prevent.
+    if (missing.size > 0) {
+      await blockUnfilled();
       return "skipped";
     }
 
@@ -524,10 +594,11 @@ export async function executeOne(
     await client.query(
       `update public.touch_ledger
           set state = 'sent', provider_message_id = $2,
-              provider_thread_id = $3, provider_rfc822_message_id = $4
+              provider_thread_id = $3, provider_rfc822_message_id = $4,
+              sent_subject = $5
         where id = $1`,
       [ledgerId, result.providerMessageId, result.threadId ?? null,
-       result.rfc822MessageId ?? null]);
+       result.rfc822MessageId ?? null, subject]);
     await events("touch.sent", {
       step_order: w.current_step_order,
       provider_message_id: result.providerMessageId,

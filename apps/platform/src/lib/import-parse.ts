@@ -39,6 +39,13 @@ const FIELD_ALIASES: Record<keyof ParsedProspect, string[]> = {
   timezone: ["timezone", "time zone", "tz", "iana timezone"],
 };
 
+/** Aliases pre-normalised the same way headers are, so "e-mail" and "E-Mail"
+ *  meet in the middle — comparing raw aliases against normalised headers left
+ *  every hyphenated alias unreachable. */
+const NORMALISED_ALIASES: [keyof ParsedProspect, Set<string>][] =
+  (Object.entries(FIELD_ALIASES) as [keyof ParsedProspect, string[]][])
+    .map(([field, aliases]) => [field, new Set(aliases.map((a) => normalise(a)))]);
+
 /** Split one delimited line, honouring double quotes and "" escapes. */
 export function splitRow(line: string, delimiter: string): string[] {
   const out: string[] = [];
@@ -83,9 +90,8 @@ function mapHeader(cells: string[]): Record<keyof ParsedProspect, number> {
   } as Record<keyof ParsedProspect, number>;
   cells.forEach((raw, i) => {
     const h = normalise(raw);
-    for (const [field, aliases] of Object.entries(FIELD_ALIASES) as
-         [keyof ParsedProspect, string[]][]) {
-      if (map[field] === -1 && aliases.includes(h)) map[field] = i;
+    for (const [field, aliases] of NORMALISED_ALIASES) {
+      if (map[field] === -1 && aliases.has(h)) map[field] = i;
     }
   });
   return map;
@@ -111,6 +117,59 @@ function splitFullName(value: string): { firstName?: string; lastName?: string }
   if (parts.length === 0) return {};
   if (parts.length === 1) return { firstName: parts[0] };
   return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+}
+
+// --- File upload: raw table + mapping suggestions ---------------------------
+//
+// The paste path above maps columns silently; a FILE goes through an explicit
+// confirmation screen instead — the user sees every detected column, corrects
+// or ignores it, and only what they mapped is imported. These helpers hand the
+// mapping UI its raw material.
+
+export interface SniffedTable {
+  /** Header cells, or null when row one already looks like data. */
+  header: string[] | null;
+  /** Data rows (header excluded), split on the sniffed delimiter. */
+  rows: string[][];
+  delimiter: string;
+}
+
+/** Split delimited text into a raw table without interpreting it. */
+export function sniffTable(text: string): SniffedTable {
+  const lines = text.split(/\r\n|\r|\n/).map((l) => l.trimEnd())
+    .filter((l) => l.trim().length > 0);
+  if (lines.length === 0) return { header: null, rows: [], delimiter: "," };
+  const delimiter = sniffDelimiter(lines);
+  const first = splitRow(lines[0]!, delimiter);
+  const hasHeader = looksLikeHeader(first);
+  return {
+    header: hasHeader ? first : null,
+    rows: lines.slice(hasHeader ? 1 : 0).map((l) => splitRow(l, delimiter)),
+    delimiter,
+  };
+}
+
+/** The standard field a header most likely means, or null → the mapping UI
+ *  offers it as ignore/custom. Same aliases the paste path trusts silently. */
+export function suggestField(header: string): keyof ParsedProspect | null {
+  const h = normalise(header);
+  for (const [field, aliases] of NORMALISED_ALIASES) {
+    if (aliases.has(h)) return field;
+  }
+  return null;
+}
+
+/** A header turned into a legal custom-variable name: "LinkedIn URL" →
+ *  "linkedin_url". Empty when nothing survives (all punctuation). */
+export function customNameFrom(header: string): string {
+  return normalise(header).replace(/[^a-z0-9 ]+/g, "").trim()
+    .replace(/\s+/g, "_").slice(0, 40);
+}
+
+/** Loose-but-real address check, shared with the server action so the file
+ *  path refuses exactly what the paste path refuses. */
+export function extractEmailCell(cell: string): string | null {
+  return extractEmail(cell);
 }
 
 export function parseProspects(text: string): ParseResult {

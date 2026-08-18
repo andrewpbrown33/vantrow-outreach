@@ -2,7 +2,9 @@
  *  swallow a row it could not read. */
 
 import { describe, expect, it } from "vitest";
-import { parseProspects, splitRow } from "./import-parse";
+import {
+  customNameFrom, parseProspects, sniffTable, splitRow, suggestField,
+} from "./import-parse";
 
 describe("splitRow", () => {
   it("honours quotes, embedded delimiters and escaped quotes", () => {
@@ -86,5 +88,53 @@ describe("parseProspects", () => {
 
   it("returns nothing for empty input", () => {
     expect(parseProspects("   \n  ").rows).toEqual([]);
+  });
+});
+
+describe("sniffTable", () => {
+  it("separates a header from its rows", () => {
+    const t = sniffTable("email,first name\na@x.com,Ana\nb@y.com,Bo\n");
+    expect(t.header).toEqual(["email", "first name"]);
+    expect(t.rows).toEqual([["a@x.com", "Ana"], ["b@y.com", "Bo"]]);
+  });
+
+  it("returns header null when row one is already data", () => {
+    const t = sniffTable("a@x.com,Ana\nb@y.com,Bo\n");
+    expect(t.header).toBeNull();
+    expect(t.rows).toHaveLength(2);
+  });
+
+  it("sniffs tabs and keeps quoted commas intact", () => {
+    expect(sniffTable("a@x.com\tAcme, Inc.\n").rows).toEqual([["a@x.com", "Acme, Inc."]]);
+    expect(sniffTable('a@x.com,"Acme, Inc."\n').rows).toEqual([["a@x.com", "Acme, Inc."]]);
+  });
+
+  it("is calm about an empty file", () => {
+    expect(sniffTable("  \n ").rows).toEqual([]);
+  });
+});
+
+describe("suggestField", () => {
+  it("matches the aliases the paste path already trusts", () => {
+    expect(suggestField("E-Mail")).toBe("email");
+    expect(suggestField("First_Name")).toBe("firstName");
+    expect(suggestField("Organisation")).toBe("company");
+    expect(suggestField("Job Title")).toBe("title");
+  });
+
+  it("returns null for anything it will not guess at", () => {
+    expect(suggestField("LinkedIn URL")).toBeNull();
+    expect(suggestField("Revenue")).toBeNull();
+  });
+});
+
+describe("customNameFrom", () => {
+  it("turns a header into a legal variable name", () => {
+    expect(customNameFrom("LinkedIn URL")).toBe("linkedin_url");
+    expect(customNameFrom("  Opening Line! ")).toBe("opening_line");
+  });
+
+  it("returns empty when nothing survives", () => {
+    expect(customNameFrom("!!!")).toBe("");
   });
 });

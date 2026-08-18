@@ -269,7 +269,7 @@ run()("workspace scoping", () => {
 
 /** What the sweep does to a draft-first step: parks it and clears the timer.
  *  Mirrors the branch in packages/engine/src/sweep.ts exactly — including the
- *  null next_touch_at, which is what made this a dead end before 0006. */
+ *  null next_touch_at, which is what made this a dead end before 0007. */
 async function sweepParksDraft(enrollmentId: string): Promise<void> {
   await admin.query(
     `update public.enrollments

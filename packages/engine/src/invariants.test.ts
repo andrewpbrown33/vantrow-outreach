@@ -295,7 +295,7 @@ describe.skipIf(!dbUrl)("engine invariants (real Postgres)", () => {
 
   it("never auto-sends a draft-first step, and sends it once approved", async () => {
     // The program plan's own Phase-4 verification row: no code path sends
-    // tenant email without an approved draft. Before 0006 the second half of
+    // tenant email without an approved draft. Before 0007 the second half of
     // this test was impossible — approval had nowhere to be recorded, so the
     // enrollment parked here permanently.
     const s = await seed();

@@ -4,8 +4,10 @@
  *  signed in" rather than as a partial trust. */
 
 import { createHmac } from "node:crypto";
-import { describe, expect, it } from "vitest";
-import { challengeFor, mintSession, newVerifier, readSession } from "./auth";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  challengeFor, mintSession, newVerifier, projectOrigin, readSession, verifyTokenHash,
+} from "./auth";
 
 const SECRET = "test-secret-do-not-ship";
 const USER = { userId: "11111111-1111-4111-8111-111111111111", email: "a@x.com" };
@@ -55,6 +57,86 @@ describe("session cookie", () => {
     const payload = Buffer.from(JSON.stringify({ email: "a@x.com" })).toString("base64url");
     const sig = createHmac("sha256", SECRET).update(payload).digest("base64url");
     expect(readSession(`${payload}.${sig}`, SECRET)).toBeNull();
+  });
+});
+
+describe("projectOrigin", () => {
+  it("keeps a correct project URL as-is", () => {
+    expect(projectOrigin("https://abc.supabase.co")).toBe("https://abc.supabase.co");
+  });
+
+  it("recovers the origin from the RESTful endpoint people actually paste", () => {
+    // This exact value produced a PGRST125 "Invalid path specified in request
+    // URL" in production, because /auth/v1/otp under /rest/v1 reaches
+    // PostgREST instead of the auth server.
+    expect(projectOrigin("https://abc.supabase.co/rest/v1"))
+      .toBe("https://abc.supabase.co");
+  });
+
+  it("strips any other stray path, query or trailing slash", () => {
+    for (const raw of [
+      "https://abc.supabase.co/",
+      "https://abc.supabase.co///",
+      "https://abc.supabase.co/auth/v1",
+      "https://abc.supabase.co/rest/v1/?apikey=x",
+      "  https://abc.supabase.co/graphql/v1  ",
+    ]) {
+      expect(projectOrigin(raw)).toBe("https://abc.supabase.co");
+    }
+  });
+
+  it("preserves a non-default port on a self-hosted instance", () => {
+    expect(projectOrigin("http://localhost:54321/rest/v1"))
+      .toBe("http://localhost:54321");
+  });
+
+  it("refuses anything that is not a usable absolute URL", () => {
+    for (const raw of [undefined, "", "   ", "abc.supabase.co", "not a url",
+                       "postgres://abc.supabase.co"]) {
+      expect(projectOrigin(raw)).toBeNull();
+    }
+  });
+});
+
+describe("verifyTokenHash", () => {
+  const CFG = { url: "https://abc.supabase.co", anonKey: "anon" };
+  const okBody = { user: { id: USER.userId, email: "A@X.com" } };
+
+  const stubFetch = (status: number, body: unknown) =>
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify(body), {
+        status, headers: { "content-type": "application/json" },
+      }));
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("proves identity with no cookie, so the link works on any device", async () => {
+    const fetchMock = stubFetch(200, okBody);
+    const result = await verifyTokenHash("hash123", "magiclink", CFG);
+    expect(result).toEqual({ ok: true, user: { userId: USER.userId, email: "a@x.com" } });
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://abc.supabase.co/auth/v1/verify");
+    expect(JSON.parse(String(init.body))).toEqual({ type: "magiclink", token_hash: "hash123" });
+    expect((init.headers as Record<string, string>).apikey).toBe("anon");
+  });
+
+  it("surfaces the auth server's own words when it refuses", async () => {
+    stubFetch(401, { error_description: "Email link is invalid or has expired" });
+    const result = await verifyTokenHash("stale", "magiclink", CFG);
+    expect(result).toEqual({ ok: false, error: "Email link is invalid or has expired" });
+  });
+
+  it("refuses a success response that carries no user", async () => {
+    stubFetch(200, { access_token: "t" });
+    const result = await verifyTokenHash("hash", "magiclink", CFG);
+    expect(result.ok).toBe(false);
+  });
+
+  it("does not throw on a non-JSON body", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("<html>502</html>", { status: 502 }));
+    const result = await verifyTokenHash("hash", "magiclink", CFG);
+    expect(result).toMatchObject({ ok: false });
   });
 });
 

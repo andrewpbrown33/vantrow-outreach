@@ -1,14 +1,32 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { replySubject } from "@vantrow/engine/subject";
 import { AppBar } from "../../../components/app-bar";
 import { Drawer } from "../../../components/drawer";
 import { Chip, Empty, Monogram, Notice, PersonLink } from "../../../components/ui";
 import { initialsOf } from "../../../lib/feed";
-import { clockOf, daysOf, intervalOf, whenOf } from "../../../lib/format";
-import { getSequence, listEnrollments, listSteps, type EnrollmentRow } from "../../../lib/queries";
+import { clockOf, dayNumbers, daysOf, intervalOf, whenOf } from "../../../lib/format";
+import { getSequence, listEnrollments, listSteps, type EnrollmentRow, type StepRow } from "../../../lib/queries";
 import type { EnrollmentState } from "../../../lib/states";
 import { requireSession } from "../../../lib/workspace";
 import { approveDraftAction, setStateAction } from "../actions";
+
+/** What a reply step's subject will read on the wire: Re: + the nearest
+ *  earlier thread-opening step. Mirrors the engine's derivation for display —
+ *  the ledger's recorded subject is the truth once a touch has sent. */
+function displaySubject(steps: StepRow[], i: number): { text: string; derived: boolean } {
+  const step = steps[i]!;
+  if (!step.threadAsReply) {
+    return { text: step.subject ?? "(no subject)", derived: false };
+  }
+  for (let j = i - 1; j >= 0; j--) {
+    const opener = steps[j]!;
+    if (!opener.threadAsReply && (opener.subject ?? "").trim().length > 0) {
+      return { text: replySubject(opener.subject!), derived: true };
+    }
+  }
+  return { text: "Re: — the subject of the step it threads under", derived: true };
+}
 
 export const dynamic = "force-dynamic";
 
@@ -122,20 +140,30 @@ export default async function SequenceDetail({
           <Empty title="No steps yet.">This sequence cannot run until it has one.</Empty>
         ) : null}
         <div className="grid gap-2.5">
-          {steps.map((step, i) => (
+          {steps.map((step, i) => {
+            const subject = displaySubject(steps, i);
+            const day = dayNumbers(steps.map(
+              (s) => ({ days: s.intervalDays, hours: s.intervalHours })))[i];
+            return (
             <div
               key={step.id}
               className="grid gap-3 rounded-lg border border-line bg-panel px-3.5 py-3 sm:grid-cols-[92px_minmax(0,1fr)_auto] sm:items-center"
             >
               <span className="font-mono text-[11px] font-bold text-sub">
-                {intervalOf(step.intervalDays, step.intervalHours, i === 0)}
+                Day {day}
                 <span className="block font-normal text-muted">
-                  {i === 0 ? "on enroll" : step.threadAsReply ? "threads under step 1" : "new thread"}
+                  {i === 0 ? "on enroll" : intervalOf(step.intervalDays, step.intervalHours, false)}
+                </span>
+                <span className="block font-normal text-muted">
+                  {i === 0 ? "opens the thread" : step.threadAsReply ? "same thread" : "new thread"}
                 </span>
               </span>
               <span>
-                <b className="font-semibold">{step.subject ?? "(no subject)"}</b>
+                <b className={subject.derived ? "font-semibold text-sub" : "font-semibold"}>
+                  {subject.text}
+                </b>
                 <span className="block text-xs text-muted">
+                  {subject.derived ? "subject written at send time · " : ""}
                   {step.templateName ?? "no template"}
                 </span>
               </span>
@@ -147,7 +175,8 @@ export default async function SequenceDetail({
                 </span>
               </span>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-4 mb-1 flex flex-wrap items-baseline gap-3">
