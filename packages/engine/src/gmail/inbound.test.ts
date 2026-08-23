@@ -159,6 +159,43 @@ describe.skipIf(!dbUrl)("inbound behaviors (real Postgres)", () => {
     expect(sup.rows).toEqual([{ reason: "hard_bounce" }]);
   });
 
+  it("a reply that asks off the list suppresses org-wide, state stays replied", async () => {
+    const s = await seed();
+    const r = await processInbound(pool!, s.mailboxId, inbound({
+      fromEmail: s.prospectEmail, bodyText: "No thanks.",
+    }));
+    expect(r.classification).toBe("reply");
+    const e = await enrollment(s.enrollmentId);
+    expect(e.state).toBe("replied");
+    const sup = await pool!.query(
+      `select reason from suppression_entries
+        where workspace_id = $1 and lower(email) = lower($2)`,
+      [s.ws, s.prospectEmail]);
+    expect(sup.rows).toEqual([{ reason: "unsubscribe" }]);
+    const p = await pool!.query(
+      "select opted_out_at from prospects where id = $1", [s.prospectId]);
+    expect(p.rows[0].opted_out_at).not.toBeNull();
+    expect(await eventTypes(s.ws)).toContain("prospect.opted_out");
+  });
+
+  it("a standalone unsubscribe email suppresses and cancels the live enrollment", async () => {
+    const s = await seed();
+    const r = await processInbound(pool!, s.mailboxId, inbound({
+      fromEmail: s.prospectEmail, subject: "unsubscribe", bodyText: "",
+    }));
+    expect(r.classification).toBe("unsubscribe");
+    const e = await enrollment(s.enrollmentId);
+    expect(e.state).toBe("canceled");
+    expect(e.next_touch_at).toBeNull();
+    expect(e.error_reason).toBe("unsubscribed");
+    const sup = await pool!.query(
+      `select reason from suppression_entries
+        where workspace_id = $1 and lower(email) = lower($2)`,
+      [s.ws, s.prospectEmail]);
+    expect(sup.rows).toEqual([{ reason: "unsubscribe" }]);
+    expect(await eventTypes(s.ws)).toContain("inbound.unsubscribe");
+  });
+
   it("records soft bounces without halting the enrollment", async () => {
     const s = await seed();
     const res = await processInbound(pool!, s.mailboxId, inbound({

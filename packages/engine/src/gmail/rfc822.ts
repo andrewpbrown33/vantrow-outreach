@@ -40,6 +40,13 @@ function encodeHeaderWord(value: string): string {
     : `=?UTF-8?B?${b64url(value).replace(/-/g, "+").replace(/_/g, "/")}?=`;
 }
 
+/** Bare address from "Name <a@b>" or a plain address — the engine passes bare
+ *  addresses today; tolerate the display form so the header never breaks. */
+function bareAddress(value: string): string {
+  const m = /<([^>]+)>/.exec(value);
+  return (m ? m[1]! : value).trim();
+}
+
 export interface ComposeInput {
   from: string;
   to: string;
@@ -58,6 +65,10 @@ export function composeRaw(input: ComposeInput): string {
     `Subject: ${encodeHeaderWord(input.subject)}`,
     `Message-ID: ${input.messageId}`,
     `X-Nudgerow-Key: ${input.idempotencyKey}`,
+    // Unsubscribe lands in the sending mailbox itself; inbound sync classifies
+    // the subject and writes the suppression row (Gate 3 item 6, first half —
+    // the RFC 8058 one-click POST endpoint is the second half).
+    `List-Unsubscribe: <mailto:${bareAddress(input.from)}?subject=unsubscribe>`,
     "MIME-Version: 1.0",
     'Content-Type: text/html; charset="UTF-8"',
     "Content-Transfer-Encoding: base64",
