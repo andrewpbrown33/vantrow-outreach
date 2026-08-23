@@ -10,7 +10,9 @@
 
 import { describe, expect, it } from "vitest";
 import type { SendRequest } from "../dispatcher";
-import { classifyInbound, type NormalizedInbound } from "./inbound";
+import {
+  classifyInbound, detectOptOut, type NormalizedInbound,
+} from "./inbound";
 import type { FetchLike, TokenSource } from "./oauth";
 import { GmailProvider } from "./provider";
 import {
@@ -21,6 +23,20 @@ import {
 const UUID = "1c9a2b3d-4e5f-6789-abcd-ef0123456789";
 
 describe("rfc822 layer", () => {
+  it("every send carries the List-Unsubscribe mailto header (Gate 3 item 6, first half)", () => {
+    const raw = composeRaw({
+      from: "andrew@getvantrow.com",
+      to: "p@example.com",
+      subject: "s",
+      bodyHtml: "<p>b</p>",
+      messageId: "<m@getvantrow.com>",
+      idempotencyKey: "e:1:0",
+    });
+    expect(fromB64url(raw)).toContain(
+      "List-Unsubscribe: <mailto:andrew@getvantrow.com?subject=unsubscribe>",
+    );
+  });
+
   it("round-trips the touch identity through the Message-ID", () => {
     const mid = touchMessageId(`${UUID}:3`, "getvantrow.com");
     expect(mid).toBe(`<touch-${UUID}-3@getvantrow.com>`);
@@ -116,6 +132,48 @@ describe("inbound classifier", () => {
 
   it("leaves unlinked human mail as other (caller may match by sender)", () => {
     expect(classifyInbound(inbound({})).classification).toBe("other");
+  });
+
+  it("classifies an unsubscribe-subject message as unsubscribe, never a reply", () => {
+    for (const subject of ["unsubscribe", "Re: unsubscribe", "  Unsubscribe me"]) {
+      expect(classifyInbound(inbound({ subject })).classification)
+        .toBe("unsubscribe");
+    }
+    // The word elsewhere in a subject is not the mailto idiom.
+    expect(classifyInbound(inbound({ subject: "how do I unsubscribe?" }))
+      .classification).toBe("other");
+  });
+
+  it("flags opt-out wording on a human reply without changing its class", () => {
+    const c = classifyInbound(inbound({ bodyText: "Please remove me from your list." }));
+    expect(c.classification).toBe("other");
+    expect(c.optOut).toBe(true);
+    expect(classifyInbound(inbound({})).optOut).toBeUndefined();
+  });
+});
+
+describe("detectOptOut", () => {
+  it("strong verbs count anywhere in the prospect's own words", () => {
+    expect(detectOptOut("Thanks but please STOP EMAILING me, we use AccuLynx.")).toBe(true);
+    expect(detectOptOut("unsubscribe")).toBe(true);
+    expect(detectOptOut("Take me off this list")).toBe(true);
+  });
+
+  it("polite declines only when they ARE the message", () => {
+    expect(detectOptOut("No thanks.")).toBe(true);
+    expect(detectOptOut("Not interested")).toBe(true);
+    expect(detectOptOut(
+      "We're not interested in switching this season, but circle back in " +
+      "January when the storm work slows down and we re-look at tooling.",
+    )).toBe(false);
+  });
+
+  it("ignores our own quoted close-out line in a positive reply", () => {
+    expect(detectOptOut(
+      "Sounds interesting — call me Friday.\n\n" +
+      "On Tue, Aug 25, 2026 at 9:02 AM Andrew wrote:\n" +
+      '> if you\'d rather not hear from me, reply "no thanks" and I won\'t write again.\n',
+    )).toBe(false);
   });
 });
 

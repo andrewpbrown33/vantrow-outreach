@@ -161,7 +161,12 @@ A healthy tick returns 200 and a report like:
    SQL-editor procedure as the others (runbook 04 §2 shows the clicks).
    Without it every send fails with `column "sent_subject" does not exist`;
    nothing is lost (failures re-arm with a 15-minute backoff), but nothing
-   sends until it runs.
+   sends until it runs. **Added 2026-08-22: `0007_draft_approval.sql` and
+   `0008_unsubscribe_and_rpc_lockdown.sql`** — same procedure, run after
+   `0006`, both idempotent. `0007` closes the draft-first dead end; `0008`
+   revokes public RPC execute on the two security-definer engine functions
+   and teaches inbound classification the `unsubscribe` value the engine now
+   writes. Apply all three in one SQL-editor sitting.
 2. At least one mailbox connected (runbook 07 §6) — otherwise the sweep has
    no provider and defers everything with `mailbox_not_connected`.
 

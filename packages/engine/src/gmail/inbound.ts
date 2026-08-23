@@ -21,7 +21,7 @@ export interface NormalizedInbound {
 }
 
 export type Classification =
-  | "reply" | "ooo" | "bounce_hard" | "bounce_soft" | "other";
+  | "reply" | "ooo" | "bounce_hard" | "bounce_soft" | "unsubscribe" | "other";
 
 export interface ClassifiedInbound {
   classification: Classification;
@@ -32,12 +32,43 @@ export interface ClassifiedInbound {
   oooReturnDate?: Date;
   /** Touch linkage recovered from In-Reply-To/References. */
   touch?: { enrollmentId: string; stepOrder: number };
+  /** A human reply whose own words ask off the list (feeds I3's suppression). */
+  optOut?: boolean;
 }
 
 const OOO_SUBJECT_RE =
   /^((auto(matic)?[ -]?reply)|out of (the )?office|ooo\b)/i;
 const RETURN_DATE_RE =
   /(?:return(?:ing)?|back)(?:\s+\S+){0,3}?\s+on\s+([A-Z][a-z]+\s+\d{1,2}(?:,?\s+\d{4})?|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)/i;
+
+const UNSUB_SUBJECT_RE = /^(\s*re:\s*)*\s*unsubscribe\b/i;
+
+// Opt-out intent in a human reply. Strong verbs count anywhere in the
+// prospect's own words; the polite forms ("no thanks" — the exact phrase the
+// close-out email invites) only when they ARE the message, so a longer answer
+// that merely contains them never suppresses. Quoted lines are stripped
+// first: every reply to the close-out quotes our own `reply "no thanks"` line.
+const OPTOUT_STRONG_RE =
+  /\b(unsubscribe|remove me|take me off|stop (?:e-?mail|messag|contact)\w*|opt (?:me )?out|do(?:n'?t| not) (?:e-?mail|contact|message) me)\b/i;
+const OPTOUT_POLITE_RE = /\b(?:no,? thank(?:s| you)|not interested)\b/i;
+
+/** The prospect's own words: drop `>` quote lines and everything under an
+ *  "On ... wrote:" / "-- Original Message --" attribution line. */
+export function stripQuoted(body: string): string {
+  let text = body;
+  const wrote = text.search(/^\s*On .{0,200}wrote:\s*$/im);
+  if (wrote >= 0) text = text.slice(0, wrote);
+  const original = text.search(/^-{2,}\s*Original Message\s*-{2,}\s*$/im);
+  if (original >= 0) text = text.slice(0, original);
+  return text.split(/\r?\n/).filter((l) => !/^\s*>/.test(l)).join("\n");
+}
+
+export function detectOptOut(bodyText: string): boolean {
+  const own = stripQuoted(bodyText);
+  if (OPTOUT_STRONG_RE.test(own)) return true;
+  const compact = own.trim();
+  return compact.length > 0 && compact.length <= 80 && OPTOUT_POLITE_RE.test(compact);
+}
 
 export function classifyInbound(msg: NormalizedInbound): ClassifiedInbound {
   const touch =
@@ -64,6 +95,13 @@ export function classifyInbound(msg: NormalizedInbound): ClassifiedInbound {
     };
   }
 
+  // Unsubscribe-by-mail: the List-Unsubscribe mailto points at the sending
+  // mailbox with exactly this subject. Suppression is the law either way
+  // (I3); the classification keeps it out of the reply counts.
+  if (UNSUB_SUBJECT_RE.test(msg.subject)) {
+    return { classification: "unsubscribe", touch };
+  }
+
   // OOO: auto-submitted machinery or the subject idiom. Never a reply (I6).
   const autoSubmitted = msg.headers["auto-submitted"];
   const isOoo =
@@ -87,7 +125,8 @@ export function classifyInbound(msg: NormalizedInbound): ClassifiedInbound {
   // A human wrote back. A synthetic touch reference proves it outright; with
   // Gmail (which rewrites Message-ID) the caller resolves the quoted provider
   // id against the ledger, or falls back to the sender address.
-  return { classification: touch ? "reply" : "other", touch };
+  const optOut = detectOptOut(msg.bodyText) || undefined;
+  return { classification: touch ? "reply" : "other", touch, optOut };
 }
 
 export interface ProcessResult {
@@ -191,7 +230,41 @@ export async function processInbound(
          mailboxId, payload],
       );
 
-    if (enrollment) {
+    // Org-wide opt-out writes, shared by the explicit unsubscribe message and
+    // the opt-out-worded reply. The suppression row is what I3's final
+    // dispatch check reads; opted_out_at is the visible mark on the prospect.
+    const suppressOptOut = async (address: string) => {
+      await client.query(
+        `insert into suppression_entries (workspace_id, email, reason)
+         values ($1, $2, 'unsubscribe')
+         on conflict (workspace_id, lower(email)) do nothing`,
+        [ws, address],
+      );
+      await client.query(
+        `update prospects
+            set opted_out_at = coalesce(opted_out_at, now()), updated_at = now()
+          where workspace_id = $1 and lower(email) = lower($2)`,
+        [ws, address],
+      );
+    };
+
+    if (classification === "unsubscribe") {
+      // The ask needs no enrollment to be honored: suppress the sender (or
+      // the linked prospect) org-wide, and cancel any live enrollment.
+      const addr = enrollment?.prospect_email ?? msg.fromEmail;
+      await suppressOptOut(addr);
+      if (enrollment) {
+        await client.query(
+          `update enrollments
+              set state = 'canceled', error_reason = 'unsubscribed',
+                  next_touch_at = null, resume_at = null, pause_reason = null,
+                  claimed_at = null, claim_token = null, updated_at = now()
+            where id = $1 and state in ('scheduled', 'active', 'paused')`,
+          [enrollment.id],
+        );
+      }
+      await events("inbound.unsubscribe", { address: addr });
+    } else if (enrollment) {
       if (classification === "reply") {
         // I2: the reply cancels every pending timer, atomically, whatever the
         // enrollment was doing (scheduled, active, even paused).
@@ -209,6 +282,13 @@ export async function processInbound(
             workspaceId: ws, sequenceId: seqId, reason: "inbound.reply",
             occurredAt: msg.receivedAt,
           });
+        }
+        if (cls.optOut) {
+          // The reply both stops this sequence (I2, above) and asks off the
+          // list entirely — honor both. State stays 'replied': that is what
+          // happened; the suppression row is what prevents the next sequence.
+          await suppressOptOut(enrollment.prospect_email);
+          await events("prospect.opted_out", { via: "reply" });
         }
       } else if (classification === "ooo") {
         // I6: pause with the return date; NEVER marks a reply. Default resume
