@@ -84,8 +84,15 @@ async function seed(opts: {
   const enrollment = await mkEnrollment(prospect);
   const extraEnrollmentIds: string[] = [];
   for (let i = 0; i < (opts.extraProspects ?? 0); i++) {
+    // Merge data is deliberate. These exist only to create a second DUE
+    // enrollment for the cap/spacing tests, and a prospect with no first_name
+    // or company now blocks on unfilled merge fields before it can reach the
+    // wire. Seeded bare, those tests silently exercised the block path instead
+    // of the invariant they name — and before the block existed they asserted
+    // that "<p>Hello </p>" was an acceptable thing to send a live prospect.
     const extra = (await q.query(
-      `insert into prospects (workspace_id, email) values ($1, $2) returning id`,
+      `insert into prospects (workspace_id, email, first_name, company)
+       values ($1, $2, 'Robin', 'Northwind') returning id`,
       [ws, `x-${randomUUID()}@example.com`],
     )).rows[0].id;
     extraEnrollmentIds.push(await mkEnrollment(extra));
@@ -218,6 +225,111 @@ describe.skipIf(!dbUrl)("engine invariants (real Postgres)", () => {
       .toBeGreaterThan(Date.now()); // re-armed in the future, still holding step 1
     const types = (await eventsOf(s.workspaceId)).map((r) => r.type);
     expect(types).toContain("touch.deferred");
+  });
+
+  it("blocks a send whose merge fields have nothing behind them", async () => {
+    // The product promise is "blocked and flagged — never sent broken, never
+    // skipped silently". Before this existed the engine rendered {{company}} as
+    // "" and sent ", a quiet question on " to a live prospect.
+    const s = await seed();
+    await pool!.query("update prospects set company = null where id = $1", [s.prospectId]);
+    const provider = new FakeProvider();
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+
+    expect(provider.attempts).toHaveLength(0); // never reached the wire
+
+    const e = await enrollment(s.enrollmentId);
+    expect(e.state).toBe("paused");
+    expect(e.pause_reason).toContain("company");
+    expect(e.next_touch_at).toBeNull();
+
+    // Flagged: named in an event a human can see, and on the ledger.
+    const blocked = (await eventsOf(s.workspaceId)).find((r) => r.type === "touch.blocked");
+    expect(blocked).toBeDefined();
+    expect(blocked!.payload.fields).toEqual(["company"]);
+
+    const led = await pool!.query(
+      "select state, error from touch_ledger where enrollment_id = $1", [s.enrollmentId]);
+    expect(led.rows[0].state).toBe("skipped");
+    expect(led.rows[0].error).toContain("company");
+  });
+
+  it("treats a whitespace-only value as unfilled, not as supplied", async () => {
+    // A merge field is a claim that a value exists; "   " produces the same
+    // broken output as nothing at all.
+    const s = await seed();
+    await pool!.query("update prospects set company = '   ' where id = $1", [s.prospectId]);
+    const provider = new FakeProvider();
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+    expect(provider.attempts).toHaveLength(0);
+    expect((await enrollment(s.enrollmentId)).state).toBe("paused");
+  });
+
+  it("spaces consecutive sends from one mailbox by min_send_gap_secs", async () => {
+    // Two due enrollments, one mailbox, cap well clear of the count: without
+    // spacing both fired in the same tick, back to back.
+    const s = await seed({ extraProspects: 1 });
+    const provider = new FakeProvider();
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+
+    const rows = await Promise.all(
+      [s.enrollmentId, ...s.extraEnrollmentIds].map(enrollment));
+    expect(rows.filter((r) => r.current_step_order === 2)).toHaveLength(1); // one sent
+    const held = rows.filter((r) => r.current_step_order === 1 && r.state === "scheduled");
+    expect(held).toHaveLength(1); // the other deferred, not dropped
+    expect(new Date(held[0].next_touch_at).getTime())
+      .toBeGreaterThan(Date.now() + 20_000); // default gap is 30s
+  });
+
+  it("applies the gap per mailbox — separate mailboxes still send in one tick", async () => {
+    // Each seed() builds its own workspace and mailbox, so neither should be
+    // held behind the other's send.
+    const a = await seed();
+    const b = await seed();
+    const provider = new FakeProvider();
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+
+    expect((await enrollment(a.enrollmentId)).current_step_order).toBe(2);
+    expect((await enrollment(b.enrollmentId)).current_step_order).toBe(2);
+  });
+
+  it("never auto-sends a draft-first step, and sends it once approved", async () => {
+    // The program plan's own Phase-4 verification row: no code path sends
+    // tenant email without an approved draft. Before 0007 the second half of
+    // this test was impossible — approval had nowhere to be recorded, so the
+    // enrollment parked here permanently.
+    const s = await seed();
+    await pool!.query(
+      `update sequence_steps set mode = 'draft_first'
+        where sequence_id = $1 and step_order = 1`, [s.sequenceId]);
+
+    const provider = new FakeProvider();
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+
+    let e = await enrollment(s.enrollmentId);
+    expect(e.state).toBe("paused");
+    expect(e.pause_reason).toBe("awaiting draft approval");
+    expect(e.next_touch_at).toBeNull();
+    // Nothing was attempted for THIS enrollment (other seeds share the sweep).
+    const before = await pool!.query<{ c: number }>(
+      "select count(*)::int as c from touch_ledger where enrollment_id = $1",
+      [s.enrollmentId]);
+    expect(before.rows[0]?.c).toBe(0);
+
+    // What approveDraft does: record the approved step, hand the timer back.
+    await pool!.query(
+      `update enrollments
+          set state = 'scheduled', pause_reason = null,
+              draft_approved_step = current_step_order, next_touch_at = now()
+        where id = $1`, [s.enrollmentId]);
+    await sweepOnce(pool!, provider, { jitterFraction: () => 0 });
+
+    e = await enrollment(s.enrollmentId);
+    expect(e.current_step_order).toBe(2); // it sent and advanced
+    const after = await pool!.query<{ c: number }>(
+      `select count(*)::int as c from touch_ledger
+        where enrollment_id = $1 and state = 'sent'`, [s.enrollmentId]);
+    expect(after.rows[0]?.c).toBe(1);
   });
 
   it("sends step 1, plans step 2 at +3 days, and finishes into the cracks", async () => {

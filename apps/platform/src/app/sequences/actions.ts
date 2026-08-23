@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { minutesFromTime } from "../../lib/format";
 import {
-  activateSequence, createSequence, getSequence, listSteps, setSequenceState,
+  activateSequence, approveDraft, createSequence, getSequence, listSteps,
+  setSequenceState,
   type NewStepInput,
 } from "../../lib/queries";
 import { requireSession } from "../../lib/workspace";
@@ -117,4 +118,19 @@ export async function createSequenceAction(
     return { error: String(err instanceof Error ? err.message : err).slice(0, 200) };
   }
   redirect(`/sequences/${id}`);
+}
+
+/** Approve a parked draft-first step (protocol §10).
+ *
+ *  The enrollment id arrives from a form and is therefore attacker-controlled;
+ *  approveDraft scopes every statement to the session's workspace and re-checks
+ *  that the row really is awaiting approval, so a forged id matches nothing. */
+export async function approveDraftAction(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireSession();
+  const enrollmentId = String(formData.get("enrollment_id") ?? "");
+  const sequenceId = String(formData.get("sequence_id") ?? "");
+  if (!enrollmentId) return;
+
+  await approveDraft(workspaceId, enrollmentId);
+  revalidatePath(`/sequences/${sequenceId}`);
 }

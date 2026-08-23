@@ -9,7 +9,7 @@ import { clockOf, dayNumbers, daysOf, intervalOf, whenOf } from "../../../lib/fo
 import { getSequence, listEnrollments, listSteps, type EnrollmentRow, type StepRow } from "../../../lib/queries";
 import type { EnrollmentState } from "../../../lib/states";
 import { requireSession } from "../../../lib/workspace";
-import { setStateAction } from "../actions";
+import { approveDraftAction, setStateAction } from "../actions";
 
 /** What a reply step's subject will read on the wire: Re: + the nearest
  *  earlier thread-opening step. Mirrors the engine's derivation for display —
@@ -29,6 +29,10 @@ function displaySubject(steps: StepRow[], i: number): { text: string; derived: b
 }
 
 export const dynamic = "force-dynamic";
+
+/** The pause_reason the sweep writes when it parks a draft-first step. Matched
+ *  exactly so the approve control appears for that state and nothing else. */
+const AWAITING_DRAFT = "awaiting draft approval";
 
 /** The enrollment states that get a monogram tone. `canceled` reads as draft
  *  grey — it is not a state the engine is working on. */
@@ -195,15 +199,16 @@ export default async function SequenceDetail({
           </Empty>
         ) : null}
         {enrollments.map((e) => (
-          <EnrollmentLine key={e.id} row={e} />
+          <EnrollmentLine key={e.id} row={e} sequenceId={seq.id} />
         ))}
       </div>
     </>
   );
 }
 
-function EnrollmentLine({ row }: { row: EnrollmentRow }) {
+function EnrollmentLine({ row, sequenceId }: { row: EnrollmentRow; sequenceId: string }) {
   const name = row.prospectName ?? row.prospectEmail;
+  const awaitingDraft = row.state === "paused" && row.pauseReason === AWAITING_DRAFT;
   return (
     <div className="grid grid-cols-[42px_1fr_auto] items-center gap-3 border-t border-line px-0.5 py-2.5 text-sm">
       <Monogram initials={initialsOf(name)} tone={TONE[row.state]} badge={BADGE[row.state] ?? null} />
@@ -211,7 +216,22 @@ function EnrollmentLine({ row }: { row: EnrollmentRow }) {
         <PersonLink href={`/prospects?q=${encodeURIComponent(row.prospectEmail)}`}>{name}</PersonLink>
         <span className="block text-xs text-muted">{describe(row)}</span>
       </span>
-      <Chip state={row.state === "canceled" ? "canceled" : row.state} />
+      {awaitingDraft ? (
+        // The only way out of a draft-first park. Without it the enrollment sits
+        // here forever: the sweep cleared next_touch_at, and that is the timer.
+        <form action={approveDraftAction} className="flex items-center gap-2">
+          <input type="hidden" name="enrollment_id" value={row.id} />
+          <input type="hidden" name="sequence_id" value={sequenceId} />
+          <button
+            type="submit"
+            className="rounded-lg bg-foreground px-3 py-1.5 text-[12px] font-semibold text-background"
+          >
+            Approve step {row.currentStepOrder}
+          </button>
+        </form>
+      ) : (
+        <Chip state={row.state === "canceled" ? "canceled" : row.state} />
+      )}
     </div>
   );
 }

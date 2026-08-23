@@ -26,7 +26,11 @@ interface StepSpec {
 /** One workspace, one prospect (Derek at Meridian), one ACTIVE sequence whose
  *  steps each get their OWN template — reply steps with an empty subject, the
  *  shape the platform form now writes. All-day window; every interval 0 so a
- *  re-arm makes the next step immediately due. */
+ *  re-arm makes the next step immediately due; and no per-mailbox send gap,
+ *  because these steps share one mailbox and the sweep would otherwise pace
+ *  them apart (the default is 30s + jitter) and defer every touch after the
+ *  first. What that spacing does is asserted in invariants.test.ts — here it
+ *  would only stop the test reaching the subject it means to check. */
 async function seedThreaded(steps: StepSpec[]): Promise<{
   workspaceId: string; enrollmentId: string;
 }> {
@@ -34,8 +38,9 @@ async function seedThreaded(steps: StepSpec[]): Promise<{
   const ws = (await q.query(
     "insert into workspaces (name) values ('threading') returning id")).rows[0].id;
   const mailbox = (await q.query(
-    `insert into mailboxes (workspace_id, email, daily_cap)
-     values ($1, $2, 100) returning id`,
+    `insert into mailboxes (workspace_id, email, daily_cap,
+       min_send_gap_secs, jitter_secs)
+     values ($1, $2, 100, 0, 0) returning id`,
     [ws, `mb-${randomUUID()}@eaverow.com`],
   )).rows[0].id;
   const prospect = (await q.query(
