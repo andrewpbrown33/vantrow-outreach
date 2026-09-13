@@ -186,10 +186,17 @@ export function Empty({ title, children }: { title: string; children?: React.Rea
   );
 }
 
-export function Notice({ tone = "info", children }: { tone?: "info" | "bad"; children: React.ReactNode }) {
+export function Notice({
+  tone = "info", children,
+}: { tone?: "info" | "good" | "bad"; children: React.ReactNode }) {
+  // "good" borrows the replied encoding — the palette's affirmative — so a
+  // success notice reads as success without inventing a colour outside the
+  // validated set that design:palette pins.
   const colour = tone === "bad"
     ? "border-state-bounced bg-wash-bounced text-state-bounced"
-    : "border-line bg-panel text-sub";
+    : tone === "good"
+      ? "border-state-replied bg-wash-replied text-state-replied"
+      : "border-line bg-panel text-sub";
   return (
     <p className={`rounded-lg border px-3.5 py-2.5 text-[13px] ${colour}`}>{children}</p>
   );

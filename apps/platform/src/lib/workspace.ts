@@ -50,7 +50,7 @@ export async function mayRequestLink(email: string): Promise<boolean> {
   return (rowCount ?? 0) > 0;
 }
 
-async function resolveWorkspace(user: SessionUser): Promise<{ id: string; name: string } | null> {
+export async function resolveWorkspace(user: SessionUser): Promise<{ id: string; name: string } | null> {
   const pool = getPool();
 
   const member = await pool.query<{ id: string; name: string }>(

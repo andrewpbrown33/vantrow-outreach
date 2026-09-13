@@ -11,7 +11,7 @@ export type {
 } from "./release";
 export type { SweepOptions, SweepStats, ProviderSource } from "./sweep";
 export {
-  GMAIL_SCOPES, buildAuthUrl, exchangeCode, RefreshTokenSource,
+  GMAIL_SCOPES, buildAuthUrl, exchangeCode, grantedAddress, RefreshTokenSource,
 } from "./gmail/oauth";
 export type { TokenSource, OAuthAppConfig, TokenGrant } from "./gmail/oauth";
 export { GmailProvider } from "./gmail/provider";
