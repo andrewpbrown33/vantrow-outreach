@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { minutesFromTime } from "../../lib/format";
 import {
   activateSequence, approveDraft, createSequence, getSequence, listSteps,
-  setSequenceState,
+  resumeRelease, setSequenceState,
   type NewStepInput,
 } from "../../lib/queries";
 import { requireSession } from "../../lib/workspace";
@@ -15,6 +15,17 @@ import { requireSession } from "../../lib/workspace";
  *  attacker-controlled string; the session is not. */
 
 export interface ActionState { error?: string }
+
+/** Lift a drip hold. The engine stops its own ramp on bad deliverability and
+ *  will not restart it — that is the whole point of "hold steady and tell me",
+ *  so resuming is a button a person presses, never a timeout. */
+export async function resumeReleaseAction(formData: FormData): Promise<void> {
+  const { workspaceId } = await requireSession();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await resumeRelease(workspaceId, id);
+  revalidatePath(`/sequences/${id}`);
+}
 
 export async function setStateAction(formData: FormData): Promise<void> {
   const { workspaceId } = await requireSession();

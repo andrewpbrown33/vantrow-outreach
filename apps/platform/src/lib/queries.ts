@@ -173,6 +173,72 @@ export interface SequenceDetail {
   oooAutoResume: boolean;
 }
 
+/** What the drip is doing for one sequence, in the terms the screen shows. */
+export interface ReleasePlan {
+  enabled: boolean;
+  /** 'ramping' grows weekly · 'holding' froze after trouble · 'paused' is off. */
+  state: "ramping" | "holding" | "paused";
+  perDay: number;
+  startPerDay: number;
+  growthPct: number;
+  maxPerDay: number;
+  /** In the operator's words, why the ramp stopped. */
+  holdReason: string | null;
+  /** People still waiting for their turn. */
+  waiting: number;
+  /** Released today, if today's release has run. */
+  releasedToday: number | null;
+  lastReleasedOn: string | null;
+}
+
+export async function getReleasePlan(
+  ws: string, sequenceId: string,
+): Promise<ReleasePlan | null> {
+  const { rows } = await getPool().query(
+    `select rp.enabled, rp.state, rp.current_per_day, rp.start_per_day,
+            rp.growth_pct, rp.max_per_day, rp.hold_reason,
+            rp.last_released_on::text as last_released_on,
+            (select count(*) from public.enrollments e
+              where e.sequence_id = rp.sequence_id and e.state = 'queued')::int
+              as waiting,
+            (select rl.released_count from public.release_log rl
+              where rl.sequence_id = rp.sequence_id
+              order by rl.released_on desc limit 1) as released_today
+       from public.release_policies rp
+      where rp.sequence_id = $1 and rp.workspace_id = $2`,
+    [sequenceId, ws],
+  );
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    enabled: r.enabled,
+    state: r.state,
+    perDay: Number(r.current_per_day),
+    startPerDay: Number(r.start_per_day),
+    growthPct: Number(r.growth_pct),
+    maxPerDay: Number(r.max_per_day),
+    holdReason: r.hold_reason ?? null,
+    waiting: Number(r.waiting),
+    releasedToday: r.released_today === null ? null : Number(r.released_today),
+    lastReleasedOn: r.last_released_on ?? null,
+  };
+}
+
+/** Lift a hold. Deliberately a human-only act: the engine freezes the ramp on
+ *  bad deliverability and never un-freezes itself, because the thing that went
+ *  wrong is usually the list, and only a person can judge that it is fixed. */
+export async function resumeRelease(ws: string, sequenceId: string): Promise<void> {
+  await getPool().query(
+    `update public.release_policies
+        set state = 'ramping', hold_reason = null, held_at = null,
+            -- Re-anchor the weekly clock: growth resumes a week from the
+            -- decision, not instantly on the back of the held rate.
+            last_grown_on = current_date, updated_at = now()
+      where sequence_id = $1 and workspace_id = $2 and state = 'holding'`,
+    [sequenceId, ws],
+  );
+}
+
 export async function getSequence(ws: string, id: string): Promise<SequenceDetail | null> {
   const { rows } = await getPool().query(
     `select s.*, mb.email as mailbox_email, mb.daily_cap

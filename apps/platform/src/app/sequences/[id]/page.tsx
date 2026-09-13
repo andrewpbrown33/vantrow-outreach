@@ -6,10 +6,13 @@ import { Drawer } from "../../../components/drawer";
 import { Chip, Empty, Monogram, Notice, PersonLink } from "../../../components/ui";
 import { initialsOf } from "../../../lib/feed";
 import { clockOf, dayNumbers, daysOf, intervalOf, whenOf } from "../../../lib/format";
-import { getSequence, listEnrollments, listSteps, type EnrollmentRow, type StepRow } from "../../../lib/queries";
+import {
+  getReleasePlan, getSequence, listEnrollments, listSteps,
+  type EnrollmentRow, type ReleasePlan, type StepRow,
+} from "../../../lib/queries";
 import type { EnrollmentState } from "../../../lib/states";
 import { requireSession } from "../../../lib/workspace";
-import { approveDraftAction, setStateAction } from "../actions";
+import { approveDraftAction, resumeReleaseAction, setStateAction } from "../actions";
 
 /** What a reply step's subject will read on the wire: Re: + the nearest
  *  earlier thread-opening step. Mirrors the engine's derivation for display —
@@ -60,9 +63,10 @@ export default async function SequenceDetail({
   const seq = await getSequence(workspaceId, id);
   if (!seq) notFound();
 
-  const [steps, enrollments] = await Promise.all([
+  const [steps, enrollments, release] = await Promise.all([
     listSteps(workspaceId, id),
     listEnrollments(workspaceId, id),
+    getReleasePlan(workspaceId, id),
   ]);
 
   const cue = [
@@ -98,6 +102,8 @@ export default async function SequenceDetail({
         </div>
 
         {error ? <div className="mt-3"><Notice tone="bad">{error}</Notice></div> : null}
+
+        {release && release.enabled ? <ReleasePanel plan={release} id={seq.id} /> : null}
 
         <Drawer title="Schedule &amp; rules" cue={cue}>
           <div className="flex flex-wrap gap-3.5 py-0.5">
@@ -234,6 +240,69 @@ function EnrollmentLine({ row, sequenceId }: { row: EnrollmentRow; sequenceId: s
       ) : (
         <Chip state={row.state} />
       )}
+    </div>
+  );
+}
+
+/** The drip, made legible.
+ *
+ *  Two numbers carry it: how many are still waiting, and how many start today.
+ *  Everything else is the answer to "why is that number what it is" — which is
+ *  the question a held ramp raises and the one an operator otherwise has to
+ *  guess at. */
+function ReleasePanel({ plan, id }: { plan: ReleasePlan; id: string }) {
+  const holding = plan.state === "holding";
+  const per = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
+
+  return (
+    <div className="mt-3 max-w-2xl rounded-xl border border-line bg-panel px-4 py-3">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <b className="text-[13px] font-extrabold">Release</b>
+        <Chip state={holding ? "paused" : "active"}>
+          {holding ? "Holding" : "Ramping"}
+        </Chip>
+        <span className="text-[13px] text-sub">
+          <b className="tabular-nums">{per(plan.perDay)}</b> start each sending day
+        </span>
+        <span className="ml-auto text-[13px] text-muted tabular-nums">
+          {plan.waiting > 0
+            ? `${plan.waiting} waiting to start`
+            : "everyone has started"}
+        </span>
+      </div>
+
+      <p className="mt-1.5 text-[12.5px] text-muted">
+        {holding
+          ? "The rate is frozen where it stands. Sending continues at it — nothing was cut and nobody was dropped."
+          : plan.perDay >= plan.maxPerDay
+            ? `At the ceiling of ${per(plan.maxPerDay)} a day.`
+            : `Grows ${plan.growthPct}% a week while delivery stays clean, up to ${per(plan.maxPerDay)} a day.`}
+        {plan.releasedToday !== null && plan.lastReleasedOn
+          ? ` Last release: ${per(plan.releasedToday)} on ${plan.lastReleasedOn}.`
+          : " No release has run yet."}
+      </p>
+
+      {holding ? (
+        <div className="mt-2.5 border-t border-dashed border-line pt-2.5">
+          <p className="text-[13px] text-state-bounced">
+            {plan.holdReason ?? "Delivery trouble stopped the ramp."}
+          </p>
+          <p className="mt-1 text-[12.5px] text-muted">
+            Growth resumes only when you say so. Worth checking the list for
+            stale addresses before you do — a bounce rate this high usually
+            means the list, not the writing.
+          </p>
+          <form action={resumeReleaseAction} className="mt-2">
+            <input type="hidden" name="id" value={id} />
+            <button
+              type="submit"
+              className="rounded-lg border border-line bg-background px-3 py-1.5 text-[12px] font-semibold text-sub"
+            >
+              Resume growing
+            </button>
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
