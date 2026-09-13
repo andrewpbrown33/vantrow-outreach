@@ -52,7 +52,7 @@ sequence and suppresses the address across the workspace.
 
 ## Thread B · visibility — **step 4 starts a new thread**
 
-### Step 4 — day 15 — new subject — *Google results*
+### Step 4 — day 15 — new subject — *showing up when someone Googles a roofer nearby*
 
 > {{firstName}} — different subject than my last note. Andrew at Vantrow.
 >
@@ -85,6 +85,14 @@ sequence and suppresses the address across the workspace.
 ---
 
 ## Notes for whoever edits this
+
+**This file is the source, not a copy of one.** `scripts/seed-campaign.mjs`
+reads these headings and blockquotes and builds the sequence from them, so
+editing the prose here and re-running the script is how the campaign changes —
+there is no retyping into a form, and a draft sequence is rewritten in place
+rather than duplicated. The heading format is load-bearing:
+`### Step N — day D — [same thread —] *subject*`, where the italic subject is
+required on any step that opens a thread and omitted on one that replies.
 
 - **Step 1 is already Andrew's approved wording** (v4, from the outreach review). Change it last.
 - **Step 4 must keep its own subject line.** It is the thread-B root; the engine derives steps 5–6 from it. A blank subject there parks the enrollment rather than sending.
