@@ -198,7 +198,8 @@ export async function executeOne(
               s.id as sequence_id, s.state as seq_state, s.timezone_source,
               s.fallback_timezone, s.window_days, s.window_start_minute,
               s.window_end_minute, s.skip_us_holidays,
-              m.id as mailbox_id, m.email as mailbox_email, m.daily_cap,
+              m.id as mailbox_id, m.email as mailbox_email,
+              public.mailbox_daily_cap(m.*, current_date) as daily_cap,
               m.min_send_gap_secs, m.jitter_secs, m.send_disabled,
               exists (
                 select 1 from public.suppression_entries sup
@@ -300,6 +301,10 @@ export async function executeOne(
     }
 
     // I5: per-mailbox daily cap defers to the next legal window, never drops.
+    // The cap is the WARMUP-AWARE one (mailbox_daily_cap): a warming mailbox
+    // earns its ceiling week by week. Without that, the drip's growing entrant
+    // rate would quietly collide with a flat cap around week three and the
+    // campaign would stretch with nothing in the UI to explain why.
     const capRes = await client.query<{ sent_today: string }>(
       `select count(*) as sent_today from public.touch_ledger
         where mailbox_id = $1 and state = 'sent'

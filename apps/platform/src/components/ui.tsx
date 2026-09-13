@@ -40,10 +40,11 @@ const STATE_WASH: Record<DotState, string> = {
 };
 
 /** Sequence-level states borrow the same encodings; draft is its own. */
-export type ChipState = DotState | "draft" | "archived" | "canceled";
+export type ChipState = DotState | "draft" | "archived" | "canceled" | "queued";
 
 function chipClasses(state: ChipState): string {
-  if (state === "draft" || state === "archived" || state === "canceled") {
+  if (state === "draft" || state === "archived" || state === "canceled" ||
+      state === "queued") {
     return "bg-wash-draft text-state-draft";
   }
   return `${STATE_WASH[state]} ${STATE_TEXT[state]}`;
@@ -53,6 +54,9 @@ export function chipLabel(state: ChipState): string {
   if (state === "draft") return "Draft";
   if (state === "archived") return "Archived";
   if (state === "canceled") return "Canceled";
+  // Said from the person's side, not the engine's: they have not been written
+  // to yet and the drip decides when. "Queued" is our word, not theirs.
+  if (state === "queued") return "Waiting to start";
   return STATE_LABEL[state];
 }
 

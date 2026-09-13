@@ -86,6 +86,10 @@ export const FEED_TYPES = [
   "inbound.reply", "touch.sent", "touch.draft_due",
   "enrollment.finished_no_reply", "enrollment.paused",
   "inbound.bounce_hard", "enrollment.suppression_halt", "touch.failed",
+  // The drip stopping its own ramp is the loudest thing the engine can say.
+  // There is no alerting infrastructure yet, so the feed IS the notification —
+  // which means this type must be in the allow-list or the warning is silent.
+  "release.held",
 ] as const;
 
 export interface FeedRow {
@@ -584,23 +588,36 @@ export async function enrollProspects(
       [ws, prospectIds],
     );
 
+    // The drip: when the sequence carries an enabled release policy, prospects
+    // land 'queued' with NO timer and the daily release lets them in a few at a
+    // time. Without a policy the old behaviour stands — everyone starts at once
+    // — so existing sequences are untouched by this.
+    const drip = (await client.query(
+      `select 1 from public.release_policies
+        where sequence_id = $1 and enabled and state <> 'paused'`,
+      [sequenceId],
+    )).rowCount ?? 0;
+    const queued = drip > 0;
+
     for (const p of rows) {
       if (p.suppressed) { out.suppressed.push(p.email); continue; }
       if (p.opted_out_at !== null) { out.optedOut.push(p.email); continue; }
 
       // Step 1 has a zero interval, so the first fire time is simply the next
-      // legal slot in the window.
-      const fireAt = nextFireTime(now, { days: 0, hours: 0 },
+      // legal slot in the window. A queued enrollment gets no timer at all —
+      // the release job plans its first touch on the day it lets them in.
+      const fireAt = queued ? null : nextFireTime(now, { days: 0, hours: 0 },
         scheduleFor(seq, p.timezone ?? null), Math.random());
 
       const ins = await client.query(
         `insert into public.enrollments
            (workspace_id, sequence_id, prospect_id, mailbox_id, state,
             current_step_order, next_touch_at)
-         values ($1, $2, $3, $4, 'scheduled', 1, $5)
+         values ($1, $2, $3, $4, $6, 1, $5)
          on conflict (sequence_id, prospect_id)
-           where state in ('scheduled','active','paused') do nothing`,
-        [ws, sequenceId, p.id, seq.mailboxId, fireAt],
+           where state in ('queued','scheduled','active','paused') do nothing`,
+        [ws, sequenceId, p.id, seq.mailboxId, queued ? null : fireAt,
+         queued ? "queued" : "scheduled"],
       );
       if ((ins.rowCount ?? 0) > 0) out.enrolled += 1;
       else out.alreadyEnrolled += 1;

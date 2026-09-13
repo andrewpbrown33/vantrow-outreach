@@ -61,6 +61,7 @@ const KIND_OF: Record<string, { kind: FeedKind; tone: DotState; badge: string | 
   "inbound.bounce_hard": { kind: "bnc", tone: "bounced", badge: "!" },
   "enrollment.suppression_halt": { kind: "bnc", tone: "bounced", badge: "!" },
   "touch.failed": { kind: "err", tone: "bounced", badge: "!" },
+  "release.held": { kind: "pau", tone: "paused", badge: "∥" },
 };
 
 export function initialsOf(name: string): string {
@@ -71,6 +72,14 @@ export function initialsOf(name: string): string {
 }
 
 function personOf(row: FeedRow): FeedPerson {
+  // Most feed rows are about a prospect. A few — the drip holding its own ramp
+  // — are about the campaign itself, and the sequence stands in the subject
+  // position so the line reads "Roofing outreach paused its ramp".
+  if (row.prospectId === null && row.sequenceName !== null) {
+    return {
+      id: null, name: row.sequenceName, initials: initialsOf(row.sequenceName),
+    };
+  }
   const name = row.prospectName ?? row.prospectEmail ?? "Someone";
   return { id: row.prospectId, name, initials: initialsOf(name) };
 }
@@ -107,6 +116,14 @@ function detailFor(row: FeedRow): string | null {
       return "ran to the end without an answer";
     case "touch.draft_due":
       return step ? `${step} is drafted and waiting for you` : "a draft is waiting for you";
+    case "release.held": {
+      const why = row.payload.reason;
+      const rate = row.payload.rate_held_at;
+      const held = typeof rate === "number"
+        ? `holding at ${rate} new ${rate === 1 ? "person" : "people"} a day`
+        : "holding at the current rate";
+      return typeof why === "string" ? `${held} — ${why}` : held;
+    }
     default:
       return step;
   }
@@ -175,6 +192,7 @@ function verbFor(type: string): string {
     case "inbound.bounce_hard": return "hard-bounced";
     case "enrollment.suppression_halt": return "was halted";
     case "touch.failed": return "send failed";
+    case "release.held": return "paused its ramp";
     default: return "changed";
   }
 }

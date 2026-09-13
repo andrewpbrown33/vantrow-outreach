@@ -5,6 +5,10 @@ export { usFederalHolidays } from "./holidays";
 export { FakeProvider } from "./dispatcher";
 export type { Provider, SendRequest, SendResult } from "./dispatcher";
 export { sweepOnce, executeOne } from "./sweep";
+export { releaseDue, readHealth, localDayString } from "./release";
+export type {
+  ReleaseOptions, ReleaseStats, SequenceReleaseResult, HealthRead,
+} from "./release";
 export type { SweepOptions, SweepStats, ProviderSource } from "./sweep";
 export {
   GMAIL_SCOPES, buildAuthUrl, exchangeCode, RefreshTokenSource,

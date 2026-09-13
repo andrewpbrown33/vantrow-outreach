@@ -18,7 +18,7 @@
 import { NextResponse } from "next/server";
 import { drainOutbox } from "@vantrow/connect";
 import {
-  RefreshTokenSource, GmailProvider, sweepOnce, syncMailboxInbound,
+  RefreshTokenSource, GmailProvider, releaseDue, sweepOnce, syncMailboxInbound,
 } from "@vantrow/engine";
 import { getPool } from "../../../../lib/db";
 
@@ -91,7 +91,17 @@ export async function GET(req: Request): Promise<NextResponse> {
     report.inbound = "skipped: GOOGLE_OAUTH_CLIENT_ID/SECRET not configured";
   }
 
-  // --- 2 · The engine sweep ---------------------------------------------
+  // --- 2 · The drip: today's release ------------------------------------
+  // Ahead of the sweep, so a prospect released this minute can take their
+  // first touch in the same tick instead of waiting for the next one.
+  // Isolated like every other job: a release failure must never stop sending.
+  try {
+    report.release = await releaseDue(pool);
+  } catch (err) {
+    errors.push(`release: ${String(err).slice(0, 300)}`);
+  }
+
+  // --- 3 · The engine sweep ---------------------------------------------
   try {
     if (clientId && clientSecret) {
       const { rows } = await pool.query<MailboxRow>(
@@ -114,7 +124,7 @@ export async function GET(req: Request): Promise<NextResponse> {
     errors.push(`sweep: ${String(err).slice(0, 300)}`);
   }
 
-  // --- 3 · Connect outbox ------------------------------------------------
+  // --- 4 · Connect outbox ------------------------------------------------
   try {
     report.connect = await drainOutbox(pool);
   } catch (err) {

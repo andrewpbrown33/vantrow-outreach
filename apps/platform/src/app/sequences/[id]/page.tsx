@@ -39,6 +39,8 @@ const AWAITING_DRAFT = "awaiting draft approval";
 const TONE: Record<EnrollmentState, Parameters<typeof Monogram>[0]["tone"]> = {
   active: "active", scheduled: "scheduled", paused: "paused", replied: "replied",
   finished_no_reply: "finished_no_reply", bounced: "bounced", canceled: "scheduled",
+  // Waiting on the drip, not yet in play — same quiet tone as canceled.
+  queued: "scheduled",
 };
 
 const BADGE: Partial<Record<EnrollmentState, string>> = {
@@ -230,7 +232,7 @@ function EnrollmentLine({ row, sequenceId }: { row: EnrollmentRow; sequenceId: s
           </button>
         </form>
       ) : (
-        <Chip state={row.state === "canceled" ? "canceled" : row.state} />
+        <Chip state={row.state} />
       )}
     </div>
   );
