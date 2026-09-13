@@ -1,7 +1,8 @@
 import { AppBar } from "../../components/app-bar";
 import { Chip, Notice } from "../../components/ui";
-import { listMailboxes } from "../../lib/queries";
+import { listMailboxes, listTeam } from "../../lib/queries";
 import { requireSession } from "../../lib/workspace";
+import { inviteAction, revokeInviteAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,15 @@ export const dynamic = "force-dynamic";
  *  on. The Google app runs in test mode, where refresh tokens expire about
  *  weekly, so people meet this screen often — vague errors here cost real
  *  sending days. */
+const INVITE_NOTE: Record<string, (detail: string | null) => string> = {
+  sent: (d) =>
+    `${d ?? "They"} can now sign in. Tell them to go to this site and ask for a ` +
+    "link — the invitation is what makes that work; no email goes out from here.",
+  "bad-email": () => "That does not look like an email address.",
+  "already-invited": () => "That address already has an invitation waiting.",
+  "already-member": () => "That address is already on the team.",
+};
+
 const CONNECT_NOTE: Record<string, (detail: string | null) => string> = {
   connected: (d) => `${d ?? "The mailbox"} is connected and sending.`,
   denied: () => "Google did not grant access — nothing changed. Press Connect to try again.",
@@ -44,7 +54,9 @@ export default async function SettingsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { workspaceId, workspaceName, user } = await requireSession();
-  const mailboxes = await listMailboxes(workspaceId);
+  const [mailboxes, team] = await Promise.all([
+    listMailboxes(workspaceId), listTeam(workspaceId),
+  ]);
   const broken = mailboxes.filter((m) => !m.connected || m.lastRefreshError);
 
   const sp = await searchParams;
@@ -52,6 +64,8 @@ export default async function SettingsPage({
     typeof v === "string" ? v : null;
   const outcome = one(sp.connect);
   const note = outcome ? CONNECT_NOTE[outcome]?.(one(sp.detail)) ?? null : null;
+  const invited = one(sp.invite);
+  const inviteNote = invited ? INVITE_NOTE[invited]?.(one(sp.detail)) ?? null : null;
 
   return (
     <>
@@ -107,6 +121,76 @@ export default async function SettingsPage({
             </div>
           ))}
         </div>
+
+        <p className="mt-7 text-[13px] font-extrabold">Who can get in</p>
+        <p className="mt-0.5 max-w-2xl text-[12.5px] text-muted">
+          An invitation is the only way into this workspace. Everyone here signs
+          in with a link to their own address — there are no passwords to share
+          and nothing to revoke but the invitation itself.
+        </p>
+
+        {inviteNote ? (
+          <div className="mt-2 max-w-2xl">
+            <Notice tone={invited === "sent" ? "good" : "bad"}>{inviteNote}</Notice>
+          </div>
+        ) : null}
+
+        <div className="mt-1 max-w-2xl">
+          {team.map((t) => (
+            <div
+              key={`${t.email}-${t.joinedAt?.getTime() ?? "pending"}`}
+              className="grid grid-cols-[1fr_auto] items-center gap-3 border-t border-line py-2.5 text-sm"
+            >
+              <span>
+                <b className="font-semibold">{t.email}</b>
+                <span className="block text-xs text-muted">
+                  {t.joinedAt
+                    ? `${t.role === "owner" ? "Owner" : "Member"} · joined ${t.joinedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                    : `Invited as ${t.role === "owner" ? "owner" : "member"} · has not signed in yet`}
+                </span>
+              </span>
+              {t.joinedAt ? (
+                <Chip state="active">On the team</Chip>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Chip state="scheduled">Invited</Chip>
+                  <form action={revokeInviteAction}>
+                    <input type="hidden" name="email" value={t.email} />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-line bg-panel px-3 py-1.5 text-[12px] font-semibold text-sub"
+                    >
+                      Withdraw
+                    </button>
+                  </form>
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <form action={inviteAction} className="mt-3 flex max-w-2xl flex-wrap items-center gap-2">
+          <label htmlFor="invite-email" className="sr-only">Email address to invite</label>
+          <input
+            id="invite-email" name="email" type="email" required
+            placeholder="name@company.com"
+            className="min-w-[15rem] flex-1 rounded-lg border border-line bg-panel px-3 py-2 text-[13px]"
+          />
+          <label htmlFor="invite-role" className="sr-only">Role</label>
+          <select
+            id="invite-role" name="role" defaultValue="member"
+            className="rounded-lg border border-line bg-panel px-3 py-2 text-[13px]"
+          >
+            <option value="member">Member</option>
+            <option value="owner">Owner</option>
+          </select>
+          <button
+            type="submit"
+            className="rounded-lg bg-foreground px-4 py-2 text-[13px] font-semibold text-background"
+          >
+            Invite
+          </button>
+        </form>
 
         <form action="/auth/signout" method="post" className="mt-8">
           <button
