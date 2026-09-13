@@ -99,6 +99,28 @@ export function exchangeCode(
   });
 }
 
+/** Which Google account a grant actually belongs to.
+ *
+ *  The connect flow needs this, not as a nicety: `login_hint` only PRE-FILLS
+ *  the account chooser. Someone signed into two Google accounts can hand us a
+ *  grant for the wrong one, and we would then store those credentials against
+ *  a mailbox row bearing a different address — every send from that mailbox
+ *  would go out from an identity nobody chose. Verifying the address closes
+ *  that, and users.getProfile is already inside the gmail.readonly scope we
+ *  hold, so it costs no extra consent. */
+export async function grantedAddress(
+  accessToken: string,
+  fetchImpl: FetchLike = fetch,
+): Promise<string | null> {
+  const res = await fetchImpl(
+    "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+    { headers: { authorization: `Bearer ${accessToken}` } },
+  );
+  if (!res.ok) return null;
+  const json = await res.json() as { emailAddress?: unknown };
+  return typeof json.emailAddress === "string" ? json.emailAddress : null;
+}
+
 /** Long-lived source backed by a refresh token; refreshes ~60s early and can
  *  persist each new access token (into mailbox_credentials). */
 export class RefreshTokenSource implements TokenSource {

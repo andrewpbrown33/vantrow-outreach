@@ -339,3 +339,82 @@ run()("approveDraft", () => {
     expect(rows[0].state).toBe("paused"); // untouched by the wrong tenant
   });
 });
+
+run()("the drip, from the app's side", () => {
+  const policy = async (seqId: string, over: Partial<{
+    start: number; per: number; max: number; state: string; hold: string | null;
+  }> = {}) => {
+    await admin.query(
+      `insert into public.release_policies
+         (sequence_id, workspace_id, start_per_day, growth_pct, max_per_day,
+          current_per_day, state, hold_reason)
+       values ($1, $2, $3, 25, $4, $5, $6, $7)
+       on conflict (sequence_id) do update
+          set state = excluded.state, hold_reason = excluded.hold_reason,
+              current_per_day = excluded.current_per_day`,
+      [seqId, WS_A, over.start ?? 5, over.max ?? 50, over.per ?? 5,
+       over.state ?? "ramping", over.hold ?? null]);
+  };
+
+  it("enrolling into a dripped sequence queues people instead of timing them", async () => {
+    const f = await seed(WS_A, ["drip1@x.com", "drip2@x.com", "drip3@x.com"], "Dripped");
+    await policy(f.sequenceId);
+    const out = await q.enrollProspects(WS_A, f.sequenceId, f.prospectIds);
+    expect(out.enrolled).toBe(3);
+
+    const { rows } = await admin.query(
+      `select state, next_touch_at from public.enrollments where sequence_id = $1`,
+      [f.sequenceId]);
+    expect(rows).toHaveLength(3);
+    for (const r of rows) {
+      expect(r.state).toBe("queued");
+      // No timer is the whole mechanism — the claim query cannot see these.
+      expect(r.next_touch_at).toBeNull();
+    }
+  });
+
+  it("a sequence with no policy still starts everyone at once", async () => {
+    const f = await seed(WS_A, ["nodrip@x.com"], "Undripped");
+    const out = await q.enrollProspects(WS_A, f.sequenceId, f.prospectIds);
+    expect(out.enrolled).toBe(1);
+    const { rows } = await admin.query(
+      `select state, next_touch_at from public.enrollments where sequence_id = $1`,
+      [f.sequenceId]);
+    expect(rows[0].state).toBe("scheduled");
+    expect(rows[0].next_touch_at).not.toBeNull();
+  });
+
+  it("the plan reports what is waiting and why the ramp stopped", async () => {
+    const f = await seed(WS_A, ["p1@x.com", "p2@x.com"], "Reported");
+    await policy(f.sequenceId, { per: 7, state: "holding", hold: "4 hard bounces" });
+    await q.enrollProspects(WS_A, f.sequenceId, f.prospectIds);
+
+    const plan = await q.getReleasePlan(WS_A, f.sequenceId);
+    expect(plan).toMatchObject({
+      enabled: true, state: "holding", perDay: 7,
+      holdReason: "4 hard bounces", waiting: 2, releasedToday: null,
+    });
+  });
+
+  it("resuming clears the hold and re-anchors the weekly clock", async () => {
+    const f = await seed(WS_A, ["r@x.com"], "Resumed");
+    await policy(f.sequenceId, { per: 9, state: "holding", hold: "too many bounces" });
+
+    await q.resumeRelease(WS_A, f.sequenceId);
+    const after = await q.getReleasePlan(WS_A, f.sequenceId);
+    expect(after).toMatchObject({ state: "ramping", holdReason: null, perDay: 9 });
+    // Resuming must not hand back a week of growth it did not earn.
+    const { rows } = await admin.query(
+      `select last_grown_on::text as d from public.release_policies
+        where sequence_id = $1`, [f.sequenceId]);
+    expect(rows[0].d).toBe(new Date().toISOString().slice(0, 10));
+  });
+
+  it("refuses to resume across a workspace boundary", async () => {
+    const f = await seed(WS_A, ["x@x.com"], "Guarded");
+    await policy(f.sequenceId, { state: "holding", hold: "bounces" });
+    await q.resumeRelease(WS_B, f.sequenceId);
+    expect((await q.getReleasePlan(WS_A, f.sequenceId))?.state).toBe("holding");
+    expect(await q.getReleasePlan(WS_B, f.sequenceId)).toBeNull();
+  });
+});

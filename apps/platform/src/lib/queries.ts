@@ -86,6 +86,10 @@ export const FEED_TYPES = [
   "inbound.reply", "touch.sent", "touch.draft_due",
   "enrollment.finished_no_reply", "enrollment.paused",
   "inbound.bounce_hard", "enrollment.suppression_halt", "touch.failed",
+  // The drip stopping its own ramp is the loudest thing the engine can say.
+  // There is no alerting infrastructure yet, so the feed IS the notification —
+  // which means this type must be in the allow-list or the warning is silent.
+  "release.held",
 ] as const;
 
 export interface FeedRow {
@@ -167,6 +171,72 @@ export interface SequenceDetail {
   windowEndMinute: number;
   skipUsHolidays: boolean;
   oooAutoResume: boolean;
+}
+
+/** What the drip is doing for one sequence, in the terms the screen shows. */
+export interface ReleasePlan {
+  enabled: boolean;
+  /** 'ramping' grows weekly · 'holding' froze after trouble · 'paused' is off. */
+  state: "ramping" | "holding" | "paused";
+  perDay: number;
+  startPerDay: number;
+  growthPct: number;
+  maxPerDay: number;
+  /** In the operator's words, why the ramp stopped. */
+  holdReason: string | null;
+  /** People still waiting for their turn. */
+  waiting: number;
+  /** Released today, if today's release has run. */
+  releasedToday: number | null;
+  lastReleasedOn: string | null;
+}
+
+export async function getReleasePlan(
+  ws: string, sequenceId: string,
+): Promise<ReleasePlan | null> {
+  const { rows } = await getPool().query(
+    `select rp.enabled, rp.state, rp.current_per_day, rp.start_per_day,
+            rp.growth_pct, rp.max_per_day, rp.hold_reason,
+            rp.last_released_on::text as last_released_on,
+            (select count(*) from public.enrollments e
+              where e.sequence_id = rp.sequence_id and e.state = 'queued')::int
+              as waiting,
+            (select rl.released_count from public.release_log rl
+              where rl.sequence_id = rp.sequence_id
+              order by rl.released_on desc limit 1) as released_today
+       from public.release_policies rp
+      where rp.sequence_id = $1 and rp.workspace_id = $2`,
+    [sequenceId, ws],
+  );
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    enabled: r.enabled,
+    state: r.state,
+    perDay: Number(r.current_per_day),
+    startPerDay: Number(r.start_per_day),
+    growthPct: Number(r.growth_pct),
+    maxPerDay: Number(r.max_per_day),
+    holdReason: r.hold_reason ?? null,
+    waiting: Number(r.waiting),
+    releasedToday: r.released_today === null ? null : Number(r.released_today),
+    lastReleasedOn: r.last_released_on ?? null,
+  };
+}
+
+/** Lift a hold. Deliberately a human-only act: the engine freezes the ramp on
+ *  bad deliverability and never un-freezes itself, because the thing that went
+ *  wrong is usually the list, and only a person can judge that it is fixed. */
+export async function resumeRelease(ws: string, sequenceId: string): Promise<void> {
+  await getPool().query(
+    `update public.release_policies
+        set state = 'ramping', hold_reason = null, held_at = null,
+            -- Re-anchor the weekly clock: growth resumes a week from the
+            -- decision, not instantly on the back of the held rate.
+            last_grown_on = current_date, updated_at = now()
+      where sequence_id = $1 and workspace_id = $2 and state = 'holding'`,
+    [sequenceId, ws],
+  );
 }
 
 export async function getSequence(ws: string, id: string): Promise<SequenceDetail | null> {
@@ -584,23 +654,36 @@ export async function enrollProspects(
       [ws, prospectIds],
     );
 
+    // The drip: when the sequence carries an enabled release policy, prospects
+    // land 'queued' with NO timer and the daily release lets them in a few at a
+    // time. Without a policy the old behaviour stands — everyone starts at once
+    // — so existing sequences are untouched by this.
+    const drip = (await client.query(
+      `select 1 from public.release_policies
+        where sequence_id = $1 and enabled and state <> 'paused'`,
+      [sequenceId],
+    )).rowCount ?? 0;
+    const queued = drip > 0;
+
     for (const p of rows) {
       if (p.suppressed) { out.suppressed.push(p.email); continue; }
       if (p.opted_out_at !== null) { out.optedOut.push(p.email); continue; }
 
       // Step 1 has a zero interval, so the first fire time is simply the next
-      // legal slot in the window.
-      const fireAt = nextFireTime(now, { days: 0, hours: 0 },
+      // legal slot in the window. A queued enrollment gets no timer at all —
+      // the release job plans its first touch on the day it lets them in.
+      const fireAt = queued ? null : nextFireTime(now, { days: 0, hours: 0 },
         scheduleFor(seq, p.timezone ?? null), Math.random());
 
       const ins = await client.query(
         `insert into public.enrollments
            (workspace_id, sequence_id, prospect_id, mailbox_id, state,
             current_step_order, next_touch_at)
-         values ($1, $2, $3, $4, 'scheduled', 1, $5)
+         values ($1, $2, $3, $4, $6, 1, $5)
          on conflict (sequence_id, prospect_id)
-           where state in ('scheduled','active','paused') do nothing`,
-        [ws, sequenceId, p.id, seq.mailboxId, fireAt],
+           where state in ('queued','scheduled','active','paused') do nothing`,
+        [ws, sequenceId, p.id, seq.mailboxId, queued ? null : fireAt,
+         queued ? "queued" : "scheduled"],
       );
       if ((ins.rowCount ?? 0) > 0) out.enrolled += 1;
       else out.alreadyEnrolled += 1;

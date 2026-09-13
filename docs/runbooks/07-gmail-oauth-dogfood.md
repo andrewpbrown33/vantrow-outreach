@@ -128,6 +128,44 @@ Secrets live in env/Vercel project settings — never in the repo.
 > The secret lives only in Andrew's env — rotate anytime via Credentials →
 > the client → Reset secret; only the env value changes.
 
+## §5b · The in-app Connect button (2026-09-13)
+
+Connecting and reconnecting now happens on the Settings page — press
+**Connect** (or **Reconnect**) beside a mailbox. `scripts/gmail-connect.mjs`
+still works and stays as the break-glass path, but it should no longer be the
+normal one: test-mode refresh tokens die about weekly, and a recovery
+procedure that needs a terminal is not usable by anyone but its author.
+
+**One-time setup, in Google Cloud, before the button works.** The existing
+OAuth client is of type *Desktop app*, which only accepts loopback redirects —
+a website cannot use it. Add a SECOND client alongside it; do not modify or
+delete the first.
+
+1. Google Cloud console → the `nudgerow-dogfood` project → **APIs & Services →
+   Credentials → Create credentials → OAuth client ID**.
+2. Application type: **Web application**. Name it `nudgerow-platform-web`.
+3. Under **Authorized redirect URIs**, add exactly:
+   `https://app.nudgerow.com/api/gmail/callback`
+   (and `http://localhost:3000/api/gmail/callback` if you ever run it locally).
+   Google matches this string exactly — a trailing slash is a different URI.
+4. Copy the new client ID and secret into Vercel as `GOOGLE_OAUTH_CLIENT_ID`
+   and `GOOGLE_OAUTH_CLIENT_SECRET`, replacing the Desktop client's values, and
+   redeploy. The engine's sending path uses the same pair, and a refresh token
+   issued to one client cannot be refreshed by another — so **every mailbox
+   must be reconnected once through the button after this swap**. That is a
+   few clicks each, and the settings chips show you which still need it.
+5. The consent screen stays **External + Testing**, and every mailbox address
+   stays on the test-user list (§3). Nothing about that changes.
+
+**What the button refuses, and why.** The callback verifies which Google
+account actually consented and saves nothing if it is not the address on the
+mailbox row — `login_hint` only pre-fills the chooser, so someone signed into
+two Google accounts can otherwise attach the wrong sending identity. It also
+refuses a grant that came back without a refresh token (usually means the
+account is already authorised — remove Nudgerow at
+`myaccount.google.com/permissions`, then press Connect again) or missing a
+required scope. Each refusal names itself on the Settings page.
+
 ## §6a · Database prep (once, before the first connect)
 
 In the Supabase SQL editor, three pastes in order (each idempotent):

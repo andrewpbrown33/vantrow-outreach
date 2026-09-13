@@ -6,11 +6,14 @@
  */
 
 export type EnrollmentState =
-  | "scheduled" | "active" | "paused" | "replied"
+  | "queued" | "scheduled" | "active" | "paused" | "replied"
   | "finished_no_reply" | "bounced" | "canceled";
 
 /** The six states a dot strip can show — fixed order so runs stay contiguous
- *  (deck v2.1). `canceled` is not a dot: it left the sequence on purpose. */
+ *  (deck v2.1). `canceled` is not a dot: it left the sequence on purpose.
+ *  `queued` is not a dot either: a dot is one person IN PLAY, and someone the
+ *  drip has not released yet is waiting in line, not in play. The sequence
+ *  screen counts them beside the strip instead. */
 export const DOT_STATES = [
   "active", "scheduled", "paused", "replied", "finished_no_reply", "bounced",
 ] as const;
