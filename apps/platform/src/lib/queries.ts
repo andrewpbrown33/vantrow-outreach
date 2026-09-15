@@ -353,6 +353,91 @@ export interface MailboxRow {
   lastRefreshError: string | null;
 }
 
+export interface TeamRow {
+  email: string;
+  role: string;
+  /** null while an invitation is outstanding. */
+  joinedAt: Date | null;
+  expiresAt: Date | null;
+}
+
+/** Everyone in the workspace, members and outstanding invitations together —
+ *  the question an operator asks is "who can get in", and a sent invitation
+ *  answers it as surely as a membership does. */
+export async function listTeam(ws: string): Promise<TeamRow[]> {
+  const { rows } = await getPool().query(
+    `select i.email, i.role, null::timestamptz as joined_at, i.expires_at
+       from public.workspace_invites i
+      where i.workspace_id = $1 and i.accepted_at is null and i.expires_at > now()
+     union all
+     select coalesce(i2.email, '(member)') as email, m.role,
+            m.created_at as joined_at, null::timestamptz
+       from public.workspace_members m
+       left join public.workspace_invites i2
+              on i2.workspace_id = m.workspace_id
+             and i2.accepted_user_id = m.user_id
+      where m.workspace_id = $1
+     order by joined_at nulls first`,
+    [ws],
+  );
+  return rows.map((r) => ({
+    email: r.email,
+    role: r.role,
+    joinedAt: (r.joined_at as Date | null) ?? null,
+    expiresAt: (r.expires_at as Date | null) ?? null,
+  }));
+}
+
+export type InviteOutcome =
+  | { ok: true }
+  | { ok: false; why: "bad-email" | "already-invited" | "already-member" };
+
+/** Write an invitation. Deliberately does not send anything: the address gets
+ *  in by requesting a sign-in link like everyone else, and the invitation is
+ *  what makes that request succeed. One less mail path to get wrong. */
+export async function inviteToWorkspace(
+  ws: string, email: string, role: "owner" | "member", invitedBy: string,
+): Promise<InviteOutcome> {
+  const clean = email.trim().toLowerCase();
+  if (!/^[^\s@,;<>"]+@[^\s@,;<>"]+\.[A-Za-z]{2,}$/.test(clean)) {
+    return { ok: false, why: "bad-email" };
+  }
+  const pool = getPool();
+  const already = await pool.query(
+    `select 1 from public.workspace_members m
+       join public.workspace_invites i
+         on i.workspace_id = m.workspace_id and i.accepted_user_id = m.user_id
+      where m.workspace_id = $1 and lower(i.email) = $2 limit 1`,
+    [ws, clean],
+  );
+  if ((already.rowCount ?? 0) > 0) return { ok: false, why: "already-member" };
+
+  const ins = await pool.query(
+    `insert into public.workspace_invites (workspace_id, email, role, invited_by)
+     values ($1, $2, $3, $4)
+     on conflict do nothing
+     returning id`,
+    [ws, clean, role, invitedBy],
+  );
+  if (ins.rowCount === 0) return { ok: false, why: "already-invited" };
+
+  await pool.query(
+    `insert into public.events (workspace_id, type, payload)
+     values ($1, 'workspace.invited', $2)`,
+    [ws, { email: clean, role }],
+  );
+  return { ok: true };
+}
+
+/** Withdraw an invitation that has not been accepted. */
+export async function revokeInvite(ws: string, email: string): Promise<void> {
+  await getPool().query(
+    `delete from public.workspace_invites
+      where workspace_id = $1 and lower(email) = lower($2) and accepted_at is null`,
+    [ws, email],
+  );
+}
+
 export async function listMailboxes(ws: string): Promise<MailboxRow[]> {
   const { rows } = await getPool().query(
     `select m.id, m.email, m.display_name, m.daily_cap, m.send_disabled,
