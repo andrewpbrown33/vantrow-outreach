@@ -418,3 +418,117 @@ run()("the drip, from the app's side", () => {
     expect(await q.getReleasePlan(WS_B, f.sequenceId)).toBeNull();
   });
 });
+
+/** The whole-surface cross-tenant sweep.
+ *
+ *  The app connects as the table owner, so RLS does not constrain it and the
+ *  tenancy boundary is the `where workspace_id = $1` written by hand in each
+ *  query. A missing clause returns MORE rows, not fewer, so every test that
+ *  only ever asserts "I can see my own data" still passes — which is exactly
+ *  how such a bug reaches production.
+ *
+ *  I tried a source check first (does each function mention workspace_id?)
+ *  and deleted it: with one query's filter deliberately removed, it still
+ *  passed, because the surrounding SQL mentioned the column elsewhere. A
+ *  textual guard cannot see scope. This can: it asks each read path, holding
+ *  tenant A's id, whether it can see anything of tenant B's.
+ *
+ *  Every read that takes a workspace id belongs here. Adding one to
+ *  queries.ts without adding it below is how the next hole gets in. */
+run()("no read path crosses a tenant boundary", () => {
+  const WS_X = "00000000-0000-4000-8000-0000000000c3";
+  const WS_Y = "00000000-0000-4000-8000-0000000000d4";
+
+  it("every list, count and lookup holding X's id is blind to Y", async () => {
+    const x = await seed(WS_X, ["mine-1@x.com", "mine-2@x.com"], "X-seq");
+    const y = await seed(WS_Y, ["theirs-1@y.com", "theirs-2@y.com"], "Y-seq");
+
+    // Give Y a full set of rows, so "nothing of Y's" is a real claim and not
+    // an empty-database tautology.
+    await q.enrollProspects(WS_Y, y.sequenceId, y.prospectIds);
+    await q.upsertProspects(WS_Y, [
+      { email: "theirs-3@y.com", company: "Theirs Ltd", custom: { secretY: "yes" } },
+    ]);
+    await admin.query(
+      `insert into public.workspace_invites (workspace_id, email, role)
+       values ($1, 'invitee@y.com', 'member')`, [WS_Y]);
+    await admin.query(
+      `insert into public.release_policies
+         (sequence_id, workspace_id, current_per_day) values ($1, $2, 5)`,
+      [y.sequenceId, WS_Y]);
+    await admin.query(
+      `insert into public.events (workspace_id, type, sequence_id, payload)
+       values ($1, 'touch.sent', $2, '{}'::jsonb)`, [WS_Y, y.sequenceId]);
+    // And X gets its own of each, so a blanket-empty answer fails too.
+    await q.enrollProspects(WS_X, x.sequenceId, x.prospectIds);
+
+    const prospects = await q.listProspects(WS_X);
+    expect(prospects.length).toBeGreaterThan(0);
+    expect(prospects.some((p) => p.email.endsWith("@y.com"))).toBe(false);
+
+    // The search branch is its own SQL path, so it is its own assertion.
+    const searched = await q.listProspects(WS_X, 200, "theirs");
+    expect(searched).toEqual([]);
+
+    expect(await q.countProspects(WS_X)).toBe(prospects.length);
+
+    const mailboxes = await q.listMailboxes(WS_X);
+    expect(mailboxes.length).toBeGreaterThan(0);
+    expect(mailboxes.some((m) => m.email.includes("-b2-"))).toBe(false);
+    expect(mailboxes.every((m) => m.email.includes("-c3-"))).toBe(true);
+
+    const feed = await q.listFeed(WS_X);
+    expect(feed.some((f) => f.sequenceId === y.sequenceId)).toBe(false);
+
+    const summaries = await q.listSequenceSummaries(WS_X);
+    expect(summaries.some((s) => s.id === y.sequenceId)).toBe(false);
+    expect(summaries.some((s) => s.id === x.sequenceId)).toBe(true);
+
+    const team = await q.listTeam(WS_X);
+    expect(team.some((t) => t.email === "invitee@y.com")).toBe(false);
+
+    const keys = await q.listCustomVariableKeys(WS_X);
+    expect(keys).not.toContain("secretY");
+
+    // Lookups by id: holding X's workspace with Y's object must find nothing.
+    expect(await q.getSequence(WS_X, y.sequenceId)).toBeNull();
+    expect(await q.getReleasePlan(WS_X, y.sequenceId)).toBeNull();
+    expect(await q.listSteps(WS_X, y.sequenceId)).toEqual([]);
+    expect(await q.listEnrollments(WS_X, y.sequenceId)).toEqual([]);
+
+    // Counts are workspace-wide sums — the easiest place for a missing filter
+    // to hide, because the number still looks plausible.
+    const counts = await q.workspaceStateCounts(WS_X);
+    const mine = Object.values(counts).reduce((a, b) => a + b, 0);
+    expect(mine).toBe(x.prospectIds.length);
+  });
+
+  it("a write cannot reach across either, even holding the other's ids", async () => {
+    const x = await seed(WS_X, ["w-mine@x.com"], "X-write");
+    const y = await seed(WS_Y, ["w-theirs@y.com"], "Y-write");
+
+    // Enrolling Y's people into X's sequence must skip them entirely.
+    const out = await q.enrollProspects(WS_X, x.sequenceId, y.prospectIds);
+    expect(out.enrolled).toBe(0);
+
+    // Inviting into a workspace you do not hold writes into YOUR workspace or
+    // nowhere — never into theirs.
+    await q.inviteToWorkspace(
+      WS_X, "crossover@example.com", "member",
+      "00000000-0000-4000-8000-0000000000e5");
+    const theirInvites = await q.listTeam(WS_Y);
+    expect(theirInvites.some((t) => t.email === "crossover@example.com")).toBe(false);
+
+    // And revoking with the wrong workspace id leaves the invitation standing.
+    await admin.query(
+      `insert into public.workspace_invites (workspace_id, email, role)
+       values ($1, 'keeper@y.com', 'member')
+       on conflict do nothing`, [WS_Y]);
+    await q.revokeInvite(WS_X, "keeper@y.com");
+    const stillThere = await admin.query(
+      `select 1 from public.workspace_invites
+        where workspace_id = $1 and lower(email) = 'keeper@y.com'
+          and accepted_at is null`, [WS_Y]);
+    expect(stillThere.rowCount).toBe(1);
+  });
+});
