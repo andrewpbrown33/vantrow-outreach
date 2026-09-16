@@ -192,6 +192,68 @@ describe.skipIf(!dbUrl)("RLS holds across tenants (real Postgres)", () => {
     expect(still.rows[0].name).toBe("seq");
   });
 
+  it("a member cannot alter the compliance tables — suppression is add-only (0011)", async () => {
+    const a = await tenant("rls compliance");
+    const email = `gone-${randomUUID()}@example.com`;
+    await pool!.query(
+      "insert into suppression_entries (workspace_id, email, reason) values ($1, $2, 'unsubscribe')",
+      [a.ws, email]);
+    const stepId = (await pool!.query(
+      `insert into sequence_steps (workspace_id, sequence_id, step_order, mode)
+       values ($1, $2, 1, 'draft_first') returning id`, [a.ws, a.sequenceId])).rows[0].id;
+    const prospectId = (await pool!.query(
+      "insert into prospects (workspace_id, email) values ($1, $2) returning id",
+      [a.ws, `p-${randomUUID()}@example.com`])).rows[0].id;
+    const enrollmentId = (await pool!.query(
+      `insert into enrollments (workspace_id, sequence_id, prospect_id, mailbox_id, state)
+       values ($1, $2, $3, $4, 'paused') returning id`,
+      [a.ws, a.sequenceId, prospectId, a.mailboxId])).rows[0].id;
+
+    await asMember(a.user, async (c) => {
+      // Reads stay open: the member sees their own workspace's rows.
+      expect((await c.query("select 1 from suppression_entries where workspace_id = $1", [a.ws]))
+        .rowCount).toBe(1);
+      expect((await c.query("select 1 from sequence_steps where id = $1", [stepId])).rowCount).toBe(1);
+
+      // Adding a suppression is the one write that is always safe.
+      const added = await c.query(
+        "insert into suppression_entries (workspace_id, email, reason) values ($1, $2, 'manual')",
+        [a.ws, `also-${randomUUID()}@example.com`]);
+      expect(added.rowCount).toBe(1);
+
+      // Removing or changing one is not. With no policy for it, the rows are
+      // simply not there to be touched — the quiet refusal.
+      expect((await c.query("delete from suppression_entries where lower(email) = lower($1)", [email]))
+        .rowCount).toBe(0);
+      expect((await c.query("update suppression_entries set email = 'x@y.z' where lower(email) = lower($1)", [email]))
+        .rowCount).toBe(0);
+      // The human gate of protocol §10 cannot be flipped to auto.
+      expect((await c.query("update sequence_steps set mode = 'auto' where id = $1", [stepId]))
+        .rowCount).toBe(0);
+      // Nor the schedule, nor the record of what a human approved.
+      expect((await c.query(
+        "update enrollments set draft_approved_step = 1, state = 'scheduled', next_touch_at = now() where id = $1",
+        [enrollmentId])).rowCount).toBe(0);
+      // Nor the deliverability brake.
+      expect((await c.query("update mailboxes set daily_cap = 9999 where id = $1", [a.mailboxId]))
+        .rowCount).toBe(0);
+      // And nothing can be enrolled from a client at all.
+      await denied(c, /row-level security/,
+        `insert into enrollments (workspace_id, sequence_id, prospect_id, mailbox_id)
+         values ($1, $2, $3, $4)`, [a.ws, a.sequenceId, prospectId, a.mailboxId]);
+    });
+
+    // The rows are as they were: the unsubscribe stands, the step is still
+    // draft-first, the enrollment still paused.
+    expect((await pool!.query(
+      "select reason from suppression_entries where workspace_id = $1 and lower(email) = lower($2)",
+      [a.ws, email])).rows).toEqual([{ reason: "unsubscribe" }]);
+    expect((await pool!.query("select mode from sequence_steps where id = $1", [stepId]))
+      .rows[0].mode).toBe("draft_first");
+    expect((await pool!.query("select state from enrollments where id = $1", [enrollmentId]))
+      .rows[0].state).toBe("paused");
+  });
+
   it("the security-definer engine functions are not callable by a member (0008)", async () => {
     const a = await tenant("rls rpc");
     await asMember(a.user, async (c) => {
