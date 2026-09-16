@@ -39,6 +39,8 @@ export async function GET(req: Request): Promise<NextResponse> {
   if (!user) return NextResponse.redirect(`${origin}/signin`, { status: 303 });
   const ws = await resolveWorkspace(user);
   if (!ws) return NextResponse.redirect(`${origin}/signin?denied=1`, { status: 303 });
+  // Attaching a sending identity to the workspace is the owner's decision.
+  if (ws.role !== "owner") return back(origin, "owner-only");
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
   const secret = process.env.AUTH_SECRET;

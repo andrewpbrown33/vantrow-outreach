@@ -43,6 +43,8 @@ export async function GET(req: Request): Promise<NextResponse> {
   if (!user) return NextResponse.redirect(`${origin}/signin`, { status: 303 });
   const ws = await resolveWorkspace(user);
   if (!ws) return NextResponse.redirect(`${origin}/signin?denied=1`, { status: 303 });
+  // The same gate as the connect step: a grant a member obtained is not stored.
+  if (ws.role !== "owner") return back(origin, "owner-only");
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;

@@ -2,13 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { inviteToWorkspace, revokeInvite } from "../../lib/queries";
-import { requireSession } from "../../lib/workspace";
+import { requireOwner } from "../../lib/workspace";
 
 /** Like every server action here: the workspace comes from the session, never
- *  from the form. A form field is an attacker-controlled string. */
+ *  from the form. A form field is an attacker-controlled string.
+ *
+ *  Who gets in is the owner's decision — a member cannot invite, and cannot
+ *  invite an owner least of all. */
 
 export async function inviteAction(formData: FormData): Promise<void> {
-  const { workspaceId, user } = await requireSession();
+  const { workspaceId, user } = await requireOwner("/settings");
   const email = String(formData.get("email") ?? "");
   const role = String(formData.get("role") ?? "member") === "owner"
     ? "owner" as const : "member" as const;
@@ -24,7 +27,7 @@ export async function inviteAction(formData: FormData): Promise<void> {
 }
 
 export async function revokeInviteAction(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireSession();
+  const { workspaceId } = await requireOwner("/settings");
   const email = String(formData.get("email") ?? "");
   if (email) await revokeInvite(workspaceId, email);
   revalidatePath("/settings");
