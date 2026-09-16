@@ -14,6 +14,10 @@ export {
   GMAIL_SCOPES, buildAuthUrl, exchangeCode, grantedAddress, RefreshTokenSource,
 } from "./gmail/oauth";
 export type { TokenSource, OAuthAppConfig, TokenGrant } from "./gmail/oauth";
+export {
+  TOKEN_KEY_ENV, canStoreToken, isEncryptedToken, loadTokenKey, openToken,
+  sealToken,
+} from "./gmail/token-crypto";
 export { GmailProvider } from "./gmail/provider";
 export {
   composeRaw, touchMessageId, parseTouchMessageId, headerRecord, decodeBody,

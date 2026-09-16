@@ -18,7 +18,7 @@ next.
 
 ## §2 · Environment variables
 
-Four values. Three you can copy straight from here; only the database string
+Five values. Three you can copy straight from here; only the database string
 needs looking up.
 
 ### Where the database string lives (this trips people up)
@@ -60,7 +60,7 @@ If the database password contains special characters, percent-encode them in
 the URI (`@` → `%40`, `#` → `%23`, `/` → `%2F`) — or reset it to something
 alphanumeric and avoid the problem.
 
-### The four variables
+### The five variables
 
 In Vercel → the `nudgerow-platform` project → Settings → Environment
 Variables. Add each with **Production and Preview** both ticked.
@@ -71,6 +71,7 @@ Variables. Add each with **Production and Preview** both ticked.
 | `CRON_SECRET` | any long random string — `openssl rand -hex 32`, or use the one the agent generated for you |
 | `GOOGLE_OAUTH_CLIENT_ID` | `517832856056-pamqalipsibcm05j5j32du018qmbe8dd.apps.googleusercontent.com` (public by design; also in runbook 07 §5) |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | **not in the repo** — Andrew's password manager. Lost it? Console → APIs & Services → Credentials → `nudgerow-connect` → **Reset secret**, then update this one variable. Nothing else breaks; connected mailboxes keep working. |
+| `MAILBOX_TOKEN_KEY` | **added 2026-09-16** — the key Gmail tokens are encrypted with at rest: `openssl rand -base64 32` (exactly 32 bytes, base64). Save it in the password manager too: **a token sealed under one key cannot be opened with another**, so losing this key means reconnecting every mailbox from Settings. Until it is set, production **refuses to connect a mailbox** (the Settings page says so by name) while mailboxes connected earlier keep sending; once it is set, their tokens are re-sealed on the next heartbeat with nothing to reconnect. |
 
 Both live at
 https://console.cloud.google.com/apis/credentials?project=nudgerow-dogfood
@@ -79,16 +80,16 @@ only once at creation, so if it was never saved, resetting is the path — not
 a lookup.
 
 **None may be prefixed `NEXT_PUBLIC_`** — that prefix ships a value to the
-browser, and all four are server secrets.
+browser, and all five are server secrets.
 
-> **Sign-in needs three more (runbook 09).** These four run the engine. The
+> **Sign-in needs three more (runbook 09).** These five run the engine. The
 > product surfaces additionally need `SUPABASE_URL`, `SUPABASE_ANON_KEY` and
 > `AUTH_SECRET`; without them every surface redirects to a sign-in page that
 > names what is missing, while the cron below keeps running normally.
 
 ### Faster: the Vercel CLI
 
-If you'd rather not click through the console four times:
+If you'd rather not click through the console five times:
 
 ```bash
 npx vercel link            # pick the nudgerow-platform project, once
@@ -96,6 +97,7 @@ npx vercel env add SUPABASE_DB_URL production
 npx vercel env add CRON_SECRET production
 npx vercel env add GOOGLE_OAUTH_CLIENT_ID production
 npx vercel env add GOOGLE_OAUTH_CLIENT_SECRET production
+npx vercel env add MAILBOX_TOKEN_KEY production
 ```
 
 Each prompts for the value and reads it without echoing to screen — better

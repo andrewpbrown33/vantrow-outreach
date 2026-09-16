@@ -7,7 +7,7 @@
 
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { exchangeCode, grantedAddress, GMAIL_SCOPES } from "@vantrow/engine";
+import { exchangeCode, grantedAddress, GMAIL_SCOPES, sealToken } from "@vantrow/engine";
 import { currentUser } from "../../../../lib/auth";
 import { resolveWorkspace } from "../../../../lib/workspace";
 import { getPool } from "../../../../lib/db";
@@ -91,6 +91,19 @@ export async function GET(req: Request): Promise<NextResponse> {
     return back(origin, "wrong-account", granted);
   }
 
+  // At rest, sealed. Production without MAILBOX_TOKEN_KEY refuses right here
+  // — the grant is discarded and the note names the variable — rather than
+  // write a standing credential to the database in the clear.
+  let refreshToken: string;
+  let accessToken: string;
+  try {
+    refreshToken = sealToken(grant.refreshToken);
+    accessToken = sealToken(grant.accessToken);
+  } catch (err) {
+    return back(origin, "no-token-key",
+      String(err instanceof Error ? err.message : err).slice(0, 200));
+  }
+
   await pool.query(
     `insert into public.mailbox_credentials
        (mailbox_id, workspace_id, refresh_token, access_token,
@@ -107,7 +120,7 @@ export async function GET(req: Request): Promise<NextResponse> {
             -- should not re-read its whole inbox.
             last_refresh_error = null,
             updated_at = now()`,
-    [state.mailboxId, ws.id, grant.refreshToken, grant.accessToken,
+    [state.mailboxId, ws.id, refreshToken, accessToken,
      new Date(grant.expiresAt), grant.scopes],
   );
   await pool.query(

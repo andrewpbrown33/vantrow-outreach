@@ -35,6 +35,8 @@ const CONNECT_NOTE: Record<string, (detail: string | null) => string> = {
     "every box ticked — sending needs all of them.",
   "not-configured": () =>
     "This server has no Google client configured yet (runbook 07). Nothing was changed.",
+  "no-token-key": (d) =>
+    `Nothing was saved. ${d ?? "MAILBOX_TOKEN_KEY is not set on this server (runbook 08 §2)."}`,
   "bad-state": () =>
     "That connect link expired or did not match this browser. Press Connect to start again.",
   "unknown-mailbox": () => "That mailbox is not in this workspace.",
