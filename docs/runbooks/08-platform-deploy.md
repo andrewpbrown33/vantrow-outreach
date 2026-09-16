@@ -170,6 +170,40 @@ A healthy tick returns 200 and a report like:
 2. At least one mailbox connected (runbook 07 §6) — otherwise the sweep has
    no provider and defers everything with `mailbox_not_connected`.
 
+## §5c · The family console seat (2026-09-16)
+
+getvantrow.com's family console renders one card per Vantrow brand. Nudgerow's
+card is currently a **placeholder** — registry identity only. Two endpoints now
+exist here to move it to **summary**, the stage Eaverow already reached:
+
+| Endpoint | Auth | Answers |
+|---|---|---|
+| `GET /v1/health` | none (per the vantrow-connect spec) | `{ status, service, database }` — liveness only, nothing private |
+| `GET /v1/metrics` | `Authorization: Bearer <key>` | brand-level counts: accounts, mailboxes connected, campaigns running, people in play, waiting on the drip, sent/replies/bounces/unsubscribes over 7 days, reply rate, and campaigns holding their ramp |
+
+**These are brand-level aggregates — Andrew's own view of Nudgerow across the
+whole install.** No tenant's rows, names or addresses cross this boundary, only
+counts, and a test asserts that. A client-facing widget is a different surface
+with different scoping and must not be built on this endpoint.
+
+**To turn the card on:**
+
+1. **Here:** set `CONNECT_METRICS_KEY` in Vercel on `nudgerow-platform` to a
+   fresh random value (`openssl rand -hex 32`), then redeploy. Until it is set
+   the endpoint is **locked**, answering 401 to everyone — a missing secret must
+   never mean "open".
+2. **On getvantrow.com** (repo `vantrow-web`, which this repo cannot change):
+   - in `lib/platform/registry.ts`, the `nudgerow` entry needs its `app` block
+     moved to `stage: "summary"` with `connectBaseUrlEnv: "NUDGEROW_CONNECT_URL"`
+     and `connectKeyEnv: "NUDGEROW_CONNECT_KEY"`, mirroring the `eaverow` entry;
+   - set those two env vars there — the URL is `https://app.nudgerow.com`, the
+     key is the same value as step 1 — and redeploy.
+
+The hub reads tolerantly (`lib/family/connect.ts`): it keeps only the fields it
+renders, ignores anything unknown, and turns any failure into an honest "not
+connected". So the metric list here can grow later without a coordinated
+release on both sides.
+
 ## §6 · Operating notes
 
 - **Token expiry (test mode):** refresh tokens die after ~7 days. The symptom
