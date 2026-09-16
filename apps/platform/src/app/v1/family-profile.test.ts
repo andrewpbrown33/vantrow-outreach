@@ -33,11 +33,15 @@ afterEach(() => {
 
 describe("GET /v1/health", () => {
   // The probe is memoised for ten seconds (module state), so each case
-  // steps the clock past the window first and sees a fresh probe.
+  // starts the clock a minute after the previous one and sees a fresh
+  // probe. Fake timers restart from real time on every useFakeTimers(), so
+  // the clock is kept here rather than advanced in place.
   const PROBE_TTL_MS = 10_000;
+  let clock = Date.now();
   beforeEach(() => {
+    clock += 60_000;
     vi.useFakeTimers();
-    vi.advanceTimersByTime(PROBE_TTL_MS + 1);
+    vi.setSystemTime(clock);
   });
   afterEach(() => { vi.useRealTimers(); });
 
