@@ -196,6 +196,58 @@ describe.skipIf(!dbUrl)("inbound behaviors (real Postgres)", () => {
     expect(await eventTypes(s.ws)).toContain("inbound.unsubscribe");
   });
 
+  it("keeps only an id for mail the engine does not act on", async () => {
+    const s = await seed();
+    const msg = inbound({
+      fromEmail: "colleague@somewhere.example",
+      subject: "Lunch on Thursday?",
+      snippet: "Are you free around noon",
+      headers: {
+        "from": "Colleague <colleague@somewhere.example>",
+        "received": "from mx.somewhere.example by mx.google.com",
+        "subject": "Lunch on Thursday?",
+      },
+    });
+    const res = await processInbound(pool!, s.mailboxId, msg);
+    expect(res).toMatchObject({ classification: "other", enrollmentId: null });
+
+    // The row exists — that is what makes a re-delivery inert — and holds
+    // nothing about the sender or the mail.
+    const row = (await pool!.query(
+      `select from_email, subject, snippet, headers, received_at, enrollment_id
+         from inbound_messages where mailbox_id = $1 and gmail_message_id = $2`,
+      [s.mailboxId, msg.gmailMessageId])).rows[0];
+    expect(row).toEqual({
+      from_email: null, subject: null, snippet: null, headers: {},
+      received_at: null, enrollment_id: null,
+    });
+    expect((await processInbound(pool!, s.mailboxId, msg)).duplicate).toBe(true);
+  });
+
+  it("stores only the headers the classifier reads on mail it does act on", async () => {
+    const s = await seed();
+    const msg = inbound({
+      fromEmail: s.prospectEmail,
+      headers: {
+        "from": `Derek <${s.prospectEmail}>`,
+        "in-reply-to": `<touch-${s.enrollmentId}-1@getvantrow.com>`,
+        "authentication-results": "mx.google.com; dkim=pass header.i=@example.com",
+        "received": "from mx.example.com by mx.google.com",
+        "x-google-smtp-source": "AGHT+IF/opaque",
+        "x-mailer": "Apple Mail",
+      },
+    });
+    expect((await processInbound(pool!, s.mailboxId, msg)).classification).toBe("reply");
+    const row = (await pool!.query(
+      `select from_email, subject, headers from inbound_messages
+        where mailbox_id = $1 and gmail_message_id = $2`,
+      [s.mailboxId, msg.gmailMessageId])).rows[0];
+    expect(row.from_email).toBe(s.prospectEmail);
+    expect(row.subject).toBe("Re: a quiet question");
+    expect(Object.keys(row.headers).sort())
+      .toEqual(["authentication-results", "from", "in-reply-to"]);
+  });
+
   it("records soft bounces without halting the enrollment", async () => {
     const s = await seed();
     const res = await processInbound(pool!, s.mailboxId, inbound({

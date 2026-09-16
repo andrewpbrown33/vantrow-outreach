@@ -129,6 +129,31 @@ export function classifyInbound(msg: NormalizedInbound): ClassifiedInbound {
   return { classification: touch ? "reply" : "other", touch, optOut };
 }
 
+/** The headers the classifier reads, and the only ones the ledger keeps.
+ *  The rest of an inbox message's headers — Received chains, tracking ids,
+ *  the sender's infrastructure — are data about the sender's mail, not
+ *  about the engine's, and the row is member-readable. */
+export const STORED_HEADERS = [
+  "from", "to", "subject", "message-id", "in-reply-to", "references", "date",
+  "authentication-results", "list-unsubscribe", "auto-submitted",
+  "x-autoreply", "return-path",
+] as const;
+
+export function storedHeaders(headers: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const name of STORED_HEADERS) {
+    const value = headers[name];
+    if (value !== undefined) out[name] = value;
+  }
+  return out;
+}
+
+/** What the engine acts on — and therefore records in full. Everything else
+ *  in an inbox is someone's ordinary mail. */
+const ACTED_ON: ReadonlySet<Classification> = new Set(
+  ["reply", "bounce_hard", "bounce_soft", "unsubscribe"] as const,
+);
+
 export interface ProcessResult {
   classification: Classification;
   enrollmentId: string | null;
@@ -203,18 +228,33 @@ export async function processInbound(
       cls.classification === "other" && enrollment ? "reply" : cls.classification;
     const seqId = enrollment?.sequence_id;
 
-    const inserted = await client.query(
-      `insert into inbound_messages
-         (workspace_id, mailbox_id, enrollment_id, prospect_id,
-          gmail_message_id, classification, from_email, subject, snippet,
-          headers, received_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-       on conflict (mailbox_id, gmail_message_id) do nothing
-       returning id`,
-      [ws, mailboxId, enrollment?.id ?? null, enrollment?.prospect_id ?? null,
-       msg.gmailMessageId, classification, msg.fromEmail, msg.subject,
-       msg.snippet, msg.headers, msg.receivedAt],
-    );
+    // A full row only for mail the engine acts on: linked to one of its own
+    // enrollments, or a reply, bounce or unsubscribe. Everything else in the
+    // inbox is somebody's ordinary correspondence; it leaves an id-only row so
+    // the at-least-once sync can dedupe, and nothing more — no sender, no
+    // subject, no snippet, no headers.
+    const keep = enrollment !== null || ACTED_ON.has(classification);
+    const inserted = keep
+      ? await client.query(
+        `insert into inbound_messages
+           (workspace_id, mailbox_id, enrollment_id, prospect_id,
+            gmail_message_id, classification, from_email, subject, snippet,
+            headers, received_at)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         on conflict (mailbox_id, gmail_message_id) do nothing
+         returning id`,
+        [ws, mailboxId, enrollment?.id ?? null, enrollment?.prospect_id ?? null,
+         msg.gmailMessageId, classification, msg.fromEmail, msg.subject,
+         msg.snippet, storedHeaders(msg.headers), msg.receivedAt],
+      )
+      : await client.query(
+        `insert into inbound_messages
+           (workspace_id, mailbox_id, gmail_message_id, classification)
+         values ($1, $2, $3, 'other')
+         on conflict (mailbox_id, gmail_message_id) do nothing
+         returning id`,
+        [ws, mailboxId, msg.gmailMessageId],
+      );
     if (inserted.rowCount === 0) {
       // Sync is at-least-once; this message was already processed.
       await client.query("rollback");
