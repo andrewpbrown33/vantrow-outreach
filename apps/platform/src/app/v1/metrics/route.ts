@@ -13,24 +13,10 @@
  *  is what lets this list grow without a coordinated release. */
 
 import { NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
+import { authorizedBearer } from "../../../lib/bearer";
 import { getPool } from "../../../lib/db";
 
 export const dynamic = "force-dynamic";
-
-/** Constant-time bearer check. Unset key means LOCKED, never open — the same
- *  posture as the cron tick: a missing secret must not silently publish. */
-function authorized(req: Request): boolean {
-  const expected = process.env.CONNECT_METRICS_KEY;
-  if (!expected) return false;
-  const header = req.headers.get("authorization") ?? "";
-  const prefix = "Bearer ";
-  if (!header.startsWith(prefix)) return false;
-  const a = Buffer.from(header.slice(prefix.length));
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
 
 interface Row {
   workspaces: string;
@@ -47,7 +33,9 @@ interface Row {
 }
 
 export async function GET(req: Request): Promise<NextResponse> {
-  if (!authorized(req)) {
+  // Unset key means LOCKED, never open — a missing secret must not silently
+  // publish — and the compare is constant-time (lib/bearer).
+  if (!authorizedBearer(req, process.env.CONNECT_METRICS_KEY)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

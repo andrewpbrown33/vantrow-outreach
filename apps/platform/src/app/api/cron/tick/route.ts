@@ -23,6 +23,7 @@ import {
   loadTokenKey, openToken, releaseDue, sealToken, sweepOnce,
   syncMailboxInbound,
 } from "@vantrow/engine";
+import { authorizedBearer } from "../../../../lib/bearer";
 import { getPool } from "../../../../lib/db";
 
 export const dynamic = "force-dynamic";
@@ -51,15 +52,9 @@ async function refreshTokenFor(pool: Pool, mb: MailboxRow): Promise<string> {
   return plain;
 }
 
-function authorized(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false; // unset means locked, never open
-  const header = req.headers.get("authorization") ?? "";
-  return header === `Bearer ${secret}`;
-}
-
 export async function GET(req: Request): Promise<NextResponse> {
-  if (!authorized(req)) {
+  // Unset means locked, never open; the compare is constant-time.
+  if (!authorizedBearer(req, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
