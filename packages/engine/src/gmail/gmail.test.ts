@@ -11,7 +11,7 @@
 import { describe, expect, it } from "vitest";
 import type { SendRequest } from "../dispatcher";
 import {
-  classifyInbound, detectOptOut, type NormalizedInbound,
+  classifyInbound, detectOptOut, senderAuthenticated, type NormalizedInbound,
 } from "./inbound";
 import type { FetchLike, TokenSource } from "./oauth";
 import { GmailProvider } from "./provider";
@@ -174,6 +174,39 @@ describe("detectOptOut", () => {
       "On Tue, Aug 25, 2026 at 9:02 AM Andrew wrote:\n" +
       '> if you\'d rather not hear from me, reply "no thanks" and I won\'t write again.\n',
     )).toBe(false);
+  });
+});
+
+describe("senderAuthenticated", () => {
+  // Gmail's own header on a real message from the sender's domain.
+  const PASS =
+    "mx.google.com; dkim=pass header.i=@meridian.com header.s=google header.b=abc123; " +
+    "spf=pass (google.com: domain of derek@meridian.com designates 1.2.3.4 as permitted sender) " +
+    "smtp.mailfrom=derek@meridian.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=meridian.com";
+  // A forged From: DKIM passes for the domain that really sent it, SPF does
+  // not pass for the claimed one, DMARC fails.
+  const FORGED =
+    "mx.google.com; dkim=pass header.i=@bulk-sender.example header.s=x header.b=zzz; " +
+    "spf=softfail (google.com: domain of transitioning derek@meridian.com does not designate " +
+    "5.6.7.8 as permitted sender) smtp.mailfrom=derek@meridian.com; dmarc=fail header.from=meridian.com";
+
+  it("vouches for a sender whose domain passed DKIM, SPF or DMARC", () => {
+    expect(senderAuthenticated({ "authentication-results": PASS }, "derek@meridian.com")).toBe(true);
+    // Any one of the three, aligned, is enough — subdomains either way.
+    expect(senderAuthenticated(
+      { "authentication-results": "mx.google.com; spf=pass smtp.mailfrom=bounce@mail.meridian.com" },
+      "derek@meridian.com")).toBe(true);
+    expect(senderAuthenticated(
+      { "authentication-results": "mx.google.com; dkim=pass header.d=meridian.com" },
+      "derek@sales.meridian.com")).toBe(true);
+  });
+
+  it("does not vouch for a forged From, or for a message with no results at all", () => {
+    expect(senderAuthenticated({ "authentication-results": FORGED }, "derek@meridian.com")).toBe(false);
+    // A pass for someone else's domain is not a pass for this one.
+    expect(senderAuthenticated({ "authentication-results": PASS }, "derek@other.example")).toBe(false);
+    expect(senderAuthenticated({}, "derek@meridian.com")).toBe(false);
+    expect(senderAuthenticated({ "authentication-results": PASS }, "no-domain")).toBe(false);
   });
 });
 

@@ -170,7 +170,16 @@ A healthy tick returns 200 and a report like:
    `0006`, both idempotent. `0007` closes the draft-first dead end; `0008`
    revokes public RPC execute on the two security-definer engine functions
    and teaches inbound classification the `unsubscribe` value the engine now
-   writes. Apply all three in one SQL-editor sitting.
+   writes. Apply all three in one SQL-editor sitting. **Added 2026-09-16
+   (after `0009` and `0010`): `0011_member_write_lockdown.sql` and
+   `0012_unverified_inbound.sql`** — same procedure, both idempotent. `0011`
+   takes away members' client-side write access to the compliance tables
+   (suppression becomes add-only; enrollments, steps and mailboxes
+   read-only); `0012` teaches inbound classification the `unverified` value
+   the engine writes for an unsubscribe or bounce nobody vouches for.
+   Without `0012`, such a message fails to record and the sync retries it
+   every minute — nothing is lost, but the tick reports an error until it
+   runs.
 2. At least one mailbox connected (runbook 07 §6) — otherwise the sweep has
    no provider and defers everything with `mailbox_not_connected`.
 
