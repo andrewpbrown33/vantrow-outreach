@@ -1,24 +1,13 @@
 "use server";
 
-import { headers, cookies } from "next/headers";
+import { cookies } from "next/headers";
 import {
   VERIFIER_COOKIE, authConfig, challengeFor, newVerifier, sendMagicLink,
 } from "../../lib/auth";
+import { appOrigin } from "../../lib/origin";
 import { mayRequestLink } from "../../lib/workspace";
 
 export interface SignInState { sent?: boolean; error?: string }
-
-/** Where the magic link comes back to. Derived from the request so preview
- *  deploys work without a per-environment variable; overridable when the app
- *  sits behind a domain the proxy headers do not report. */
-async function callbackUrl(): Promise<string> {
-  const configured = process.env.APP_ORIGIN;
-  if (configured) return `${configured.replace(/\/+$/, "")}/auth/callback`;
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}/auth/callback`;
-}
 
 export async function requestLinkAction(
   _prev: SignInState, formData: FormData,
@@ -26,6 +15,16 @@ export async function requestLinkAction(
   const cfg = authConfig();
   if (!cfg.ok) {
     return { error: `Sign-in is not configured yet: ${cfg.missing.join(", ")} unset.` };
+  }
+  // Where the magic link comes back to. A link that lands in someone's inbox
+  // is built from configuration in production, never from request headers
+  // (lib/origin); a missing value is reported here, by name, like the rest.
+  let redirectTo: string;
+  try {
+    redirectTo = `${await appOrigin()}/auth/callback`;
+  } catch (err) {
+    return { error: `Sign-in is not configured yet: ${
+      String(err instanceof Error ? err.message : err)}` };
   }
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -39,7 +38,7 @@ export async function requestLinkAction(
 
   const verifier = newVerifier();
   const result = await sendMagicLink(
-    email, await callbackUrl(), challengeFor(verifier), cfg);
+    email, redirectTo, challengeFor(verifier), cfg);
   if (!result.ok) return { error: `The auth server refused: ${result.error}` };
 
   const jar = await cookies();

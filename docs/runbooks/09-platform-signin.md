@@ -246,12 +246,17 @@ NUDGEROW_ALLOWED_EMAILS=andrewbrown2017@gmail.com
 
 (That key only opens a workspace when exactly one exists, which is true today.)
 
-## §6 · Optional: `APP_ORIGIN`
+## §6 · `APP_ORIGIN` — required in production (changed 2026-09-16)
 
-The callback URL is derived from the incoming request, which is correct on
-Vercel. Set `APP_ORIGIN` (e.g. `https://app.nudgerow.com`) only if you put the
-app behind a proxy that rewrites the host header, or if links start arriving
-with the wrong domain.
+The sign-in link's callback used to be derived from the incoming request's
+host headers. It no longer is in production: a URL that lands in someone's
+inbox — and the Gmail `redirect_uri` that Google matches exactly — must come
+from configuration, not from whoever sent the request. Set `APP_ORIGIN` to
+`https://app.nudgerow.com` (no trailing slash) on the platform project,
+alongside the §3 values; runbook 08 §2 lists it with the rest. Until it is
+set, the sign-in page answers every request with a message naming it, and
+the Connect button on Settings does the same. Local runs on `localhost`
+still need nothing.
 
 ## §7 · Troubleshooting
 

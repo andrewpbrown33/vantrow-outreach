@@ -8,24 +8,14 @@
  *  usable by anyone who is not its author. */
 
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { buildAuthUrl } from "@vantrow/engine";
 import { currentUser } from "../../../../lib/auth";
 import { resolveWorkspace } from "../../../../lib/workspace";
 import { getPool } from "../../../../lib/db";
 import { mintConnectState, connectRedirectUri } from "../../../../lib/oauth-state";
+import { appOrigin } from "../../../../lib/origin";
 
 export const dynamic = "force-dynamic";
-
-async function originOf(): Promise<string> {
-  const configured = process.env.APP_ORIGIN;
-  if (configured) return configured.replace(/\/+$/, "");
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
 
 function back(origin: string, note: string): NextResponse {
   return NextResponse.redirect(
@@ -34,7 +24,15 @@ function back(origin: string, note: string): NextResponse {
 }
 
 export async function GET(req: Request): Promise<NextResponse> {
-  const origin = await originOf();
+  let origin: string;
+  try {
+    origin = await appOrigin();
+  } catch (err) {
+    // Production without APP_ORIGIN: there is no correct redirect_uri to
+    // hand Google, so say so rather than guess one from the request.
+    return NextResponse.json(
+      { error: String(err instanceof Error ? err.message : err) }, { status: 500 });
+  }
   const user = await currentUser();
   if (!user) return NextResponse.redirect(`${origin}/signin`, { status: 303 });
   const ws = await resolveWorkspace(user);

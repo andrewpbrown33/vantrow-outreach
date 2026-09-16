@@ -18,7 +18,7 @@ next.
 
 ## §2 · Environment variables
 
-Five values. Three you can copy straight from here; only the database string
+Six values. Four you can copy straight from here; only the database string
 needs looking up.
 
 ### Where the database string lives (this trips people up)
@@ -60,7 +60,7 @@ If the database password contains special characters, percent-encode them in
 the URI (`@` → `%40`, `#` → `%23`, `/` → `%2F`) — or reset it to something
 alphanumeric and avoid the problem.
 
-### The five variables
+### The six variables
 
 In Vercel → the `nudgerow-platform` project → Settings → Environment
 Variables. Add each with **Production and Preview** both ticked.
@@ -72,6 +72,7 @@ Variables. Add each with **Production and Preview** both ticked.
 | `GOOGLE_OAUTH_CLIENT_ID` | `517832856056-pamqalipsibcm05j5j32du018qmbe8dd.apps.googleusercontent.com` (public by design; also in runbook 07 §5) |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | **not in the repo** — Andrew's password manager. Lost it? Console → APIs & Services → Credentials → `nudgerow-connect` → **Reset secret**, then update this one variable. Nothing else breaks; connected mailboxes keep working. |
 | `MAILBOX_TOKEN_KEY` | **added 2026-09-16** — the key Gmail tokens are encrypted with at rest: `openssl rand -base64 32` (exactly 32 bytes, base64). Save it in the password manager too: **a token sealed under one key cannot be opened with another**, so losing this key means reconnecting every mailbox from Settings. Until it is set, production **refuses to connect a mailbox** (the Settings page says so by name) while mailboxes connected earlier keep sending; once it is set, their tokens are re-sealed on the next heartbeat with nothing to reconnect. |
+| `APP_ORIGIN` | **added 2026-09-16** — this app's public origin, `https://app.nudgerow.com`, no trailing slash. **Required in production**: it is the Gmail `redirect_uri` Google matches exactly (runbook 07 §5b) and where the sign-in link comes back to, so it must come from configuration, never from the request. Without it the sign-in page and the Connect button say so by name. A preview deployment needs its own value (its `*.vercel.app` URL) or sign-in there will say the same. |
 
 Both live at
 https://console.cloud.google.com/apis/credentials?project=nudgerow-dogfood
@@ -80,16 +81,16 @@ only once at creation, so if it was never saved, resetting is the path — not
 a lookup.
 
 **None may be prefixed `NEXT_PUBLIC_`** — that prefix ships a value to the
-browser, and all five are server secrets.
+browser, and all six are server-side.
 
-> **Sign-in needs three more (runbook 09).** These five run the engine. The
+> **Sign-in needs three more (runbook 09).** These six run the engine and the connect flow. The
 > product surfaces additionally need `SUPABASE_URL`, `SUPABASE_ANON_KEY` and
 > `AUTH_SECRET`; without them every surface redirects to a sign-in page that
 > names what is missing, while the cron below keeps running normally.
 
 ### Faster: the Vercel CLI
 
-If you'd rather not click through the console five times:
+If you'd rather not click through the console six times:
 
 ```bash
 npx vercel link            # pick the nudgerow-platform project, once
@@ -98,6 +99,7 @@ npx vercel env add CRON_SECRET production
 npx vercel env add GOOGLE_OAUTH_CLIENT_ID production
 npx vercel env add GOOGLE_OAUTH_CLIENT_SECRET production
 npx vercel env add MAILBOX_TOKEN_KEY production
+npx vercel env add APP_ORIGIN production
 ```
 
 Each prompts for the value and reads it without echoing to screen — better

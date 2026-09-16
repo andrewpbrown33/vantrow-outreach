@@ -6,24 +6,14 @@
  *  page, because every one of them is something the operator can act on. */
 
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
 import { exchangeCode, grantedAddress, GMAIL_SCOPES, sealToken } from "@vantrow/engine";
 import { currentUser } from "../../../../lib/auth";
 import { resolveWorkspace } from "../../../../lib/workspace";
 import { getPool } from "../../../../lib/db";
 import { readConnectState, connectRedirectUri } from "../../../../lib/oauth-state";
+import { appOrigin } from "../../../../lib/origin";
 
 export const dynamic = "force-dynamic";
-
-async function originOf(): Promise<string> {
-  const configured = process.env.APP_ORIGIN;
-  if (configured) return configured.replace(/\/+$/, "");
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
 
 function back(origin: string, note: string, extra?: string): NextResponse {
   const q = new URLSearchParams({ connect: note });
@@ -32,7 +22,15 @@ function back(origin: string, note: string, extra?: string): NextResponse {
 }
 
 export async function GET(req: Request): Promise<NextResponse> {
-  const origin = await originOf();
+  let origin: string;
+  try {
+    origin = await appOrigin();
+  } catch (err) {
+    // The code exchange must quote the same redirect_uri the consent step
+    // used; without APP_ORIGIN in production there is nothing to quote.
+    return NextResponse.json(
+      { error: String(err instanceof Error ? err.message : err) }, { status: 500 });
+  }
   const url = new URL(req.url);
 
   // The operator pressed Cancel, or Google refused.
