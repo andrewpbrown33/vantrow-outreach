@@ -26,3 +26,5 @@ export { classifyInbound, processInbound } from "./gmail/inbound";
 export type { NormalizedInbound, Classification } from "./gmail/inbound";
 export { syncMailboxInbound } from "./gmail/sync";
 export type { SyncStats } from "./gmail/sync";
+export { escapeHtml, textToHtml } from "./text-to-html";
+export { fillMergeFields, MERGE_FIELD_RE } from "./merge";

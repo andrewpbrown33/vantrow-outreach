@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { textToHtml } from "@vantrow/engine";
 import { minutesFromTime } from "../../lib/format";
 import {
   activateSequence, approveDraft, createSequence, getSequence, listSteps,
@@ -77,7 +78,9 @@ function stepsFrom(formData: FormData): NewStepInput[] {
     if (subject.length === 0 && body.trim().length === 0) continue;
     steps.push({
       subject,
-      bodyHtml: body,
+      // Typed as text, sent as HTML: paragraphs, breaks, and the writer's
+      // characters escaped. Stored bodies are never re-converted.
+      bodyHtml: textToHtml(body),
       intervalDays: clampInt(days[i], 0, 365),
       intervalHours: clampInt(hours[i], 0, 23),
       mode: modes[i] === "draft_first" ? "draft_first" : "auto",
