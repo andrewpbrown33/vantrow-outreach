@@ -176,19 +176,27 @@ In the Supabase SQL editor, three pastes in order (each idempotent):
 
 ## §6 · Connect a mailbox (per mailbox, repeatable)
 
-On any machine with node 22+ and this repo:
+**Normal path (2026-09-13 →):** the **Connect** button on Settings, §5b.
+What follows is the **break-glass** path for the day that button cannot be
+reached. On any machine with node 22+ and this repo installed
+(`pnpm install`):
 
 ```bash
 GOOGLE_OAUTH_CLIENT_ID=... GOOGLE_OAUTH_CLIENT_SECRET=... \
-  node scripts/gmail-connect.mjs andrew@getvantrow.com
+SUPABASE_DB_URL=... MAILBOX_TOKEN_KEY=... \
+  pnpm exec tsx scripts/gmail-connect.mjs andrew@getvantrow.com
 ```
 
 1. Open the printed URL **in a browser signed in as that mailbox**, approve the
    two scopes (`gmail.send`, `gmail.readonly`).
-2. The script finishes itself and prints a `psql` block; run it against the
-   Supabase project **with the service-role connection** — it upserts
-   `mailbox_credentials` for that mailbox. (The mailbox row itself must exist
-   in `public.mailboxes` first.)
+2. The script finishes itself: it checks which Google account actually
+   consented, then **writes the credential straight to the database, sealed
+   under `MAILBOX_TOKEN_KEY`** — the same key the platform runs with (runbook
+   08 §2), or the heartbeat cannot open it. **Nothing is printed and there is
+   nothing to paste** (changed 2026-09-16; it used to print a `psql` block
+   containing the token). Without `SUPABASE_DB_URL` or the key it refuses
+   before asking Google for anything. The mailbox row must already exist in
+   `public.mailboxes`.
 3. Repeat per mailbox (getvantrow / eaverow / parcelrow).
 
 > **Status 2026-08-10: ALL THREE MAILBOXES LIVE.** `andrew@getvantrow.com`,
@@ -197,13 +205,18 @@ GOOGLE_OAUTH_CLIENT_ID=... GOOGLE_OAUTH_CLIENT_SECRET=... \
 > address before the credential is stored). R10 — standalone, brand-level,
 > multi-mailbox — is real, not just modeled. The platform deploy (runbook 08)
 > is live too, so the minute heartbeat syncs all three unattended.
-> **Chat-assisted connect path (proven ×3):** the agent builds the §6 auth URL,
+> ~~**Chat-assisted connect path (proven ×3):** the agent builds the §6 auth URL,
 > you approve in the browser, the redirect lands on a dead 127.0.0.1 page, you
 > paste that page's full URL back — the agent exchanges the code, verifies the
-> identity, and hands you one SQL statement. No local node or repo clone.
-> Test-mode reminder: refresh tokens expire ~7 days; reconnecting is the same
-> 30-second dance, and an expired mailbox shows up as a 207 tick with
-> `last_refresh_error` set.
+> identity, and hands you one SQL statement. No local node or repo clone.~~
+> **DEPRECATED 2026-09-16 — do not use.** That path moved an OAuth code and
+> then a refresh token through a chat transcript and a pasted SQL block; a
+> refresh token is a standing grant to send as that mailbox, held by whatever
+> holds the text. Reconnect from **Settings → Connect** (§5b). If the button
+> is unreachable, the break-glass script in §6 writes the sealed credential
+> itself and prints nothing. Never paste a code or a token into a chat.
+> Test-mode reminder still stands: refresh tokens expire ~7 days, and an
+> expired mailbox shows up as a 207 tick with `last_refresh_error` set.
 
 ## §7 · What this unlocks / what still gates
 

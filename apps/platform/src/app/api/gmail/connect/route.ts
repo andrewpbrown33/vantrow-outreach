@@ -1,11 +1,11 @@
 /** Step one of connecting a mailbox: send the operator to Google's consent
  *  screen with a signed state that says which mailbox they were standing on.
  *
- *  This replaces the CLI ritual (scripts/gmail-connect.mjs, which prints SQL a
- *  human pastes into psql). That script stays as the break-glass path, but it
- *  cannot be the normal one: Google's test-mode refresh tokens die about
- *  weekly, and a product whose recovery procedure is "open a terminal" is not
- *  usable by anyone who is not its author. */
+ *  This replaces the CLI ritual (scripts/gmail-connect.mjs, which now writes
+ *  the sealed credential itself and prints nothing). That script stays as the
+ *  break-glass path, but it cannot be the normal one: Google's test-mode
+ *  refresh tokens die about weekly, and a product whose recovery procedure is
+ *  "open a terminal" is not usable by anyone who is not its author. */
 
 import { NextResponse } from "next/server";
 import { buildAuthUrl } from "@vantrow/engine";
