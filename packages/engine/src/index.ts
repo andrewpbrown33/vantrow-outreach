@@ -14,6 +14,10 @@ export {
   GMAIL_SCOPES, buildAuthUrl, exchangeCode, grantedAddress, RefreshTokenSource,
 } from "./gmail/oauth";
 export type { TokenSource, OAuthAppConfig, TokenGrant } from "./gmail/oauth";
+export {
+  TOKEN_KEY_ENV, canStoreToken, isEncryptedToken, loadTokenKey, openToken,
+  sealToken,
+} from "./gmail/token-crypto";
 export { GmailProvider } from "./gmail/provider";
 export {
   composeRaw, touchMessageId, parseTouchMessageId, headerRecord, decodeBody,
@@ -22,3 +26,5 @@ export { classifyInbound, processInbound } from "./gmail/inbound";
 export type { NormalizedInbound, Classification } from "./gmail/inbound";
 export { syncMailboxInbound } from "./gmail/sync";
 export type { SyncStats } from "./gmail/sync";
+export { escapeHtml, textToHtml } from "./text-to-html";
+export { fillMergeFields, MERGE_FIELD_RE } from "./merge";

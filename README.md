@@ -33,7 +33,7 @@ requirements: `docs/research/inputs/customer1-requirements.md`.
 | `packages/brand/` | `@vantrow/brand` — white-label tokens (identity, parent linkage, light+dark palettes, typography, shape); placeholder until Gate 2 |
 | `packages/growth/` | `@vantrow/growth` — deterministic legal/claims lint (`block` findings disable publishing); pricing module arrives Phase 2 |
 | `scripts/` | `validate-connect-fixtures.mjs` — the Connect contract's test suite, run in CI |
-| `apps/` | `site/` arrives Phase 2 (post-name) · `platform/` arrives Phase 4 |
+| `apps/` | `site/` — the marketing site (Phase 2, live at nudgerow.com) · `platform/` — the product app (Phase 4, deployed as `app.nudgerow.com`): sign-in, sequences, import, mailbox connect, and the minute heartbeat that runs `packages/engine` — runbooks 07–09 |
 
 ## Quick start
 

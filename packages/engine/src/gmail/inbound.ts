@@ -21,7 +21,11 @@ export interface NormalizedInbound {
 }
 
 export type Classification =
-  | "reply" | "ooo" | "bounce_hard" | "bounce_soft" | "unsubscribe" | "other";
+  | "reply" | "ooo" | "bounce_hard" | "bounce_soft" | "unsubscribe"
+  /** A claimed unsubscribe or bounce from a sender nothing vouches for:
+   *  recorded, never acted on. */
+  | "unverified"
+  | "other";
 
 export interface ClassifiedInbound {
   classification: Classification;
@@ -68,6 +72,41 @@ export function detectOptOut(bodyText: string): boolean {
   if (OPTOUT_STRONG_RE.test(own)) return true;
   const compact = own.trim();
   return compact.length > 0 && compact.length <= 80 && OPTOUT_POLITE_RE.test(compact);
+}
+
+/** Does Authentication-Results vouch for the sender's domain?
+ *
+ *  An unsubscribe or a bounce is acted on org-wide — the suppression row is
+ *  what I3 reads last — and the From header is whatever the sender wrote. A
+ *  forged From plus the word "unsubscribe" would otherwise silence a prospect
+ *  who never asked. The receiving MTA (Gmail, here) records what it verified
+ *  in Authentication-Results: DKIM signed by the domain, SPF passed for the
+ *  envelope sender, or DMARC passed for the From domain. Any one of those,
+ *  aligned with the sender's own domain (subdomains either way), is enough;
+ *  none of them is "unverified". Real DSNs come from mailer-daemon or
+ *  postmaster and are exempt at the call site. */
+export function senderAuthenticated(
+  headers: Record<string, string>, fromEmail: string,
+): boolean {
+  const domain = fromEmail.split("@")[1]?.toLowerCase();
+  const results = headers["authentication-results"];
+  if (!domain || !results) return false;
+  const aligned = (value: string | undefined): boolean => {
+    const d = value?.toLowerCase().replace(/^.*@/, "").replace(/[;,)]+$/, "");
+    return d !== undefined && d.length > 0 &&
+      (d === domain || d.endsWith(`.${domain}`) || domain.endsWith(`.${d}`));
+  };
+  for (const raw of results.split(";")) {
+    const clause = raw.trim();
+    if (/^dkim=pass\b/i.test(clause)) {
+      if (aligned(/header\.(?:i|d)=(\S+)/i.exec(clause)?.[1])) return true;
+    } else if (/^spf=pass\b/i.test(clause)) {
+      if (aligned(/smtp\.mailfrom=(\S+)/i.exec(clause)?.[1])) return true;
+    } else if (/^dmarc=pass\b/i.test(clause)) {
+      if (aligned(/header\.from=(\S+)/i.exec(clause)?.[1])) return true;
+    }
+  }
+  return false;
 }
 
 export function classifyInbound(msg: NormalizedInbound): ClassifiedInbound {
@@ -128,6 +167,38 @@ export function classifyInbound(msg: NormalizedInbound): ClassifiedInbound {
   const optOut = detectOptOut(msg.bodyText) || undefined;
   return { classification: touch ? "reply" : "other", touch, optOut };
 }
+
+/** The headers the classifier reads, and the only ones the ledger keeps.
+ *  The rest of an inbox message's headers — Received chains, tracking ids,
+ *  the sender's infrastructure — are data about the sender's mail, not
+ *  about the engine's, and the row is member-readable. */
+export const STORED_HEADERS = [
+  "from", "to", "subject", "message-id", "in-reply-to", "references", "date",
+  "authentication-results", "list-unsubscribe", "auto-submitted",
+  "x-autoreply", "return-path",
+] as const;
+
+export function storedHeaders(headers: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const name of STORED_HEADERS) {
+    const value = headers[name];
+    if (value !== undefined) out[name] = value;
+  }
+  return out;
+}
+
+/** What the engine acts on — or would have, had the sender been vouched for
+ *  — and therefore records in full. Everything else in an inbox is someone's
+ *  ordinary mail. */
+const KEPT_IN_FULL: ReadonlySet<Classification> = new Set(
+  ["reply", "bounce_hard", "bounce_soft", "unsubscribe", "unverified"] as const,
+);
+
+/** The classifications whose effect is org-wide and irreversible from the
+ *  prospect's side: they need the sender vouched for (senderAuthenticated). */
+const SUPPRESSING: ReadonlySet<Classification> = new Set(
+  ["bounce_hard", "bounce_soft", "unsubscribe"] as const,
+);
 
 export interface ProcessResult {
   classification: Classification;
@@ -199,22 +270,48 @@ export async function processInbound(
       )).rows[0] ?? null;
     }
 
-    const classification: Classification =
+    const claimed: Classification =
       cls.classification === "other" && enrollment ? "reply" : cls.classification;
     const seqId = enrollment?.sequence_id;
 
-    const inserted = await client.query(
-      `insert into inbound_messages
-         (workspace_id, mailbox_id, enrollment_id, prospect_id,
-          gmail_message_id, classification, from_email, subject, snippet,
-          headers, received_at)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-       on conflict (mailbox_id, gmail_message_id) do nothing
-       returning id`,
-      [ws, mailboxId, enrollment?.id ?? null, enrollment?.prospect_id ?? null,
-       msg.gmailMessageId, classification, msg.fromEmail, msg.subject,
-       msg.snippet, msg.headers, msg.receivedAt],
-    );
+    // Who vouches for the sender. A DSN from mailer-daemon or postmaster is
+    // the receiving MTA's own word; anyone else needs Authentication-Results
+    // to say the From domain really sent this. A claimed unsubscribe or
+    // bounce that fails that test is recorded as unverified and acts on
+    // nothing — a forged From must not be able to silence a prospect.
+    const verified =
+      /^(mailer-daemon|postmaster)@/i.test(msg.fromEmail) ||
+      senderAuthenticated(msg.headers, msg.fromEmail);
+    const classification: Classification =
+      SUPPRESSING.has(claimed) && !verified ? "unverified" : claimed;
+
+    // A full row only for mail the engine acts on: linked to one of its own
+    // enrollments, or a reply, bounce or unsubscribe. Everything else in the
+    // inbox is somebody's ordinary correspondence; it leaves an id-only row so
+    // the at-least-once sync can dedupe, and nothing more — no sender, no
+    // subject, no snippet, no headers.
+    const keep = enrollment !== null || KEPT_IN_FULL.has(classification);
+    const inserted = keep
+      ? await client.query(
+        `insert into inbound_messages
+           (workspace_id, mailbox_id, enrollment_id, prospect_id,
+            gmail_message_id, classification, from_email, subject, snippet,
+            headers, received_at)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         on conflict (mailbox_id, gmail_message_id) do nothing
+         returning id`,
+        [ws, mailboxId, enrollment?.id ?? null, enrollment?.prospect_id ?? null,
+         msg.gmailMessageId, classification, msg.fromEmail, msg.subject,
+         msg.snippet, storedHeaders(msg.headers), msg.receivedAt],
+      )
+      : await client.query(
+        `insert into inbound_messages
+           (workspace_id, mailbox_id, gmail_message_id, classification)
+         values ($1, $2, $3, 'other')
+         on conflict (mailbox_id, gmail_message_id) do nothing
+         returning id`,
+        [ws, mailboxId, msg.gmailMessageId],
+      );
     if (inserted.rowCount === 0) {
       // Sync is at-least-once; this message was already processed.
       await client.query("rollback");
@@ -248,7 +345,14 @@ export async function processInbound(
       );
     };
 
-    if (classification === "unsubscribe") {
+    if (classification === "unverified") {
+      // On the record, and nothing else: no suppression, no halt. The
+      // sender, the claim and what it named are in the event for a human.
+      await events("inbound.unverified", {
+        claimed, from: msg.fromEmail,
+        address: cls.bouncedAddress ?? enrollment?.prospect_email ?? msg.fromEmail,
+      });
+    } else if (classification === "unsubscribe") {
       // The ask needs no enrollment to be honored: suppress the sender (or
       // the linked prospect) org-wide, and cancel any live enrollment.
       const addr = enrollment?.prospect_email ?? msg.fromEmail;
@@ -283,12 +387,18 @@ export async function processInbound(
             occurredAt: msg.receivedAt,
           });
         }
-        if (cls.optOut) {
+        if (cls.optOut && verified) {
           // The reply both stops this sequence (I2, above) and asks off the
           // list entirely — honor both. State stays 'replied': that is what
           // happened; the suppression row is what prevents the next sequence.
           await suppressOptOut(enrollment.prospect_email);
           await events("prospect.opted_out", { via: "reply" });
+        } else if (cls.optOut) {
+          // Stopping this sequence is the safe direction and has happened
+          // (I2). The org-wide part waits for a sender someone vouches for.
+          await events("inbound.unverified", {
+            claimed: "opt_out", from: msg.fromEmail, address: enrollment.prospect_email,
+          });
         }
       } else if (classification === "ooo") {
         // I6: pause with the return date; NEVER marks a reply. Default resume

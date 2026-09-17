@@ -56,6 +56,7 @@ run()("getting into a workspace", () => {
 
     const got = await ws.resolveWorkspace(user(email));
     expect(got?.id).toBe(w);
+    expect(got?.role).toBe("owner");   // the bootstrap keys mint an owner
   });
 
   it("THE HOLE: a mailbox address does NOT open a workspace that already has an owner", async () => {
@@ -92,7 +93,12 @@ run()("getting into a workspace", () => {
        values ($1, $2, 'member')`, [w, email]);
 
     const u = user(email);
-    expect((await ws.resolveWorkspace(u))?.id).toBe(w);
+    const got = await ws.resolveWorkspace(u);
+    expect(got?.id).toBe(w);
+    // The role rides the session from the first request: this is what the
+    // owner-only actions read, so an invited member must not come back as
+    // anything else.
+    expect(got?.role).toBe("member");
     expect(await membershipsOf(u.userId)).toEqual([{ workspace_id: w, role: "member" }]);
 
     // Accepting consumes it, and the join is on the record.
@@ -128,7 +134,9 @@ run()("getting into a workspace", () => {
       [home, u.userId]);
     await mailbox(other, email);   // a bootstrap-eligible workspace elsewhere
 
-    expect((await ws.resolveWorkspace(u))?.id).toBe(home);
+    const got = await ws.resolveWorkspace(u);
+    expect(got?.id).toBe(home);
+    expect(got?.role).toBe("member");  // reports the role it holds, not a default
     expect(await membershipsOf(u.userId)).toHaveLength(1);
   });
 

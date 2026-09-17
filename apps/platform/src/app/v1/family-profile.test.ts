@@ -6,7 +6,7 @@
  *  would happily accept and shouldn't: an open metrics endpoint, or a card of
  *  zeros standing in for an unreachable database. */
 
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const query = vi.fn();
 vi.mock("../../lib/db", () => ({ getPool: () => ({ query }) }));
@@ -32,6 +32,19 @@ afterEach(() => {
 });
 
 describe("GET /v1/health", () => {
+  // The probe is memoised for ten seconds (module state), so each case
+  // starts the clock a minute after the previous one and sees a fresh
+  // probe. Fake timers restart from real time on every useFakeTimers(), so
+  // the clock is kept here rather than advanced in place.
+  const PROBE_TTL_MS = 10_000;
+  let clock = Date.now();
+  beforeEach(() => {
+    clock += 60_000;
+    vi.useFakeTimers();
+    vi.setSystemTime(clock);
+  });
+  afterEach(() => { vi.useRealTimers(); });
+
   it("answers ok when the database answers", async () => {
     query.mockResolvedValue({ rows: [{}] });
     const body = await (await health()).json();
@@ -53,6 +66,23 @@ describe("GET /v1/health", () => {
     query.mockResolvedValue({ rows: [{}] });
     const body = await (await health()).json();
     expect(Object.keys(body).sort()).toEqual(["database", "service", "status"]);
+  });
+
+  it("probes the database at most once every ten seconds — the pool is not a stranger's to drain", async () => {
+    query.mockResolvedValue({ rows: [{}] });
+    // A burst, and then a loop inside the window: one probe.
+    await Promise.all([health(), health(), health()]);
+    await health();
+    expect(query).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(PROBE_TTL_MS - 1);
+    await health();
+    expect(query).toHaveBeenCalledTimes(1);
+    // Past the window, it looks again — and reports what it now sees.
+    vi.advanceTimersByTime(2);
+    query.mockRejectedValue(new Error("connection refused"));
+    const body = await (await health()).json();
+    expect(query).toHaveBeenCalledTimes(2);
+    expect(body.database).toBe("unavailable");
   });
 });
 

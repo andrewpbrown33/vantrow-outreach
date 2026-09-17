@@ -2,36 +2,46 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { textToHtml } from "@vantrow/engine";
 import { minutesFromTime } from "../../lib/format";
 import {
   activateSequence, approveDraft, createSequence, getSequence, listSteps,
   resumeRelease, setSequenceState,
   type NewStepInput,
 } from "../../lib/queries";
-import { requireSession } from "../../lib/workspace";
+import { requireOwner, requireSession } from "../../lib/workspace";
 
 /** Server actions carry no workspace id from the client — every one of them
  *  re-derives it from the session, then scopes its write. A form field is an
- *  attacker-controlled string; the session is not. */
+ *  attacker-controlled string; the session is not.
+ *
+ *  What goes out is the owner's call: starting a sequence, approving a
+ *  draft-first step and lifting a drip hold all require the owner role. A
+ *  member may still create a draft and may still PAUSE — stopping is the safe
+ *  direction, and anyone on the team may pull that lever. */
 
 export interface ActionState { error?: string }
+
+const sequencePage = (id: string): string => `/sequences/${encodeURIComponent(id)}`;
 
 /** Lift a drip hold. The engine stops its own ramp on bad deliverability and
  *  will not restart it — that is the whole point of "hold steady and tell me",
  *  so resuming is a button a person presses, never a timeout. */
 export async function resumeReleaseAction(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireSession();
   const id = String(formData.get("id") ?? "");
   if (!id) return;
+  const { workspaceId } = await requireOwner(sequencePage(id));
   await resumeRelease(workspaceId, id);
   revalidatePath(`/sequences/${id}`);
 }
 
 export async function setStateAction(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireSession();
   const id = String(formData.get("id") ?? "");
   const next = String(formData.get("state") ?? "");
   if (!["draft", "active", "paused", "archived"].includes(next)) return;
+  const { workspaceId } = next === "active" || next === "archived"
+    ? await requireOwner(sequencePage(id))
+    : await requireSession();
 
   if (next === "active") {
     // Activating is the moment the engine starts sending. Refuse to do it
@@ -68,7 +78,9 @@ function stepsFrom(formData: FormData): NewStepInput[] {
     if (subject.length === 0 && body.trim().length === 0) continue;
     steps.push({
       subject,
-      bodyHtml: body,
+      // Typed as text, sent as HTML: paragraphs, breaks, and the writer's
+      // characters escaped. Stored bodies are never re-converted.
+      bodyHtml: textToHtml(body),
       intervalDays: clampInt(days[i], 0, 365),
       intervalHours: clampInt(hours[i], 0, 23),
       mode: modes[i] === "draft_first" ? "draft_first" : "auto",
@@ -137,10 +149,10 @@ export async function createSequenceAction(
  *  approveDraft scopes every statement to the session's workspace and re-checks
  *  that the row really is awaiting approval, so a forged id matches nothing. */
 export async function approveDraftAction(formData: FormData): Promise<void> {
-  const { workspaceId } = await requireSession();
   const enrollmentId = String(formData.get("enrollment_id") ?? "");
   const sequenceId = String(formData.get("sequence_id") ?? "");
   if (!enrollmentId) return;
+  const { workspaceId } = await requireOwner(sequencePage(sequenceId));
 
   await approveDraft(workspaceId, enrollmentId);
   revalidatePath(`/sequences/${sequenceId}`);

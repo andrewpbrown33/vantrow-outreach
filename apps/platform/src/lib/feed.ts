@@ -171,7 +171,7 @@ export function buildFeed(rows: FeedRow[]): FeedItem[] {
       tone: mapped.tone,
       badge: mapped.badge,
       people: [person],
-      verb: verbFor(row.type),
+      verb: verbFor(row),
       at: row.createdAt,
       sequenceId: row.sequenceId,
       sequenceName: row.sequenceName,
@@ -183,12 +183,27 @@ export function buildFeed(rows: FeedRow[]): FeedItem[] {
   return items;
 }
 
-function verbFor(type: string): string {
-  switch (type) {
+/** Every reason the engine writes on an enrollment.paused event, in the
+ *  words a reader needs. The engine parks people for more than one reason,
+ *  and "out of office" on a row that was actually waiting for its sequence
+ *  to be switched on sent the reader looking for an auto-reply that never
+ *  came. */
+const PAUSE_LABEL: Record<string, string> = {
+  ooo: "paused — out of office",
+  sequence_not_active: "paused — the sequence is not running",
+  missing_template: "paused — the step has no template",
+  missing_thread_subject: "paused — the reply step has no thread subject",
+};
+
+function verbFor(row: FeedRow): string {
+  switch (row.type) {
     case "inbound.reply": return "replied";
     case "touch.draft_due": return "has a draft waiting";
     case "enrollment.finished_no_reply": return "finished";
-    case "enrollment.paused": return "paused — out of office";
+    case "enrollment.paused": {
+      const why = row.payload.reason;
+      return (typeof why === "string" && PAUSE_LABEL[why]) || "paused";
+    }
     case "inbound.bounce_hard": return "hard-bounced";
     case "enrollment.suppression_halt": return "was halted";
     case "touch.failed": return "send failed";

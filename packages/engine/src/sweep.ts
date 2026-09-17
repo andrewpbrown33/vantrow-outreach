@@ -11,6 +11,7 @@
 import type { Pool, PoolClient } from "pg";
 import type { Provider } from "./dispatcher";
 import { emitSequenceProgress } from "./connect-emit";
+import { fillMergeFields } from "./merge";
 import { nextFireTime, snapToWindow, type SendSchedule } from "./planner";
 import { replySubject } from "./subject";
 
@@ -469,19 +470,13 @@ export async function executeOne(
     // broken output as nothing. An operator who wants an optional value should
     // not be using a merge field for it.
     const missing = new Set<string>();
-    const fill = (s: string) =>
-      s.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, name: string) => {
-        const v = vars[name];
-        if (typeof v !== "string" || v.trim() === "") {
-          missing.add(name);
-          return "";
-        }
-        return v;
-      });
+    const fill = (s: string) => fillMergeFields(s, vars, missing);
     // `let`, because a reply step overwrites this below with the derived
     // "Re: " subject once the thread it belongs to is known.
     let subject = fill(template.subject);
-    const bodyHtml = fill(template.body_html);
+    // The body is HTML, so a prospect's value is escaped on the way in:
+    // "A&B <Roofing>" is a company name, not markup. Subjects are text.
+    const bodyHtml = fillMergeFields(template.body_html, vars, missing, { html: true });
 
     // Paused, not dropped: this is a data gap a human fixes on the prospect,
     // after which the enrollment is re-armed like any other paused work.

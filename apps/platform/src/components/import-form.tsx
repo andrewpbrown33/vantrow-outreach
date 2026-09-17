@@ -10,7 +10,7 @@ import type { SequenceSummary } from "../lib/queries";
 import { Field, Notice, inputClass } from "./ui";
 
 const SAMPLE = `email,first name,last name,company,title,timezone
-dana@foundryco.com,Dana,Nakamura,Foundry & Co,VP Operations,America/Chicago`;
+dana@example.com,Dana,Nakamura,Foundry & Co,VP Operations,America/Chicago`;
 
 /** Where a file column can land. Standard fields come first; "custom" makes
  *  the column a {{variable}} of the user's naming; "ignore" leaves it behind. */

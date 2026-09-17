@@ -9,14 +9,17 @@
  *  policy, so re-seeding never disturbs a campaign that is already running.
  *
  *  Usage:
- *    SUPABASE_DB_URL=... node scripts/seed-campaign.mjs \
+ *    SUPABASE_DB_URL=... pnpm exec tsx scripts/seed-campaign.mjs \
  *      docs/campaigns/vantrow-services-roofing.md \
  *      --workspace 00000000-0000-4000-8000-000000000001 \
  *      --mailbox andrew@getvantrow.com \
  *      [--address "123 Main St, Denver CO 80202"] \
  *      [--apply]
  *
- *  Without --apply it prints what it would do and changes nothing.
+ *  Without --apply it prints what it would do and changes nothing. tsx (a
+ *  dev dependency of this repo) is for the write path, which shares the
+ *  engine's text-to-HTML step with the sequence form so a seeded campaign
+ *  and a typed one produce the same bodies; a dry run imports nothing.
  */
 
 import { readFileSync } from "node:fs";
@@ -116,11 +119,6 @@ const withAddress = (body) =>
 // Intervals are gaps between steps; the doc states cumulative days.
 const intervals = steps.map((s, i) => (i === 0 ? 0 : s.day - steps[i - 1].day));
 
-// Plain-text paragraphs become the HTML the engine sends.
-const html = (body) =>
-  body.split(/\n{2,}/).map((p) =>
-    `<p>${p.trim().split(/\n/).join("<br>")}</p>`).join("\n");
-
 const name = (/^#\s+(.*)$/m.exec(md)?.[1] ?? "Campaign")
   .replace(/^Campaign\s*·\s*/i, "").trim();
 
@@ -146,8 +144,10 @@ if (!url) {
   process.exit(2);
 }
 // Imported only on the write path, so a dry run parses and reports with no
-// dependencies at all — the same posture as scripts/gmail-connect.mjs.
+// dependencies at all — the same posture as scripts/gmail-connect.mjs. The
+// text-to-HTML step is the engine's own (hence tsx), not a copy of it.
 const { default: pg } = await import("pg");
+const { textToHtml } = await import("../packages/engine/src/text-to-html.ts");
 const pool = new pg.Pool({ connectionString: url, max: 2 });
 const client = await pool.connect();
 try {
@@ -199,7 +199,7 @@ try {
       `insert into public.email_templates (workspace_id, name, subject, body_html)
        values ($1, $2, $3, $4) returning id`,
       [workspaceId, `${name} · step ${s.order}`, s.subject,
-       html(withAddress(s.body))]);
+       textToHtml(withAddress(s.body))]);
     await client.query(
       `insert into public.sequence_steps
          (workspace_id, sequence_id, step_order, template_id, mode,

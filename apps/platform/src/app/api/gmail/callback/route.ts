@@ -6,24 +6,14 @@
  *  page, because every one of them is something the operator can act on. */
 
 import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { exchangeCode, grantedAddress, GMAIL_SCOPES } from "@vantrow/engine";
+import { exchangeCode, grantedAddress, GMAIL_SCOPES, sealToken } from "@vantrow/engine";
 import { currentUser } from "../../../../lib/auth";
 import { resolveWorkspace } from "../../../../lib/workspace";
 import { getPool } from "../../../../lib/db";
 import { readConnectState, connectRedirectUri } from "../../../../lib/oauth-state";
+import { appOrigin } from "../../../../lib/origin";
 
 export const dynamic = "force-dynamic";
-
-async function originOf(): Promise<string> {
-  const configured = process.env.APP_ORIGIN;
-  if (configured) return configured.replace(/\/+$/, "");
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
 
 function back(origin: string, note: string, extra?: string): NextResponse {
   const q = new URLSearchParams({ connect: note });
@@ -32,7 +22,15 @@ function back(origin: string, note: string, extra?: string): NextResponse {
 }
 
 export async function GET(req: Request): Promise<NextResponse> {
-  const origin = await originOf();
+  let origin: string;
+  try {
+    origin = await appOrigin();
+  } catch (err) {
+    // The code exchange must quote the same redirect_uri the consent step
+    // used; without APP_ORIGIN in production there is nothing to quote.
+    return NextResponse.json(
+      { error: String(err instanceof Error ? err.message : err) }, { status: 500 });
+  }
   const url = new URL(req.url);
 
   // The operator pressed Cancel, or Google refused.
@@ -43,6 +41,8 @@ export async function GET(req: Request): Promise<NextResponse> {
   if (!user) return NextResponse.redirect(`${origin}/signin`, { status: 303 });
   const ws = await resolveWorkspace(user);
   if (!ws) return NextResponse.redirect(`${origin}/signin?denied=1`, { status: 303 });
+  // The same gate as the connect step: a grant a member obtained is not stored.
+  if (ws.role !== "owner") return back(origin, "owner-only");
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
@@ -91,6 +91,19 @@ export async function GET(req: Request): Promise<NextResponse> {
     return back(origin, "wrong-account", granted);
   }
 
+  // At rest, sealed. Production without MAILBOX_TOKEN_KEY refuses right here
+  // — the grant is discarded and the note names the variable — rather than
+  // write a standing credential to the database in the clear.
+  let refreshToken: string;
+  let accessToken: string;
+  try {
+    refreshToken = sealToken(grant.refreshToken);
+    accessToken = sealToken(grant.accessToken);
+  } catch (err) {
+    return back(origin, "no-token-key",
+      String(err instanceof Error ? err.message : err).slice(0, 200));
+  }
+
   await pool.query(
     `insert into public.mailbox_credentials
        (mailbox_id, workspace_id, refresh_token, access_token,
@@ -107,7 +120,7 @@ export async function GET(req: Request): Promise<NextResponse> {
             -- should not re-read its whole inbox.
             last_refresh_error = null,
             updated_at = now()`,
-    [state.mailboxId, ws.id, grant.refreshToken, grant.accessToken,
+    [state.mailboxId, ws.id, refreshToken, accessToken,
      new Date(grant.expiresAt), grant.scopes],
   );
   await pool.query(

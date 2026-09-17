@@ -16,10 +16,14 @@
  *  errors named, never a silent 200. */
 
 import { NextResponse } from "next/server";
+import type { Pool } from "pg";
 import { drainOutbox } from "@vantrow/connect";
 import {
-  RefreshTokenSource, GmailProvider, releaseDue, sweepOnce, syncMailboxInbound,
+  RefreshTokenSource, GmailProvider, canStoreToken, isEncryptedToken,
+  loadTokenKey, openToken, releaseDue, sealToken, sweepOnce,
+  syncMailboxInbound,
 } from "@vantrow/engine";
+import { authorizedBearer } from "../../../../lib/bearer";
 import { getPool } from "../../../../lib/db";
 
 export const dynamic = "force-dynamic";
@@ -31,15 +35,26 @@ interface MailboxRow {
   refresh_token: string;
 }
 
-function authorized(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false; // unset means locked, never open
-  const header = req.headers.get("authorization") ?? "";
-  return header === `Bearer ${secret}`;
+/** The refresh token in usable form. A token stored before MAILBOX_TOKEN_KEY
+ *  existed is re-sealed on this first read under the key, so setting the key
+ *  is the whole migration — no reconnect, no SQL. A token this deployment
+ *  cannot open (key missing or wrong) throws, and the caller records that
+ *  against the mailbox where an operator will see it. */
+async function refreshTokenFor(pool: Pool, mb: MailboxRow): Promise<string> {
+  const plain = openToken(mb.refresh_token);
+  if (!isEncryptedToken(mb.refresh_token) && loadTokenKey() !== null) {
+    await pool.query(
+      `update public.mailbox_credentials
+          set refresh_token = $2, updated_at = now()
+        where mailbox_id = $1 and refresh_token = $3`,
+      [mb.id, sealToken(plain), mb.refresh_token]);
+  }
+  return plain;
 }
 
 export async function GET(req: Request): Promise<NextResponse> {
-  if (!authorized(req)) {
+  // Unset means locked, never open; the compare is constant-time.
+  if (!authorizedBearer(req, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -62,14 +77,17 @@ export async function GET(req: Request): Promise<NextResponse> {
       try {
         const tokenSource = new RefreshTokenSource(
           { clientId, clientSecret },
-          mb.refresh_token,
+          await refreshTokenFor(pool, mb),
           async (accessToken, expiresAt) => {
+            // Short-lived and read by nothing yet: without a key in
+            // production it is simply not written, never in the clear.
+            const stored = canStoreToken() ? sealToken(accessToken) : null;
             await pool.query(
               `update public.mailbox_credentials
                   set access_token = $2, access_token_expires_at = $3,
                       last_refresh_error = null, updated_at = now()
                 where mailbox_id = $1`,
-              [mb.id, accessToken, expiresAt]);
+              [mb.id, stored, expiresAt]);
           },
         );
         inbound[mb.email] = await syncMailboxInbound(pool, mb.id, tokenSource);
@@ -111,11 +129,21 @@ export async function GET(req: Request): Promise<NextResponse> {
       );
       // R10: one provider per connected mailbox; the sweep resolves the one
       // that owns each enrollment's sending identity. A mailbox with no
-      // credentials simply has no provider, and its work defers.
-      const providers = new Map(rows.map((mb) => [mb.id, new GmailProvider({
-        tokenSource: new RefreshTokenSource({ clientId, clientSecret }, mb.refresh_token),
-        senderDomain: mb.email.split("@")[1] ?? "getvantrow.com",
-      })]));
+      // credentials — or a token this deployment cannot open — simply has no
+      // provider, and its work defers; the inbound job above has already
+      // named the broken one.
+      const providers = new Map<string, GmailProvider>();
+      for (const mb of rows) {
+        try {
+          providers.set(mb.id, new GmailProvider({
+            tokenSource: new RefreshTokenSource(
+              { clientId, clientSecret }, await refreshTokenFor(pool, mb)),
+            senderDomain: mb.email.split("@")[1] ?? "getvantrow.com",
+          }));
+        } catch (err) {
+          errors.push(`sweep(${mb.email}): ${String(err).slice(0, 300)}`);
+        }
+      }
       report.sweep = await sweepOnce(pool, (mailboxId) => providers.get(mailboxId));
     } else {
       report.sweep = "skipped: Gmail credentials not configured";

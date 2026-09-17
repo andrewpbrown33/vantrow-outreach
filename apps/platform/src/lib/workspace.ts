@@ -33,11 +33,22 @@ import { redirect } from "next/navigation";
 import { currentUser, type SessionUser } from "./auth";
 import { getPool } from "./db";
 
+export type Role = "owner" | "member";
+
 export interface Session {
   user: SessionUser;
   workspaceId: string;
   workspaceName: string;
+  role: Role;
 }
+
+export interface Membership {
+  id: string;
+  name: string;
+  role: Role;
+}
+
+export const OWNER_ONLY = "Only a workspace owner can do that.";
 
 function allowedEmails(): string[] {
   return (process.env.NUDGEROW_ALLOWED_EMAILS ?? "")
@@ -66,11 +77,11 @@ export async function mayRequestLink(email: string): Promise<boolean> {
   return (rowCount ?? 0) > 0;
 }
 
-export async function resolveWorkspace(user: SessionUser): Promise<{ id: string; name: string } | null> {
+export async function resolveWorkspace(user: SessionUser): Promise<Membership | null> {
   const pool = getPool();
 
-  const member = await pool.query<{ id: string; name: string }>(
-    `select w.id, w.name
+  const member = await pool.query<{ id: string; name: string; role: string }>(
+    `select w.id, w.name, m.role
        from public.workspace_members m
        join public.workspaces w on w.id = m.workspace_id
       where m.user_id = $1
@@ -78,7 +89,10 @@ export async function resolveWorkspace(user: SessionUser): Promise<{ id: string;
       limit 1`,
     [user.userId],
   );
-  if (member.rows[0]) return member.rows[0];
+  if (member.rows[0]) {
+    const m = member.rows[0];
+    return { id: m.id, name: m.name, role: m.role === "owner" ? "owner" : "member" };
+  }
 
   // An invitation someone wrote. This is the ONLY route into a workspace that
   // already has members, and it carries the role the inviter chose.
@@ -101,7 +115,7 @@ export async function resolveWorkspace(user: SessionUser): Promise<{ id: string;
         where id = $1 and accepted_at is null`,
       [inv.invite, user.userId],
     );
-    return { id: inv.id, name: inv.name };
+    return { id: inv.id, name: inv.name, role: inv.role === "owner" ? "owner" : "member" };
   }
 
   // The bootstrap keys below open a workspace that has NO members — and only
@@ -140,7 +154,7 @@ export async function resolveWorkspace(user: SessionUser): Promise<{ id: string;
   if (!target) return null;
 
   await join(pool, target.id, user, "owner", how);
-  return target;
+  return { ...target, role: "owner" };
 }
 
 type JoinRoute = "invite" | "mailbox" | "allowlist";
@@ -175,5 +189,18 @@ export async function requireSession(): Promise<Session> {
   if (!user) redirect("/signin");
   const ws = await resolveWorkspace(user);
   if (!ws) redirect("/signin?denied=1");
-  return { user, workspaceId: ws.id, workspaceName: ws.name };
+  return { user, workspaceId: ws.id, workspaceName: ws.name, role: ws.role };
+}
+
+/** Guard for the actions that change what goes out or who gets in. A member
+ *  reads everything and edits prospects and templates; starting a sequence,
+ *  approving a draft, lifting a hold, connecting a mailbox and changing the
+ *  team are the owner's. A member who reaches one lands back on `backTo`
+ *  and is told why, rather than shown an error screen. */
+export async function requireOwner(backTo: string): Promise<Session> {
+  const session = await requireSession();
+  if (session.role !== "owner") {
+    redirect(`${backTo}?error=${encodeURIComponent(OWNER_ONLY)}`);
+  }
+  return session;
 }

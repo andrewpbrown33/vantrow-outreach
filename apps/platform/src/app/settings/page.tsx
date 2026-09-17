@@ -35,9 +35,12 @@ const CONNECT_NOTE: Record<string, (detail: string | null) => string> = {
     "every box ticked — sending needs all of them.",
   "not-configured": () =>
     "This server has no Google client configured yet (runbook 07). Nothing was changed.",
+  "no-token-key": (d) =>
+    `Nothing was saved. ${d ?? "MAILBOX_TOKEN_KEY is not set on this server (runbook 08 §2)."}`,
   "bad-state": () =>
     "That connect link expired or did not match this browser. Press Connect to start again.",
   "unknown-mailbox": () => "That mailbox is not in this workspace.",
+  "owner-only": () => "Only a workspace owner can connect a mailbox. Nothing was changed.",
   "no-mailbox": () => "No mailbox was named.",
   "profile-unreadable": () =>
     "Google would not say which account consented, so nothing was saved. Try again.",
@@ -66,6 +69,8 @@ export default async function SettingsPage({
   const note = outcome ? CONNECT_NOTE[outcome]?.(one(sp.detail)) ?? null : null;
   const invited = one(sp.invite);
   const inviteNote = invited ? INVITE_NOTE[invited]?.(one(sp.detail)) ?? null : null;
+  // Where an action sends a member who reached an owner-only control.
+  const refused = one(sp.error);
 
   return (
     <>
@@ -79,6 +84,11 @@ export default async function SettingsPage({
         {note ? (
           <div className="mt-3 max-w-2xl">
             <Notice tone={outcome === "connected" ? "good" : "bad"}>{note}</Notice>
+          </div>
+        ) : null}
+        {refused ? (
+          <div className="mt-3 max-w-2xl">
+            <Notice tone="bad">{refused}</Notice>
           </div>
         ) : null}
 

@@ -66,6 +66,14 @@ function inbound(over: Partial<NormalizedInbound>): NormalizedInbound {
   };
 }
 
+/** Gmail's Authentication-Results for a message the prospect's domain really
+ *  sent. Suppressing writes need this; a forged From gets nothing. */
+const VOUCHED = {
+  "authentication-results":
+    "mx.google.com; dkim=pass header.i=@example.com header.s=g header.b=x; " +
+    "spf=pass smtp.mailfrom=bounce@example.com; dmarc=pass header.from=example.com",
+};
+
 const enrollment = async (id: string) =>
   (await pool!.query("select * from enrollments where id = $1", [id])).rows[0];
 const eventTypes = async (ws: string) =>
@@ -162,7 +170,7 @@ describe.skipIf(!dbUrl)("inbound behaviors (real Postgres)", () => {
   it("a reply that asks off the list suppresses org-wide, state stays replied", async () => {
     const s = await seed();
     const r = await processInbound(pool!, s.mailboxId, inbound({
-      fromEmail: s.prospectEmail, bodyText: "No thanks.",
+      fromEmail: s.prospectEmail, bodyText: "No thanks.", headers: VOUCHED,
     }));
     expect(r.classification).toBe("reply");
     const e = await enrollment(s.enrollmentId);
@@ -181,7 +189,7 @@ describe.skipIf(!dbUrl)("inbound behaviors (real Postgres)", () => {
   it("a standalone unsubscribe email suppresses and cancels the live enrollment", async () => {
     const s = await seed();
     const r = await processInbound(pool!, s.mailboxId, inbound({
-      fromEmail: s.prospectEmail, subject: "unsubscribe", bodyText: "",
+      fromEmail: s.prospectEmail, subject: "unsubscribe", bodyText: "", headers: VOUCHED,
     }));
     expect(r.classification).toBe("unsubscribe");
     const e = await enrollment(s.enrollmentId);
@@ -194,6 +202,115 @@ describe.skipIf(!dbUrl)("inbound behaviors (real Postgres)", () => {
       [s.ws, s.prospectEmail]);
     expect(sup.rows).toEqual([{ reason: "unsubscribe" }]);
     expect(await eventTypes(s.ws)).toContain("inbound.unsubscribe");
+  });
+
+  it("a claimed unsubscribe nobody vouches for is recorded as unverified and suppresses nobody", async () => {
+    const s = await seed();
+    // The prospect's address in From, and Gmail saying the domain did NOT
+    // send it: DKIM for someone else, SPF not passing, DMARC failing.
+    const forged = {
+      "authentication-results":
+        "mx.google.com; dkim=pass header.i=@bulk-sender.example; " +
+        `spf=softfail smtp.mailfrom=${s.prospectEmail}; dmarc=fail header.from=example.com`,
+    };
+    const msg = inbound({
+      fromEmail: s.prospectEmail, subject: "unsubscribe", bodyText: "", headers: forged,
+    });
+    const r = await processInbound(pool!, s.mailboxId, msg);
+    expect(r).toMatchObject({ classification: "unverified", enrollmentId: s.enrollmentId });
+
+    // Nothing acted on: the enrollment runs, no suppression row, no opt-out.
+    expect((await enrollment(s.enrollmentId)).state).toBe("active");
+    expect((await pool!.query(
+      "select 1 from suppression_entries where workspace_id = $1", [s.ws])).rowCount).toBe(0);
+    expect((await pool!.query(
+      "select opted_out_at from prospects where id = $1", [s.prospectId])).rows[0].opted_out_at)
+      .toBeNull();
+    // But on the record, in full, for a human to look at.
+    const types = await eventTypes(s.ws);
+    expect(types).toContain("inbound.unverified");
+    expect(types).not.toContain("inbound.unsubscribe");
+    const row = (await pool!.query(
+      "select classification, from_email, headers from inbound_messages where gmail_message_id = $1",
+      [msg.gmailMessageId])).rows[0];
+    expect(row.classification).toBe("unverified");
+    expect(row.from_email).toBe(s.prospectEmail);
+    expect(row.headers["authentication-results"]).toContain("dmarc=fail");
+
+    // Without any Authentication-Results at all, the same answer.
+    const bare = await processInbound(pool!, s.mailboxId, inbound({
+      fromEmail: s.prospectEmail, subject: "unsubscribe", bodyText: "",
+    }));
+    expect(bare.classification).toBe("unverified");
+    expect((await enrollment(s.enrollmentId)).state).toBe("active");
+  });
+
+  it("an opt-out reply nobody vouches for still stops the sequence (I2) but suppresses nobody", async () => {
+    const s = await seed();
+    const r = await processInbound(pool!, s.mailboxId, inbound({
+      fromEmail: s.prospectEmail, bodyText: "Please remove me from your list.",
+    }));
+    expect(r.classification).toBe("reply");
+    // Stopping is the safe direction: it happened.
+    expect((await enrollment(s.enrollmentId)).state).toBe("replied");
+    // The org-wide part did not.
+    expect((await pool!.query(
+      "select 1 from suppression_entries where workspace_id = $1", [s.ws])).rowCount).toBe(0);
+    const types = await eventTypes(s.ws);
+    expect(types).toContain("inbound.unverified");
+    expect(types).not.toContain("prospect.opted_out");
+  });
+
+  it("keeps only an id for mail the engine does not act on", async () => {
+    const s = await seed();
+    const msg = inbound({
+      fromEmail: "colleague@somewhere.example",
+      subject: "Lunch on Thursday?",
+      snippet: "Are you free around noon",
+      headers: {
+        "from": "Colleague <colleague@somewhere.example>",
+        "received": "from mx.somewhere.example by mx.google.com",
+        "subject": "Lunch on Thursday?",
+      },
+    });
+    const res = await processInbound(pool!, s.mailboxId, msg);
+    expect(res).toMatchObject({ classification: "other", enrollmentId: null });
+
+    // The row exists — that is what makes a re-delivery inert — and holds
+    // nothing about the sender or the mail.
+    const row = (await pool!.query(
+      `select from_email, subject, snippet, headers, received_at, enrollment_id
+         from inbound_messages where mailbox_id = $1 and gmail_message_id = $2`,
+      [s.mailboxId, msg.gmailMessageId])).rows[0];
+    expect(row).toEqual({
+      from_email: null, subject: null, snippet: null, headers: {},
+      received_at: null, enrollment_id: null,
+    });
+    expect((await processInbound(pool!, s.mailboxId, msg)).duplicate).toBe(true);
+  });
+
+  it("stores only the headers the classifier reads on mail it does act on", async () => {
+    const s = await seed();
+    const msg = inbound({
+      fromEmail: s.prospectEmail,
+      headers: {
+        "from": `Derek <${s.prospectEmail}>`,
+        "in-reply-to": `<touch-${s.enrollmentId}-1@getvantrow.com>`,
+        "authentication-results": "mx.google.com; dkim=pass header.i=@example.com",
+        "received": "from mx.example.com by mx.google.com",
+        "x-google-smtp-source": "AGHT+IF/opaque",
+        "x-mailer": "Apple Mail",
+      },
+    });
+    expect((await processInbound(pool!, s.mailboxId, msg)).classification).toBe("reply");
+    const row = (await pool!.query(
+      `select from_email, subject, headers from inbound_messages
+        where mailbox_id = $1 and gmail_message_id = $2`,
+      [s.mailboxId, msg.gmailMessageId])).rows[0];
+    expect(row.from_email).toBe(s.prospectEmail);
+    expect(row.subject).toBe("Re: a quiet question");
+    expect(Object.keys(row.headers).sort())
+      .toEqual(["authentication-results", "from", "in-reply-to"]);
   });
 
   it("records soft bounces without halting the enrollment", async () => {

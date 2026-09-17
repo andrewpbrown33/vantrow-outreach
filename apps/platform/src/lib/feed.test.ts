@@ -82,6 +82,23 @@ describe("buildFeed", () => {
     expect(items[1].detail).toContain("5.1.1");
   });
 
+  it("names each pause reason, not just out-of-office", () => {
+    const verbs = buildFeed([
+      row({ id: "1", type: "enrollment.paused", payload: { reason: "ooo", resume_at: "2026-08-12T09:00:00Z" } }),
+      row({ id: "2", type: "enrollment.paused", payload: { reason: "sequence_not_active" } }),
+      row({ id: "3", type: "enrollment.paused", payload: { reason: "missing_template" } }),
+      row({ id: "4", type: "enrollment.paused", payload: { reason: "missing_thread_subject" } }),
+      row({ id: "5", type: "enrollment.paused", payload: {} }),
+    ]).map((i) => i.verb);
+    expect(verbs).toEqual([
+      "paused — out of office",
+      "paused — the sequence is not running",
+      "paused — the step has no template",
+      "paused — the reply step has no thread subject",
+      "paused",
+    ]);
+  });
+
   it("uses no emoji — only typographic glyphs (design law rule 3)", () => {
     const items = buildFeed([
       row({ id: "1", type: "inbound.reply" }),
