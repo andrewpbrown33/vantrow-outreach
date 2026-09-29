@@ -23,18 +23,22 @@ protects the Vantrow follow-up that goes to non-responders later.
 DMARC (`p=none`, reporting to `andrew@eaverow.com`). Authentication is correct; send
 reputation is what the 5/day ramp is building.
 
-> ## ⚠ The site does not say this yet
+> ## ⚠ Gated on the Eaverow site catching up
 >
-> These emails quote **$199/month flat, $99/month founding**. As of 29 Sep,
-> eaverow.com sells **"Software you finish paying for" — $18,000 once, paid down at
-> $300/month**, founding cohort $9,000 at $150/month, and the family plan records
-> those as decided. A monthly subscription is the opposite claim to "software you
-> finish paying for."
+> These emails quote **$199/month flat, $99/month founding**. Andrew decided on
+> 29 Sep to move Eaverow from the one-price payoff model to a **perpetual
+> subscription** at those numbers, superseding the $18,000-once / $300-a-month
+> structure decided 2026-08-06.
 >
-> **Do not start this campaign until eaverow.com and the family plan's pricing row
-> match the numbers above.** A prospect who opens email 1, believes it, and lands on
-> a page selling an $18,000 one-time build is a prospect lost on the strongest
-> moment the sequence has.
+> That change is in flight in `vantrow-acculynx`, and it is not a copy edit: it
+> retires the "Software you finish paying for" promise, the locked sticker and
+> `paid_off` lifecycle in migration 0011, the Stripe schedules that cancel the
+> subscription once a balance clears, and the layaway-not-credit legal structuring
+> in `docs/plan/one-price.md`.
+>
+> **Do not start this campaign until eaverow.com serves $199/$99.** A prospect who
+> opens email 1, believes it, and lands on a page selling an $18,000 one-time build
+> is a prospect lost at the strongest moment the sequence has.
 
 ---
 
@@ -92,11 +96,13 @@ reputation is what the 5/day ramp is building.
 
 > {{firstName}} — one thing I should have said earlier, because it has an end.
 >
-> Companies coming on now pay $99 a month instead of $199, and keep that rate for good. It's a limited group, and it's limited for a real reason rather than a fake one: early customers get something I can't offer everyone later, which is that their requests actually get built. The roadmap today is mostly one roofing company's list. I'd rather it were several.
+> Companies coming on now pay $99 a month instead of $199, and keep that rate for good. There are fifty founding places, and forty of them are held for roofing companies I write to directly — which is the reason you're reading this at all.
+>
+> It's limited for a real reason rather than a manufactured one: early customers get something I can't offer everyone later, which is that their requests actually get built. The roadmap today is mostly one roofing company's list. I'd rather it were several.
 >
 > So if there's a piece of running {{company}} that no software has ever handled properly — the thing still living on a whiteboard, in a spreadsheet, or in one person's head — this is the window where it gets built in a few weeks instead of never.
 >
-> Worth a conversation while the founding rate is open?
+> Worth a conversation while a founding place is open?
 
 ### Step 6 — day 30 — same thread — *closing the loop*
 
@@ -141,10 +147,12 @@ required on any step that opens a thread and omitted on one that replies.
 
 ### Where a real number would make this stronger
 
-- **Step 5 says "a limited group" without saying how many.** The site already runs a
-  live allocation counter — it showed ten slots under the old offer. A specific
-  number converts better than "limited," and the machinery exists. Tell me the count
-  and I'll put it in.
+- **The cohort numbers in step 5 are real, not decorative.** `packages/growth/src/pricing.ts`
+  in `vantrow-acculynx` sets `foundersCap: 50` and `foundersAllocated: 40`, and its
+  own comment says the forty are "held for the direct outreach campaign (the
+  several-hundred-company roofing list)" — this campaign. The copy claims places
+  exist without promising anyone a specific one, which is the honest form: 151 emails
+  against 40 held places only oversells at a conversion rate we will not see.
 - **Step 1** — if the first roofing company will be named, "it runs {Company}'s business now" beats "a roofing company." A named reference is the biggest single lift available here.
 - **Step 2** — one specific thing Eaverow does that AccuLynx does badly, named concretely, is worth more than the whole feature list.
 
