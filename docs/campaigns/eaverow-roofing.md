@@ -13,6 +13,7 @@ Structure, cadence, threading and variables are decided; the prose is a starting
 | Window | Tue–Fri, 08:30–11:30, each prospect's timezone, US holidays skipped |
 | Threading | steps 1–3 in one thread; **step 4 opens a second thread**; 5–6 reply under it |
 | Variables | `{{firstName}}`, `{{company}}` — both present for all 151, so nothing blocks |
+| Price quoted | **$199/month flat, $99/month founding rate** (Andrew, 29 Sep) |
 
 Every send carries `List-Unsubscribe`; a reply — including "no thanks" — stops the
 sequence and suppresses the address across the workspace, which means it also
@@ -22,19 +23,32 @@ protects the Vantrow follow-up that goes to non-responders later.
 DMARC (`p=none`, reporting to `andrew@eaverow.com`). Authentication is correct; send
 reputation is what the 5/day ramp is building.
 
+> ## ⚠ The site does not say this yet
+>
+> These emails quote **$199/month flat, $99/month founding**. As of 29 Sep,
+> eaverow.com sells **"Software you finish paying for" — $18,000 once, paid down at
+> $300/month**, founding cohort $9,000 at $150/month, and the family plan records
+> those as decided. A monthly subscription is the opposite claim to "software you
+> finish paying for."
+>
+> **Do not start this campaign until eaverow.com and the family plan's pricing row
+> match the numbers above.** A prospect who opens email 1, believes it, and lands on
+> a page selling an $18,000 one-time build is a prospect lost on the strongest
+> moment the sequence has.
+
 ---
 
-## Thread A · the money
+## Thread A · the number
 
-### Step 1 — day 1 — *AccuLynx without the AccuLynx bill*
+### Step 1 — day 1 — *however many people you hire*
 
-> {{firstName}} — Eaverow is roofing software: estimating, job tracking and pipeline in one place. The short version of why it exists is that a roofing company got tired of what they were paying per seat and asked me to build the parts they actually used.
+> {{firstName}} — Eaverow is roofing software: estimating, job tracking and pipeline in one place. The part worth thirty seconds is how it's priced.
 >
-> So I did. It's running their business now, and it's open to other roofing companies. Same core workflow, a fraction of the price.
+> $199 a month for {{company}}. Not per seat, not per user, not per job — one number, however many people you hire. Add three crews in June and it's still $199.
 >
-> We're early and I'm not going to pretend otherwise — that's most of the appeal. You'd pay a lot less, and you'd have real say in what gets built next.
+> It exists because a roofing company got tired of paying per seat for software half their people barely opened, and asked me to build the parts they actually used. It runs their business now, and it's open to other roofing companies.
 >
-> How does your availability look this week or early next to take a quick look?
+> How does your availability look this week or early next to take a look?
 >
 > All the best,
 > Andrew
@@ -46,7 +60,7 @@ reputation is what the 5/day ramp is building.
 >
 > What's in it: estimates that become jobs without retyping, a board that shows where every roof actually is, a pipeline you can read from your phone, and the photo and document trail that keeps a supplement from falling apart six weeks later.
 >
-> What's not in it: the modules nobody at {{company}} would ever open. That's deliberate, and it's most of why the price is what it is.
+> What's not in it: the modules nobody at {{company}} would ever open. That's deliberate, and it's most of why one flat number works.
 >
 > Worth fifteen minutes? I'll share my screen and you can tell me what's missing.
 
@@ -70,19 +84,19 @@ reputation is what the 5/day ramp is building.
 >
 > Most roofing software is priced per user per month. That's fine in January. By June you've added crews and a couple of office people, and the bill scales with your headcount whether or not those seats get used the same way.
 >
-> I'd genuinely like to know what {{company}} pays for software, all in, and how many seats that covers. Partly because I want to know how bad it's gotten across the industry, and partly because if it's the number I suspect, Eaverow will look obvious without me arguing for it.
+> Run your own number: what you pay per seat, times everyone who needs a login in your busiest month, times sixty months. For a twelve-person shop on AccuLynx that lands somewhere between $118,800 and $216,000 over five years. Eaverow across the same five years is $11,940, because the number doesn't move when you hire.
 >
-> Reply with a number if you're willing. Nothing attached to it.
+> I'd like to know what {{company}} actually pays, all in, and how many seats that covers. Reply with a number if you're willing — nothing attached to it.
 
-### Step 5 — day 22 — same thread — *the offer I should have led with*
+### Step 5 — day 22 — same thread — *the founding rate, and why it ends*
 
-> {{firstName}} — being early is the actual pitch, so let me make it properly.
+> {{firstName}} — one thing I should have said earlier, because it has an end.
 >
-> The companies that come on now get their requests built rather than filed. The roadmap today is mostly one roofing company's list, and I'd rather it were several — that's how this gets good.
+> Companies coming on now pay $99 a month instead of $199, and keep that rate for good. It's a limited group, and it's limited for a real reason rather than a fake one: early customers get something I can't offer everyone later, which is that their requests actually get built. The roadmap today is mostly one roofing company's list. I'd rather it were several.
 >
-> So: if there's a piece of running {{company}} that no software has ever handled properly — the thing still living on a whiteboard, in a spreadsheet, or in one person's head — that's the sort of thing that gets built in a few weeks here instead of never.
+> So if there's a piece of running {{company}} that no software has ever handled properly — the thing still living on a whiteboard, in a spreadsheet, or in one person's head — this is the window where it gets built in a few weeks instead of never.
 >
-> Worth a conversation?
+> Worth a conversation while the founding rate is open?
 
 ### Step 6 — day 30 — same thread — *closing the loop*
 
@@ -116,14 +130,23 @@ required on any step that opens a thread and omitted on one that replies.
 - Steps 2, 3, 5, 6 have no subject of their own by design — the engine writes `Re: <thread root>` at send time so Gmail keeps the conversation.
 - The postal address is supplied with `--address` at seed time, not edited in here.
 
+### The arithmetic, so it can be re-checked rather than trusted
+
+- $199 × 60 months = **$11,940**, the five-year figure in step 4.
+- $99 × 60 = $5,940, if the founding rate is ever quoted over five years.
+- The AccuLynx range ($118,800–$216,000 over five years for a twelve-person shop)
+  is **eaverow.com's own published comparison**, not a number invented here. It
+  implies roughly $165–$300 per seat per month. If that range changes on the site,
+  change it here in the same edit.
+
 ### Where a real number would make this stronger
 
-Nothing below is invented in the copy above, deliberately — but Andrew knows
-things I don't, and each of these would sharpen an email:
-
-- **Step 1** — if the client will be named, "it's running [Company]'s business now" beats "a roofing company." A named reference is the single biggest lift available here.
+- **Step 5 says "a limited group" without saying how many.** The site already runs a
+  live allocation counter — it showed ten slots under the old offer. A specific
+  number converts better than "limited," and the machinery exists. Tell me the count
+  and I'll put it in.
+- **Step 1** — if the first roofing company will be named, "it runs {Company}'s business now" beats "a roofing company." A named reference is the biggest single lift available here.
 - **Step 2** — one specific thing Eaverow does that AccuLynx does badly, named concretely, is worth more than the whole feature list.
-- **Step 4** — if Eaverow's own per-seat price can be stated, stating it converts better than withholding it. The email works either way.
 
 ### Note for the Vantrow follow-up
 
