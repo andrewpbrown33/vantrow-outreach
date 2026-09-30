@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Nudgerow mark">
   <!-- Nudgerow mark on dark grounds (the app's dark scheme, #16151A).
-       Law: ink #4A4952 cannot draw lines on dark (2.4:1) — the arcs go
+       Law: the brand deep, damson #403243, cannot draw lines on dark
+       (1.5:1; ink #4A4952 was 2.0:1 before the D9 re-theme) — the arcs go
        clarity yellow #F3DD6D, which IS the brand's dark-scheme primary
        (12.4:1 on #16151A), so dark stays two colors: dark-primary + camel.
        The camel ball stays camel. Small-cut weights. -->

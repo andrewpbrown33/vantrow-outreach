@@ -111,17 +111,37 @@ export const brand: BrandConfig = {
   parentName: "Vantrow",
   parentUrl: "https://getvantrow.com",
   colors: {
-    // "Clarity Ink" — palette F, chosen by Andrew 2026-08-07 (decision log;
-    // specimens in docs/brand/palette-preview.html). Violet-gray ink on
-    // yellow-cast cream; the clarity yellow is the signature highlight and
-    // takes the wordmark after dark.
+    // Damson over Clarity Ink's violet-gray (Andrew, 2026-09-30, family-plan
+    // D9): the structural colors now come from the family register so this app
+    // sits beside its siblings on the getvantrow.com console, while the
+    // clarity yellow accent — the part of palette F Andrew kept — stays.
+    //
+    // Sourced, not picked. getvantrow.com BRANDBOOK §6 gives Nudgerow three
+    // tokens: damson #403243 (deep/primary), newsprint #CFCABE (thread), soft
+    // #FAFAF7 (ground). Damson is engineered to the family OKLCH register
+    // (L 0.340 · C 0.035, H 320) so no sibling reads louder than another.
+    //
+    // The two values the book does NOT give, derived with the arithmetic
+    // recorded so it can be checked rather than trusted:
+    //   primaryDark #1C151D — Eaverow's proportional method (decision log
+    //     2026-08-25): the old #4A4952 → #201F24 channel ratios (0.4324,
+    //     0.4247, 0.4390) applied to damson. 17.10:1 on soft.
+    //   muted #6E6C77 — the old #7E7D81 measured 3.91:1 on this ground,
+    //     failing AA for body text. This is an accessibility fix riding
+    //     along, not a brand change: 4.93:1, and it is the same value the
+    //     state palette already uses for `draft`.
+    //
+    // Contrast on the new ground, all computed: damson 11.44:1 · primaryDark
+    // 17.10:1 · foreground 15.65:1 · muted 4.93:1 · accent 8.76:1 against
+    // damson (ink on accent 11.98:1). The dark scheme is untouched — clarity
+    // yellow is 13.30:1 on #16151A and remains the after-dark signature.
     light: {
-      primary: "#4A4952",
-      primaryDark: "#201F24",
+      primary: "#403243",
+      primaryDark: "#1C151D",
       accent: "#F3DD6D",
-      background: "#FDFBF2",
+      background: "#FAFAF7",
       foreground: "#201F24",
-      muted: "#7E7D81",
+      muted: "#6E6C77",
     },
     dark: {
       primary: "#F3DD6D",

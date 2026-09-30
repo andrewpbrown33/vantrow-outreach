@@ -5,11 +5,13 @@
        (round-2 candidate G, direction flipped: ball LEFT, arcs signal forward).
        Construction law: 100-unit grid, 80-unit live area; ball cx34 cy50 r13
        NEVER moves and is ALWAYS family camel #B8956A (fills only, never
-       strokes); arcs are brand ink #4A4952, stroke 7, round caps, radii
-       22/32/42 centered on the ball, spans ±50°/±35°/±25°.
+       strokes); arcs are the brand deep, damson #403243, stroke 7, round
+       caps, radii 22/32/42 centered on the ball, spans ±50°/±35°/±25°.
+       Arcs re-cut from ink #4A4952 to damson 2026-09-30 (D9): 11.44:1 on
+       the soft ground, up from ink's 8.49:1 on the old cream.
        Keep in sync with mark-small.svg / mark-dark.svg / icon.svg. -->
-  <path d="M48.1 33.1 A22 22 0 0 1 48.1 66.9" fill="none" stroke="#4A4952" stroke-width="7" stroke-linecap="round"/>
-  <path d="M60.2 31.6 A32 32 0 0 1 60.2 68.4" fill="none" stroke="#4A4952" stroke-width="7" stroke-linecap="round"/>
-  <path d="M72.1 32.2 A42 42 0 0 1 72.1 67.8" fill="none" stroke="#4A4952" stroke-width="7" stroke-linecap="round"/>
+  <path d="M48.1 33.1 A22 22 0 0 1 48.1 66.9" fill="none" stroke="#403243" stroke-width="7" stroke-linecap="round"/>
+  <path d="M60.2 31.6 A32 32 0 0 1 60.2 68.4" fill="none" stroke="#403243" stroke-width="7" stroke-linecap="round"/>
+  <path d="M72.1 32.2 A42 42 0 0 1 72.1 67.8" fill="none" stroke="#403243" stroke-width="7" stroke-linecap="round"/>
   <circle cx="34" cy="50" r="13" fill="#B8956A"/>
 </svg>
