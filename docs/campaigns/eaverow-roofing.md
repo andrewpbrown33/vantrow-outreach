@@ -96,13 +96,13 @@ reputation is what the 5/day ramp is building.
 
 > {{firstName}} — one thing I should have said earlier, because it has an end.
 >
-> Companies coming on now pay $99 a month instead of $199, and keep that rate for good. There are fifty founding places, and forty of them are held for roofing companies I write to directly — which is the reason you're reading this at all.
+> Five companies get the founding rate: $99 a month instead of $199, kept for good. I'm not advertising it — I'm writing to roofing companies directly, so all five will come out of conversations like this one. That's the reason you have this email at all.
 >
 > It's limited for a real reason rather than a manufactured one: early customers get something I can't offer everyone later, which is that their requests actually get built. The roadmap today is mostly one roofing company's list. I'd rather it were several.
 >
 > So if there's a piece of running {{company}} that no software has ever handled properly — the thing still living on a whiteboard, in a spreadsheet, or in one person's head — this is the window where it gets built in a few weeks instead of never.
 >
-> Worth a conversation while a founding place is open?
+> Worth a conversation while one of the five is open?
 
 ### Step 6 — day 30 — same thread — *closing the loop*
 
@@ -147,12 +147,16 @@ required on any step that opens a thread and omitted on one that replies.
 
 ### Where a real number would make this stronger
 
-- **The cohort numbers in step 5 are real, not decorative.** `packages/growth/src/pricing.ts`
-  in `vantrow-acculynx` sets `foundersCap: 50` and `foundersAllocated: 40`, and its
-  own comment says the forty are "held for the direct outreach campaign (the
-  several-hundred-company roofing list)" — this campaign. The copy claims places
-  exist without promising anyone a specific one, which is the honest form: 151 emails
-  against 40 held places only oversells at a conversion rate we will not see.
+- **Five founding places (Andrew, 30 Sep).** Eaverow's `packages/growth/src/pricing.ts`
+  still reads `foundersCap: 50` / `foundersAllocated: 40` — **it has to come down to 5
+  in the same change as the reprice**, or the site's allocation counter and these emails
+  disagree.
+- **The scarcity is now tight enough to be worth watching.** Five places against 151
+  recipients means roughly 146 people are told about something they probably cannot
+  have. That is honest, and tight scarcity does convert — but it can also read as
+  manufactured, and it caps the campaign's best outcome at five founding customers plus
+  whatever converts at the full $199. If the intent is to fill more than five seats from
+  this list, the number should be the one Andrew will actually honour.
 - **Step 1** — if the first roofing company will be named, "it runs {Company}'s business now" beats "a roofing company." A named reference is the biggest single lift available here.
 - **Step 2** — one specific thing Eaverow does that AccuLynx does badly, named concretely, is worth more than the whole feature list.
 
