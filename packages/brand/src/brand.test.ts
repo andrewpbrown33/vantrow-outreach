@@ -42,13 +42,14 @@ describe("brand config shape", () => {
     expectValidPalette(brand.colors.dark);
   });
 
-  it("gives every founder color a semantic job and carries the row thread", () => {
+  it("gives every founder color a semantic job and carries the signal amber", () => {
     expect(brand.semantic.alert).toMatch(HEX);
     expect(brand.semantic.success).toMatch(HEX);
     expect(brand.semantic.info).toMatch(HEX);
     expect(brand.semantic.highlight).toMatch(HEX);
-    // The family thread is the Vantrow camel, by definition.
-    expect(brand.rowThread.toUpperCase()).toBe("#B8956A");
+    // Signal amber: clarity yellow's hue at full saturation, dark enough to
+    // clear 4.5:1 on the soft ground. Replaced the Vantrow camel 2026-10-04.
+    expect(brand.signal.toUpperCase()).toBe("#887200");
   });
 
   it("has non-empty typography, radius, and spacing tokens", () => {
@@ -77,11 +78,11 @@ describe("brandCssVars", () => {
     expect(css).toContain("--brand-spacing-unit:");
   });
 
-  it("emits semantic and row-thread tokens", () => {
+  it("emits semantic and signal tokens", () => {
     const css = brandCssVars(brand);
     expect(css).toContain(`--brand-alert:${brand.semantic.alert};`);
     expect(css).toContain(`--brand-success:${brand.semantic.success};`);
     expect(css).toContain(`--brand-highlight:${brand.semantic.highlight};`);
-    expect(css).toContain(`--brand-row-thread:${brand.rowThread};`);
+    expect(css).toContain(`--brand-signal:${brand.signal};`);
   });
 });

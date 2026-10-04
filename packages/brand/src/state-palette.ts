@@ -3,7 +3,7 @@
  *
  * Two-palette law (ported from Parcelrow, R11): this file is the DATA palette;
  * `brand.config.ts` is the CHROME palette. Brand color never encodes state,
- * the family camel (#B8956A) never encodes data, and states are never
+ * the signal amber (#887200) never encodes data, and states are never
  * color-only — every chip/dot carries its text label; color is redundant.
  *
  * Values are pinned by `scripts/check-state-palette.mjs` (exact-match against
