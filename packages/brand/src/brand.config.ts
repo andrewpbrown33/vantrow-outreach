@@ -69,11 +69,17 @@ export interface BrandConfig {
     highlight: string;
   };
   /**
-   * The Vantrow family thread: the camel that colors the "row" in every
-   * subsidiary wordmark and the endorsement tick (sourced from the parent
-   * mark, getvantrow.com).
+   * Nudgerow's signal amber — the one warm value in the identity. It fills
+   * the mark's ball on every ground and is available for small accents.
+   *
+   * It REPLACES `rowThread`, the Vantrow camel #B8956A (Andrew, 2026-10-04:
+   * the shared camel is no longer a cross-brand thread). That retirement also
+   * fixed a defect the old law was hiding — `assets/README.md` recorded camel
+   * at 2.5:1 on the light ground and waved it through as "display-only".
+   *
+   * Not a graphical token for text on dark: see the arithmetic at the value.
    */
-  rowThread: string;
+  signal: string;
   /** CSS font-family stacks (system-stack placeholders until Gate 2 picks type). */
   typography: {
     sans: string;
@@ -111,17 +117,37 @@ export const brand: BrandConfig = {
   parentName: "Vantrow",
   parentUrl: "https://getvantrow.com",
   colors: {
-    // "Clarity Ink" — palette F, chosen by Andrew 2026-08-07 (decision log;
-    // specimens in docs/brand/palette-preview.html). Violet-gray ink on
-    // yellow-cast cream; the clarity yellow is the signature highlight and
-    // takes the wordmark after dark.
+    // Damson over Clarity Ink's violet-gray (Andrew, 2026-09-30, family-plan
+    // D9): the structural colors now come from the family register so this app
+    // sits beside its siblings on the getvantrow.com console, while the
+    // clarity yellow accent — the part of palette F Andrew kept — stays.
+    //
+    // Sourced, not picked. getvantrow.com BRANDBOOK §6 gives Nudgerow three
+    // tokens: damson #403243 (deep/primary), newsprint #CFCABE (thread), soft
+    // #FAFAF7 (ground). Damson is engineered to the family OKLCH register
+    // (L 0.340 · C 0.035, H 320) so no sibling reads louder than another.
+    //
+    // The two values the book does NOT give, derived with the arithmetic
+    // recorded so it can be checked rather than trusted:
+    //   primaryDark #1C151D — Eaverow's proportional method (decision log
+    //     2026-08-25): the old #4A4952 → #201F24 channel ratios (0.4324,
+    //     0.4247, 0.4390) applied to damson. 17.10:1 on soft.
+    //   muted #6E6C77 — the old #7E7D81 measured 3.91:1 on this ground,
+    //     failing AA for body text. This is an accessibility fix riding
+    //     along, not a brand change: 4.93:1, and it is the same value the
+    //     state palette already uses for `draft`.
+    //
+    // Contrast on the new ground, all computed: damson 11.44:1 · primaryDark
+    // 17.10:1 · foreground 15.65:1 · muted 4.93:1 · accent 8.76:1 against
+    // damson (ink on accent 11.98:1). The dark scheme is untouched — clarity
+    // yellow is 13.30:1 on #16151A and remains the after-dark signature.
     light: {
-      primary: "#4A4952",
-      primaryDark: "#201F24",
+      primary: "#403243",
+      primaryDark: "#1C151D",
       accent: "#F3DD6D",
-      background: "#FDFBF2",
+      background: "#FAFAF7",
       foreground: "#201F24",
-      muted: "#7E7D81",
+      muted: "#6E6C77",
     },
     dark: {
       primary: "#F3DD6D",
@@ -138,7 +164,33 @@ export const brand: BrandConfig = {
     info: "#7DA1C4",
     highlight: "#F3DD6D",
   },
-  rowThread: "#B8956A",
+  // Signal amber: clarity yellow's OWN hue, taken to full saturation and
+  // darkened until it clears the light ground. #F3DD6D is hue 50.1° at
+  // saturation 0.551; holding hue (G/R = 50.1/60 = 0.8350) with B driven to 0
+  // gives this ramp, and #887200 is the first rung that clears 4.5:1 on soft.
+  //
+  // Computed, not recalled — the ball sits on a ground in every cut, so each
+  // cut is checked against ITS ground:
+  //   on soft #FAFAF7          4.51:1  ✓ clears 4.5 text-grade
+  //   on dark #16151A          3.85:1  ✓ clears the 3:1 graphical floor
+  //   vs damson arcs (light)   2.54:1  — aesthetic only
+  //   vs clarity-yellow (dark) 3.45:1  — aesthetic only
+  //
+  // Ball-vs-arc is deliberately NOT a floor here: a logo is exempt from WCAG
+  // 1.4.11, and the real requirement is that each element reads against the
+  // ground, which both do. How they separate differs by cut, and it is worth
+  // being exact about it — on light, amber (hue 50.3°) sits 120.9° from damson
+  // (289.4°), so hue does the work; on dark, amber and clarity yellow are the
+  // SAME hue (50.3° vs 50.1°), so the only separation is value, 3.45:1, plus
+  // the geometric gap. Forcing 3:1 on all four at once is arithmetically
+  // impossible on this hue — checked rung by rung, no value clears all four.
+  //
+  // One value serves every cut, which is what the retired camel law promised
+  // and did not deliver. It cannot ALSO carry text on dark, and that is a
+  // proof, not an oversight: 4.5:1 vs soft needs luminance ≤ 0.1731 while
+  // 4.5:1 vs dark needs ≥ 0.2102 — an empty window. Hence the wordmark is
+  // single-tone and inherits the per-scheme `primary` instead.
+  signal: "#887200",
   typography: {
     sans: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
     display: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
@@ -186,7 +238,7 @@ export function brandCssVars(b: BrandConfig): string {
     `--brand-success:${b.semantic.success};`,
     `--brand-info:${b.semantic.info};`,
     `--brand-highlight:${b.semantic.highlight};`,
-    `--brand-row-thread:${b.rowThread};`,
+    `--brand-signal:${b.signal};`,
   ].join("");
   return [
     ":root{",

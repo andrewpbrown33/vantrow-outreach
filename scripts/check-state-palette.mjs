@@ -2,15 +2,19 @@
 //
 // Asserts packages/brand/src/state-palette.ts matches the last VALIDATED set
 // below AND that every value still clears text-grade contrast on its ground
-// (light ≥4.5:1 on #FDFBF2, dark ≥4.5:1 on #16151A). An edit to the palette
+// (light ≥4.5:1 on #FAFAF7, dark ≥4.5:1 on #16151A). An edit to the palette
 // fails CI until this block is deliberately re-stamped with a new date —
 // drift must be a decision, never an accident.
 
 import { readFileSync } from "node:fs";
 
 const VALIDATED = {
-  stamp: "2026-08-07",
-  groundLight: "#FDFBF2",
+  // Re-stamped 2026-09-30: the GROUND moved cream #FDFBF2 → soft #FAFAF7
+  // with the damson re-theme (D9). No state value changed — all seven were
+  // recomputed against the new ground and still clear 4.5:1; the closest is
+  // `active` at 4.64:1 (was 4.68:1). A deliberate re-stamp, not a drift.
+  stamp: "2026-09-30",
+  groundLight: "#FAFAF7",
   groundDark: "#16151A",
   states: {
     draft: { light: "#6E6C77", dark: "#9B99A3" },

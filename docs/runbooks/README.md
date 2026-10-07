@@ -26,7 +26,8 @@ settings, legal). Policy, learned the hard way in subsidiary #1:
 | 07 | `07-gmail-oauth-dogfood.md` — Google Cloud project, consent screen in test mode, OAuth client, mailbox connect | ✅ Done 2026-08-10 (all three mailboxes live) |
 | 08 | `08-platform-deploy.md` — `nudgerow-platform` Vercel project, env vars, the minute cron | ✅ Done 2026-08-10 (heartbeat returning 200) |
 | 09 | `09-platform-signin.md` — Supabase Auth values, `AUTH_SECRET`, the redirect allow-list | **ACTIVE — the product surfaces are locked until this is done** |
-| 10 | mailbox OAuth verification (Microsoft publisher verification; Google restricted-scope assessment) | Planned — per `docs/plan/long-lead-register.md` |
+| 10 | `10-google-oauth-verification.md` — the Workspace **Trusted** override that ends the weekly reconnect for free, and what Google verification would take when a first client arrives | **ACTIVE — §1 is a 5-minute win, do it in the sitting** |
+| 10b | Microsoft publisher verification | Planned — no Outlook adapter yet |
 | 11 | sending domains + warmup operations | Planned — Phase 3/4 |
 | 12 | Stripe billing activation (build-now-charge-at-GA switch) | Planned — Phase 5 |
 | 13 | dogfood go-live checklist (Gate 7 acceptance) | Planned — Phase 4 |

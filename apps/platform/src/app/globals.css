@@ -7,7 +7,7 @@
  * the family camel never encodes data (two-palette law, R11).
  *
  * Dark is a PLACE, not a theme. The activity feed sits on the night ground
- * (#16151A) inside an otherwise light room (#FDFBF2), exactly as deck v2.1
+ * (#16151A) inside an otherwise light room (#FAFAF7), exactly as deck v2.1
  * draws it. `.on-night` re-points the same --state-* variables at their dark
  * values, so one set of utilities renders correctly on both grounds and no
  * component needs to know which ground it is standing on.
@@ -34,7 +34,7 @@
   --color-line: #DCD6C2;
   --color-panel: #FFFFFF;
   --color-sub: #403F49;
-  --color-camel: #B8956A;
+  --color-signal: #887200;
 
   /* The night pane */
   --color-night: #16151A;

@@ -3,12 +3,12 @@
  *
  * Two-palette law (ported from Parcelrow, R11): this file is the DATA palette;
  * `brand.config.ts` is the CHROME palette. Brand color never encodes state,
- * the family camel (#B8956A) never encodes data, and states are never
+ * the signal amber (#887200) never encodes data, and states are never
  * color-only — every chip/dot carries its text label; color is redundant.
  *
  * Values are pinned by `scripts/check-state-palette.mjs` (exact-match against
  * the last VALIDATED set + computed WCAG ratios: every `light` ≥4.5:1 on the
- * light ground #FDFBF2, every `dark` ≥4.5:1 on the dark ground #16151A) so an
+ * light ground #FAFAF7, every `dark` ≥4.5:1 on the dark ground #16151A) so an
  * edit here fails CI until the check's VALIDATED block is deliberately
  * re-stamped. Washes are decorative backgrounds (ink text sits on them) and
  * are not contrast-pinned.
@@ -21,7 +21,7 @@ export interface StateEncoding {
   key: string;
   /** human label — always rendered next to the color */
   label: string;
-  /** text-grade encoding on the light ground (#FDFBF2) */
+  /** text-grade encoding on the light ground (#FAFAF7) */
   light: string;
   /** text-grade encoding on the dark ground (#16151A) */
   dark: string;

@@ -1,11 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Nudgerow mark">
   <!-- Nudgerow mark on dark grounds (the app's dark scheme, #16151A).
-       Law: ink #4A4952 cannot draw lines on dark (2.4:1) — the arcs go
+       Law: the brand deep, damson #403243, cannot draw lines on dark
+       (1.5:1; ink #4A4952 was 2.0:1 before the D9 re-theme) — the arcs go
        clarity yellow #F3DD6D, which IS the brand's dark-scheme primary
-       (12.4:1 on #16151A), so dark stays two colors: dark-primary + camel.
-       The camel ball stays camel. Small-cut weights. -->
+       (13.30:1 on #16151A), so dark stays two colors: dark-primary + amber.
+       The ball is the same signal amber #887200 as every other cut — 3.85:1
+       on this ground, so it reads on its own. Note it shares clarity yellow's
+       HUE almost exactly (50.3° vs 50.1°, by construction), so on this cut
+       ball and arcs separate by value alone — 3.45:1 — plus the geometric gap.
+       That is a deliberate family resemblance, not a clash. Small-cut
+       weights. -->
   <path d="M46.5 33.9 A21 21 0 0 1 46.5 66.1" fill="none" stroke="#F3DD6D" stroke-width="8" stroke-linecap="round"/>
   <path d="M58.4 32.2 A31 31 0 0 1 58.4 67.8" fill="none" stroke="#F3DD6D" stroke-width="8" stroke-linecap="round"/>
   <path d="M70.2 32.7 A41 41 0 0 1 70.2 67.3" fill="none" stroke="#F3DD6D" stroke-width="8" stroke-linecap="round"/>
-  <circle cx="33" cy="50" r="14" fill="#B8956A"/>
+  <circle cx="33" cy="50" r="14" fill="#887200"/>
 </svg>

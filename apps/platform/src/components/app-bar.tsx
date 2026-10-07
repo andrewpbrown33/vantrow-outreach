@@ -18,7 +18,7 @@ export function AppBar({ here, trailing }: { here: string; trailing?: React.Reac
     <div className="flex flex-wrap items-center gap-2.5 border-b border-line bg-background px-4 py-2.5">
       <Link href="/" className="flex items-center gap-2 text-[15px] font-extrabold tracking-tight">
         <Mark className="text-sub" />
-        <span><span className="text-sub">nudge</span><span className="text-camel">row</span></span>
+        <span className="text-sub">nudgerow</span>
       </Link>
       <nav className="ml-4 flex flex-wrap gap-1.5 text-[13px]" aria-label="Primary">
         {NAV.map((item) => (

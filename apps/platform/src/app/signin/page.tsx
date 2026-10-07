@@ -18,7 +18,7 @@ export default async function SignInPage({
     <main className="mx-auto max-w-sm px-6 py-24">
       <span className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
         <Mark className="text-sub" size={26} />
-        <span><span className="text-sub">nudge</span><span className="text-camel">row</span></span>
+        <span className="text-sub">nudgerow</span>
       </span>
 
       {denied ? (
