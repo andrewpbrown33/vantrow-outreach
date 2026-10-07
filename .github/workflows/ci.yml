@@ -2,10 +2,24 @@ name: CI
 on:
   push: { branches: [main] }
   pull_request:
+
+# Read-only token: nothing in CI writes to this repository.
+permissions:
+  contents: read
+
+# One run per branch at a time; a newer push cancels the older run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Actions are pinned to commit SHAs (the tag is in the comment) so a moved tag
+# cannot change what runs here. Node comes from .nvmrc, the same pin the
+# package.json engines field and Vercel read.
 jobs:
   checks:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     # The engine invariant suite (phase-4 §1) runs against real Postgres —
     # never mocks. Locally it provisions the machine's cluster; here it gets a
     # service container and hard-fails if the database is missing.
@@ -22,13 +36,13 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       # Design law + state-palette pin run before install — no deps needed, fast fail.
       - run: bash scripts/check-design-law.sh
       - run: node scripts/check-state-palette.mjs
-      - uses: pnpm/action-setup@v4 # version comes from packageManager in package.json
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0 — version comes from packageManager in package.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
       - run: pnpm typecheck
@@ -39,11 +53,13 @@ jobs:
   spec:
     name: Vantrow Connect spec + fixtures
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm }
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version-file: .nvmrc, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: npx -y @redocly/cli@latest lint docs/specs/vantrow-connect/openapi.yaml
+      # Pinned: `@latest` let a new major change the lint rules under us.
+      - run: npx -y @redocly/cli@2.54.3 lint docs/specs/vantrow-connect/openapi.yaml
       - run: node scripts/validate-connect-fixtures.mjs
