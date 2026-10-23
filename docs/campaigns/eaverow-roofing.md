@@ -96,7 +96,7 @@ reputation is what the 5/day ramp is building.
 
 > {{firstName}} — one thing I should have said earlier, because it has an end.
 >
-> Five companies get the founding rate: $99 a month instead of $199, kept for good. I'm not advertising it — I'm writing to roofing companies directly, so all five will come out of conversations like this one. That's the reason you have this email at all.
+> Five companies get the founding rate: $99 a month instead of $199, kept for good. It's on the site, but I'm not running ads for it or waiting on inbound — I'm writing to roofing companies one at a time, which is why you have this email at all.
 >
 > It's limited for a real reason rather than a manufactured one: early customers get something I can't offer everyone later, which is that their requests actually get built. The roadmap today is mostly one roofing company's list. I'd rather it were several.
 >
@@ -140,6 +140,11 @@ required on any step that opens a thread and omitted on one that replies.
 
 - $199 × 60 months = **$11,940**, the five-year figure in step 4.
 - $99 × 60 = $5,940, if the founding rate is ever quoted over five years.
+- **Annual, decided 7 Oct:** $2,388/yr list and $1,188/yr founding — straight 12×,
+  **no discount**, carrying forward the repo's own principle that "a dollar is a dollar
+  on every cadence". Deliberately NOT quoted in these emails: the monthly number is the
+  hook, and a second cadence in a cold email costs more clarity than it buys. The site
+  carries both.
 - The AccuLynx range ($118,800–$216,000 over five years for a twelve-person shop)
   is **eaverow.com's own published comparison**, not a number invented here. It
   implies roughly $165–$300 per seat per month. If that range changes on the site,
@@ -148,9 +153,15 @@ required on any step that opens a thread and omitted on one that replies.
 ### Where a real number would make this stronger
 
 - **Five founding places (Andrew, 30 Sep).** Eaverow's `packages/growth/src/pricing.ts`
-  still reads `foundersCap: 50` / `foundersAllocated: 40` — **it has to come down to 5
-  in the same change as the reprice**, or the site's allocation counter and these emails
-  disagree.
+  reads `foundersCap: 50` / `foundersAllocated: 40`, and that is not a simple 10 → 5: the
+  fifty is a cohort of which **forty are reserved for this very campaign** and ten are the
+  public pool the site counts down. Five places total therefore means cohort 50 → 5,
+  outreach-reserved 40 → 5, public pool 10 → **0**. It has to land **in the same change as
+  the reprice**, or the site and these emails disagree.
+- **Why step 5 no longer says "I'm not advertising it" (7 Oct).** Andrew chose to keep the
+  founding rate visible on eaverow.com, so that clause became false the moment the site
+  changed. The sentence now says what is actually true — published, but not advertised and
+  not waiting on inbound — and keeps the beat that earns the email.
 - **The scarcity is now tight enough to be worth watching.** Five places against 151
   recipients means roughly 146 people are told about something they probably cannot
   have. That is honest, and tight scarcity does convert — but it can also read as
