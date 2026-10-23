@@ -15,9 +15,13 @@ Parcelrow (CRE) → Nudgerow.
 > competitive research and internal decision memos
 > (`docs/legal/clean-room-protocol.md` §4).
 
-**Program status: Gates 1–2 closed** (posture B · name Nudgerow). Phase 1 teardown
-complete and merged. **Next: Phase 2** — synthesis & storefront (marketing site,
-`/vs-outreach`, launch runbooks) → **Gate 3: MVP scope & cutline**. Customer-#1
+**Program status: Gates 1–6 closed** — Gate 1 (research posture B) and Gate 2 (name
+Nudgerow) on 2026-08-06; Gate 3's decision half (MVP scope → Option E, Auto-Email
+Core) on 2026-08-06, its acceptance half (site launch, runbook 06) still open; Gates
+4–6 (Gmail first · Postgres durable timers · Connect project = sequence) on
+2026-08-07. **Phase 4 (MVP build) has run live in dogfood since 2026-08-10** — three
+brand mailboxes, the minute heartbeat, the Connect producer — and **Gate 7 (dogfood
+acceptance) is not yet closed**; no gate-07 memo exists. Customer-#1
 requirements: `docs/research/inputs/customer1-requirements.md`.
 
 ## Map
@@ -33,7 +37,7 @@ requirements: `docs/research/inputs/customer1-requirements.md`.
 | `packages/brand/` | `@vantrow/brand` — white-label tokens (identity, parent linkage, light+dark palettes, typography, shape); placeholder until Gate 2 |
 | `packages/growth/` | `@vantrow/growth` — deterministic legal/claims lint (`block` findings disable publishing); pricing module arrives Phase 2 |
 | `scripts/` | `validate-connect-fixtures.mjs` — the Connect contract's test suite, run in CI |
-| `apps/` | `site/` — the marketing site (Phase 2, live at nudgerow.com) · `platform/` — the product app (Phase 4, deployed as `app.nudgerow.com`): sign-in, sequences, import, mailbox connect, and the minute heartbeat that runs `packages/engine` — runbooks 07–09 |
+| `apps/` | `site/` — the marketing site (Phase 2; Vercel project `vantrow-outreach-site`). **`nudgerow.com` currently shows the platform's sign-in page**, because the apex and `www` are attached to the platform's Vercel project — moving them to the site project is owner action A8 in the hub's family plan · `platform/` — the product app (Phase 4, **live at `app.nudgerow.com`**): sign-in, sequences, import, mailbox connect, and the minute heartbeat that runs `packages/engine` — runbooks 07–09 |
 
 ## Quick start
 

@@ -13,10 +13,12 @@ build/
 # local data (file-adapter output — never commit tenant or waitlist data)
 .data/
 
-# env — every variant; .env.production and .env.development were uncovered
+# env — every variant; .env.production and .env.development were uncovered.
+# Only the tracked examples are let back in; .env.local itself stays ignored.
 .env
 .env.*
 !.env.example
+!.env.local.example
 
 # misc
 .DS_Store

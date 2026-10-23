@@ -7,7 +7,7 @@
     "typecheck": "pnpm -r --if-present run typecheck",
     "test": "vitest run",
     "build": "pnpm -r --if-present run build",
-    "spec:lint": "npx -y @redocly/cli@latest lint docs/specs/vantrow-connect/openapi.yaml",
+    "spec:lint": "npx -y @redocly/cli@2.54.3 lint docs/specs/vantrow-connect/openapi.yaml",
     "spec:fixtures": "node scripts/validate-connect-fixtures.mjs",
     "design:law": "bash scripts/check-design-law.sh",
     "design:palette": "node scripts/check-state-palette.mjs",
